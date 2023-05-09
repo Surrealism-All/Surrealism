@@ -1,0 +1,16 @@
+[package]
+name = "surrealism"
+version = "0.1.0"
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+figment = { version = "0.10.8", features = ["toml", "env","json"] }
+futures = "0.3.28"
+log = "0.4.17"
+serde = "1.0.162"
+serde_json = "1.0.96"
+simple_logger = "4.1.0"
+surrealdb = "1.0.0-beta.9"
+
