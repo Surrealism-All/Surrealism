@@ -11,6 +11,7 @@ use std::sync::{Arc, Mutex};
 pub const COMMON_SEPARATOR: &'static str = " ";
 pub const END_SEPARATOR: &'static str = ";";
 pub const EQUAL_SEPARATOR: &'static str = "=";
+pub const USE: &'static str = "USE";
 pub const NS: &'static str = "NS";
 pub const DB: &'static str = "DB";
 pub const RETURN: &'static str = "RETURN";
@@ -83,7 +84,81 @@ pub trait Wrapper {
     fn build(&mut self) -> &mut Self;
     fn commit(&mut self) -> &str;
     fn get_keyword(&self) -> &str;
-    fn get_available(&self) -> Arc<Mutex<HashMap<&'static str, String>>>;
+    fn get_available(&self) -> &Vec<AvailData>;
+}
+
+///语句可用参数
+/// order:语句顺序
+/// key:语句键
+/// value:语句值
+/// repeat:是否可重复
+/// end:结束标识,end = true 说明语句结束
+#[derive(Debug,Clone)]
+pub struct AvailData {
+    order: usize,
+    key: String,
+    value: String,
+    repeat: bool,
+    end: bool,
+}
+
+///语句可用参数方法实现
+impl AvailData {
+    pub fn new(
+        order: usize,
+        key: String,
+        value: String,
+        repeat: bool,
+        end: bool,
+    ) -> Self {
+        AvailData {
+            order,
+            key,
+            value,
+            repeat,
+            end,
+        }
+    }
+
+    pub fn new_no_args() -> Self {
+        AvailData {
+            order: 0,
+            key: String::new(),
+            value: String::new(),
+            repeat: true,
+            end: false,
+        }
+    }
+    pub fn order(&self) -> usize {
+        self.order
+    }
+    pub fn key(&self) -> &str {
+        &self.key
+    }
+    pub fn value(&self) -> &str {
+        &self.value
+    }
+    pub fn repeat(&self) -> bool {
+        self.repeat
+    }
+    pub fn end(&self) -> bool {
+        self.end
+    }
+    pub fn set_order(&mut self, order: usize) {
+        self.order = order;
+    }
+    pub fn set_key(&mut self, key: String) {
+        self.key = key;
+    }
+    pub fn set_value(&mut self, value: String) {
+        self.value = value;
+    }
+    pub fn set_repeat(&mut self, repeat: bool) {
+        self.repeat = repeat;
+    }
+    pub fn set_end(&mut self, end: bool) {
+        self.end = end;
+    }
 }
 
 

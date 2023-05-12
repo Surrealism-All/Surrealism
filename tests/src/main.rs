@@ -1,6 +1,6 @@
 use surrealdb::engine::remote::ws::Client;
 use surrealdb::Surreal;
-use surrealism::{SurrealRes, InitServiceImpl, SurrealDB, UseWrapper, Wrapper, CreateWrapper, TableId, IdFunction, SQLParser, ParseSQL};
+use surrealism::{SurrealRes, InitServiceImpl, SurrealDB, UseWrapper, Wrapper, TableId, IdFunction, SQLParser, ParseSQL};
 use serde::{Serialize, Deserialize};
 use surrealdb::sql::Thing;
 use lazy_static::lazy_static;
@@ -29,36 +29,39 @@ async fn main() -> SurrealRes<()> {
     //选择命名空间和数据库
     let mut stmt = UseWrapper::new();
     stmt.use_ns("test").and().use_db("test").build();
+
+
     //提交
-    db.use_commit(stmt).await;
-
-    //创建表
-    let mut create_table = CreateWrapper::new();
-
+    let r = db.use_commit(stmt).await;
+    dbg!(r);
+    //
+    // //创建表
+    // let mut create_table = CreateWrapper::new();
+    //
+    // // create_table.create("user")
+    // //     .id(TableId::<IdFunction>::Fun(IdFunction::RAND))
+    // //     .and()
+    // //     .set("name","zhangsan")
+    // //     .set("email","syf2002@out.com")
+    // //     .return_field("name")
+    // //     .build();
+    //
     // create_table.create("user")
     //     .id(TableId::<IdFunction>::Fun(IdFunction::RAND))
     //     .and()
-    //     .set("name","zhangsan")
-    //     .set("email","syf2002@out.com")
-    //     .return_field("name")
+    //     .content(User {
+    //         userId: "123".to_string(),
+    //         name: "zhangsan".to_string(),
+    //         email: "syf20020816".to_string(),
+    //     })
+    //     .return_after()
     //     .build();
-
-    create_table.create("user")
-        .id(TableId::<IdFunction>::Fun(IdFunction::RAND))
-        .and()
-        .content(User {
-            userId: "123".to_string(),
-            name: "zhangsan".to_string(),
-            email: "syf20020816".to_string(),
-        })
-        .return_after()
-        .build();
-
-
-    // let res = db.commit(create_table).await?;
-    // dbg!(res);
-    let q = db.core.cn.query("SELECT * FROM user").await?;
-    dbg!(q);
+    //
+    //
+    // // let res = db.commit(create_table).await?;
+    // // dbg!(res);
+    // let q = db.core.cn.query("SELECT * FROM user").await?;
+    // dbg!(q);
     Ok(())
 }
 

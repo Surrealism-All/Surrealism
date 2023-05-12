@@ -2,7 +2,7 @@ use std::fs;
 use std::fs::{File};
 use std::io::Read;
 use regex::Regex;
-
+use crate::creator::AvailData;
 /*=================================================
  * @params:
  * 1. file_path:文件路径
@@ -55,4 +55,22 @@ pub fn handle_str2(origin_str: &str) -> String {
     let re = Regex::new(r#"""#).unwrap();
 
     re.replace_all(origin_str, "'").to_string()
+}
+
+///检查顺序
+pub fn check_available_order(availables: &Vec<AvailData>) -> bool {
+    let mut order_or_not: Option<usize> = None;
+    for available in availables {
+        if let Some(order) = order_or_not {
+            if available.order() != order + 1 {
+                return false;
+            }
+        } else {
+            if available.order() != 0 {
+                return false;
+            }
+        }
+        order_or_not = Some(available.order())
+    }
+    true
 }
