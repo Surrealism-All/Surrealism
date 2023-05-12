@@ -1,4 +1,3 @@
-use std::error::Error;
 use surrealdb::sql::Thing;
 use serde::{Deserialize, Serialize};
 use super::SurrealCore;
@@ -12,7 +11,7 @@ pub struct SurrealRecord {
     #[allow(dead_code)]
     id: Thing,
 }
-
+///SurrealDB存储配置和Surreal核心
 pub struct SurrealDB {
     pub core: SurrealCore,
     pub config: SurrealConfig,
@@ -20,8 +19,8 @@ pub struct SurrealDB {
 
 impl SurrealDB {
     /// 提交SurralQL语句
-    pub async fn commit(&self, wrapper: impl Wrapper) -> Result<surrealdb::Response, surrealdb::Error> {
-        let sql = wrapper.commit();
+    pub async fn commit(&self,mut wrapper: impl Wrapper) -> Result<surrealdb::Response, surrealdb::Error> {
+        let sql= wrapper.commit();
         self.core.cn.query(sql).await
     }
     ///提交USE语句

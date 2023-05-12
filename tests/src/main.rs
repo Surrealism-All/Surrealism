@@ -1,6 +1,6 @@
 use surrealdb::engine::remote::ws::Client;
 use surrealdb::Surreal;
-use surrealism::{SurrealRes, InitServiceImpl, SurrealDB, UseWrapper,Wrapper};
+use surrealism::{SurrealRes, InitServiceImpl, SurrealDB, UseWrapper, Wrapper, CreateWrapper, TableId, IdFunction, SQLParser, ParseSQL};
 use serde::{Serialize, Deserialize};
 use surrealdb::sql::Thing;
 use lazy_static::lazy_static;
@@ -9,11 +9,11 @@ use lazy_static::lazy_static;
 // lazy_static! {
 //     static ref DB: Surreal<Client> = InitServiceImpl::new().init().unwrap();
 // }
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize, ParseSQL)]
 struct User {
-    id: String,
-    name: String,
-    email: String,
+    pub userId: String,
+    pub name: String,
+    pub email: String,
 }
 
 #[derive(Debug, Deserialize)]
@@ -24,29 +24,41 @@ struct Record {
 
 #[tokio::main]
 async fn main() -> SurrealRes<()> {
+    //初始化数据库连接
     let db: SurrealDB = InitServiceImpl::new().init().unwrap();
-
+    //选择命名空间和数据库
     let mut stmt = UseWrapper::new();
-
     stmt.use_ns("test").and().use_db("test").build();
-
-    println!("{}", stmt.commit());
+    //提交
     db.use_commit(stmt).await;
 
-    // let create: Record = DB.create(("user","2")).content(
-    //     User {
-    //         id: "1".to_string(),
-    //         name: "user1".to_string(),
-    //         email: "syf@example.com".to_string(),
-    //     }
-    // ).await?;
-    // dbg!(create);
-    // let user:Option<Record>= DB.select(("user","1")).await?;
-    // dbg!(user.unwrap());
-    let res = db.core.cn.query("SELECT * FROM type::table($table)")
-        .bind(("table", "user")).await?;
-    dbg!(res);
+    //创建表
+    let mut create_table = CreateWrapper::new();
 
+    // create_table.create("user")
+    //     .id(TableId::<IdFunction>::Fun(IdFunction::RAND))
+    //     .and()
+    //     .set("name","zhangsan")
+    //     .set("email","syf2002@out.com")
+    //     .return_field("name")
+    //     .build();
+
+    create_table.create("user")
+        .id(TableId::<IdFunction>::Fun(IdFunction::RAND))
+        .and()
+        .content(User {
+            userId: "123".to_string(),
+            name: "zhangsan".to_string(),
+            email: "syf20020816".to_string(),
+        })
+        .return_after()
+        .build();
+
+
+    // let res = db.commit(create_table).await?;
+    // dbg!(res);
+    let q = db.core.cn.query("SELECT * FROM user").await?;
+    dbg!(q);
     Ok(())
 }
 

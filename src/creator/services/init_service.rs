@@ -11,17 +11,21 @@ use surrealdb::{Error, Surreal};
 use crate::creator::entities::{SurrealDB,SurrealCore};
 
 
-
+///初始化服务
 trait InitService {
     ///初始化Banner
+    /// 若使用者的项目中包含一个banner.txt既可以自定义打印banner
     fn initBanner(&self);
+    ///初始化日志
+    /// 使用者在Surrealism.
     fn initLog(&self, config: SurrealConfig);
+    ///初始化连接
     fn initConnection(&self, config: SurrealConfig) -> Result<Surreal<Client>, surrealdb::Error>;
 }
 
-
+///默认初始化服务的实现
 pub struct InitServiceImpl {}
-
+///默认初始化服务的具体实现
 impl InitService for InitServiceImpl {
     fn initBanner(&self) {
         //查找banner.txt文件进行打印

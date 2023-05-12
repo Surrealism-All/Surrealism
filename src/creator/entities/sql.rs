@@ -1,15 +1,31 @@
-use std::collections::HashMap;
-use std::ops::Add;
 use surrealdb::engine::remote::ws::Client;
 use surrealdb::Surreal;
+use serde::{Deserialize, Serialize};
+use serde_json;
+use log::error;
+use crate::utils::handle_str;
+use std::collections::HashMap;
 use std::sync::{Arc, Mutex};
 
-const COMMON_SEPERATOR: &'static str = " ";
-const END_SEPERATOR: &'static str = ";";
-const NS: &'static str = "NS";
-const DB: &'static str = "DB";
+///==========================构建语句所需的常量================================
+pub const COMMON_SEPARATOR: &'static str = " ";
+pub const END_SEPARATOR: &'static str = ";";
+pub const EQUAL_SEPARATOR: &'static str = "=";
+pub const NS: &'static str = "NS";
+pub const DB: &'static str = "DB";
+pub const RETURN: &'static str = "RETURN";
+pub const NONE: &'static str = "NONE";
+pub const DIFF: &'static str = "DIFF";
+pub const BEFORE: &'static str = "BEFORE";
+pub const AFTER: &'static str = "AFTER";
+pub const CONTENT: &'static str = "CONTENT";
+pub const SET: &'static str = "SET";
+pub const UUID: &'static str = "uuid()";
+pub const ULID: &'static str = "ulid()";
+pub const RAND: &'static str = "rand()";
 
-
+///SurrealCore是应用核心结构体，连接使用的是Surreal<Client>
+/// operator: SurrealOperator 暂时并未有任何具体有用实现
 pub struct SurrealCore {
     pub cn: Surreal<Client>,
     pub operator: SurrealOperator,
@@ -24,7 +40,8 @@ impl SurrealCore {
     }
 }
 
-
+/// 语句枚举
+/// 考虑结合包装器,也许可以将包装器的keyword字段使用Statements枚举
 enum Statements {
     USE,
     LET,
@@ -52,65 +69,55 @@ impl SurrealOperator {
     }
 }
 
-///USE语句包装器
-///
-#[derive(Debug)]
-pub struct UseWrapper {
-    pub keyword: String,
-    pub available: Arc<Mutex<HashMap<&'static str, String>>>,
-    pub stmt: String,
-}
 
+///所有包装器都需要实现这个顶级包装器trait
+/// new:创建一个新包装器
+/// and:语句连接,当语句进入一个新区域时,使用and(),例如: USE NS xxx DB xxx; => UseWrapper::new().use_ns("xxx")`.and()下个方法进入新区域`.use_db("xxx")
+/// build:当所有构建结束后使用build进行完整的构建,否则导致语句不完整
+/// commit:语句提交
+/// get_keyword:获取keyword
+/// get_available:获取可用参数Map
 pub trait Wrapper {
     fn new() -> Self;
     fn and(&mut self) -> &mut Self;
     fn build(&mut self) -> &mut Self;
-    fn commit(&self) -> &str;
+    fn commit(&mut self) -> &str;
     fn get_keyword(&self) -> &str;
     fn get_available(&self) -> Arc<Mutex<HashMap<&'static str, String>>>;
 }
 
-impl UseWrapper {
-    pub fn use_ns(&mut self, namespace: &str) -> &mut Self {
-        let stmt = format!("{}{}{}{}", self.stmt, NS, COMMON_SEPERATOR, namespace);
-        self.stmt = stmt;
-        self.available.lock().unwrap().insert(NS, namespace.to_string());
-        self
-    }
-    pub fn use_db(&mut self, database: &str) -> &mut Self {
-        let stmt = format!("{}{}{}{}", self.stmt, DB, COMMON_SEPERATOR, database);
-        self.stmt = stmt;
-        self.available.lock().unwrap().insert(DB,database.to_string());
-        self
-    }
+
+///TableID枚举
+///当使用CreateWrapper中的id()方法,该方法的入参需要使用TableID enum进行指定
+/// Num: 数字类型
+/// Str: 字符串类型
+/// Object: 对象类型
+/// Array: 数组类型
+/// Range: 范围类型(使用IdRange进行指定)
+/// Fun: 对应Surreal的内置生成ID的方法,包含:rand(),uuid(),ulid()三种
+#[derive(Debug, Clone, Serialize)]
+pub enum TableId<'a, T: Serialize> {
+    Num(isize),
+    Str(&'a str),
+    Object(T),
+    Array(Vec<T>),
+    Range {
+        min: IdRange<T>,
+        max: IdRange<T>,
+    },
+    Fun(IdFunction),
 }
 
-impl Wrapper for UseWrapper {
-    fn new() -> Self {
-        UseWrapper {
-            keyword: "USE".to_string(),
-            available: Arc::new(Mutex::new(HashMap::new())),
-            stmt: String::from("USE").add(COMMON_SEPERATOR),
-        }
-    }
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub enum IdFunction {
+    UUID,
+    ULID,
+    RAND,
+}
 
-    fn and(&mut self) -> &mut Self {
-        self.stmt = format!("{}{}", self.stmt, COMMON_SEPERATOR);
-
-        self
-    }
-    fn build(&mut self) -> &mut Self {
-        self.stmt = format!("{}{}", self.stmt, END_SEPERATOR);
-        self
-    }
-    fn commit(&self) -> &str {
-        &self.stmt
-    }
-    fn get_keyword(&self) -> &str {
-        &self.keyword
-    }
-    fn get_available(&self) -> Arc<Mutex<HashMap<&'static str,String>>> {
-        self.available.clone()
-    }
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub enum IdRange<T> {
+    Num(isize),
+    Arr(Vec<T>),
 }
 

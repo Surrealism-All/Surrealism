@@ -13,8 +13,9 @@ use crate::config::{SurrealConfig};
 /// 3. 静态数据库引擎可以提供更快的数据访问速度，因为它不需要通过网络传输数据。而普通连接则受制于网络速度和带宽的限制。
 /// 4. 静态数据库引擎通常用于单机应用程序或小型团队协作，而普通连接则用于大型分布式应用程序或多人协作。
 /// 5. 静态数据库引擎不支持多用户并发访问，而普通连接可以支持多用户并发访问。
-
+///
 ///连接SurrealDB数据库
+/// connect SurrealDB database
 pub async fn connect(config: SurrealConfig) -> Result<Surreal<Client>, surrealdb::Error> {
     //连接URI = URL+PORT
     let uri = config.url.add(":").add(config.port.as_str());

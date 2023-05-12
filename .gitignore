@@ -3,3 +3,5 @@
 .idea
 /tests/target
 /tests/Cargo.lock
+/surrealism_macro/target
+/surrealism_macro/Cargo.lock

@@ -1,3 +1,3 @@
-mod surrealConfig;
+mod surreal_config;
 
-pub use surrealConfig::*;
+pub use surreal_config::*;

@@ -4,5 +4,5 @@ mod bindings;
 
 
 pub use bindings::{SurrealRes,BANNER};
-pub use entities::{SurrealDB,UseWrapper,Wrapper};
+pub use entities::{SurrealDB,UseWrapper,Wrapper,CreateWrapper,TableId,IdRange,IdFunction};
 

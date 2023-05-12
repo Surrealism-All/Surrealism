@@ -1,3 +1,3 @@
-mod findConfigService;
+mod config_service;
 
-pub use findConfigService::find_config;
+pub use config_service::find_config;
