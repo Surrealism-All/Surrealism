@@ -9,11 +9,14 @@ use std::sync::{Arc, Mutex};
 
 ///==========================构建语句所需的常量================================
 pub const COMMON_SEPARATOR: &'static str = " ";
+pub const IS_SEPARATOR: &'static str = ":";
 pub const END_SEPARATOR: &'static str = ";";
 pub const EQUAL_SEPARATOR: &'static str = "=";
+pub const NEXT_SEPARATOR: &'static str = ",";
 pub const USE: &'static str = "USE";
 pub const NS: &'static str = "NS";
 pub const DB: &'static str = "DB";
+pub const CREATE: &'static str = "CREATE";
 pub const RETURN: &'static str = "RETURN";
 pub const NONE: &'static str = "NONE";
 pub const DIFF: &'static str = "DIFF";

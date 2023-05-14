@@ -19,7 +19,7 @@ pub struct SurrealDB {
 }
 
 impl SurrealDB {
-    /// 提交SurralQL语句
+    /// 提交SurrealQL语句
     pub async fn commit(&self, mut wrapper: impl Wrapper) -> Result<surrealdb::Response, surrealdb::Error> {
         let sql = wrapper.commit();
         self.core.cn.query(sql).await
@@ -51,7 +51,6 @@ impl SurrealDB {
             }
             _ => {
                 let e = "非USE语句请使用commit方法";
-                // error!("{}",e);
                 Err(Box::new(e))
             }
         }
