@@ -25,11 +25,11 @@ impl SurrealDB {
         self.core.cn.query(sql).await
     }
     ///提交USE语句
-    pub async fn use_commit(&self, wrapper: impl Wrapper) -> Result<(), Box<&'static str>> {
+    pub async fn use_commit(&self,mut wrapper: impl Wrapper) -> Result<(), Box<&'static str>> {
         match wrapper.get_keyword() {
             "USE" => {
+                wrapper.commit();
                 let attrs = wrapper.get_available();
-
                 if attrs.is_empty() {
                     Err(Box::new("命名空间，数据库构建异常"))
                 } else if attrs.len() > 10 {
@@ -39,10 +39,8 @@ impl SurrealDB {
                     let mut use_attrs: Vec<String> = Vec::new();
 
                     for attr in attrs {
-                        if attr.key() == "namespace" || attr.key() == "database" {
-                            let value  = attr.value().clone().to_string();
-                            use_attrs.push(value);
-                        }
+                        let value = attr.value().clone().to_string();
+                        use_attrs.push(value);
                     }
 
                     self.core.cn.use_ns(&use_attrs[0]).use_db(&use_attrs[1]).await;

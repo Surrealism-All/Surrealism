@@ -1,7 +1,7 @@
 use std::collections::HashMap;
 use std::ops::Add;
 use std::sync::{Arc, Mutex};
-use super::{COMMON_SEPARATOR, SET, END_SEPARATOR, CREATE, EQUAL_SEPARATOR, NEXT_SEPARATOR, IS_SEPARATOR, RETURN, NONE, DIFF, AFTER, BEFORE, RAND, ULID, UUID, CONTENT, AvailData, Wrapper, TableId, IdRange, IdFunction};
+use super::{RegionImpl, COMMON_SEPARATOR, SET, END_SEPARATOR, CREATE, EQUAL_SEPARATOR, NEXT_SEPARATOR, IS_SEPARATOR, RETURN, NONE, DIFF, AFTER, BEFORE, RAND, ULID, UUID, CONTENT, AvailData, Wrapper, TableId, IdRange, IdFunction};
 use log::error;
 use crate::{ParseSQL, SQLParser, handle_str, check_available_order};
 use serde::{Deserialize, Serialize};
@@ -9,36 +9,109 @@ use serde::{Deserialize, Serialize};
 
 ///create语句包装器
 /// 生成create语句，实现添加数据操作
-/// keywords:关键词
-/// available:参数存储器
-/// stmt:具体语句
-/// field_type:设置构建类型(SET,CONTENT)
-/// return_type:返回类型
 /// example:
 /// use surrealism::{CreateWrapper,TableId,IdFunction}
 /// let mut create_table = CreateWrapper::new();
 ///
 ///     create_table.create("user")
 ///         .id(TableId::<IdFunction>::Fun(IdFunction::RAND))
-///         .and()
 ///         .set("name","zhangsan")
 ///         .set("email","syf2002@out.com")
-///         .return_field("name")
-///         .build();
+///         .return_field("name");
 ///
 /// let res = db.commit(create_table).await?;
 ///
 #[derive(Debug, Clone)]
 pub struct CreateWrapper {
+    ///关键词
     pub keyword: String,
+    ///可获取值
     pub available: Vec<AvailData>,
+    ///语句
     pub stmt: String,
-    pub field_type: FieldType,
-    pub return_type: ReturnType,
+    ///内容区域
+    pub content_region: ContentRegion,
+    ///构建区域
+    pub create_region: CreateRegion,
+    ///返回区域
+    pub return_region: ReturnRegion,
+}
+
+///构建第一部分tablename和Id
+/// 形如：
+///person:100
+#[derive(Debug, Clone)]
+pub struct CreateRegion {
+    id: String,
+    table: String,
+    keyword: String,
+    create_str: String,
+    available_data: Vec<AvailData>,
+}
+
+impl RegionImpl for CreateRegion {
+    fn combine(&mut self) -> &str {
+        self.create_str = format!("{}{}{}{}{}", self.keyword, COMMON_SEPARATOR, self.table, IS_SEPARATOR, self.id);
+        self.create_str.as_str()
+    }
 }
 
 #[derive(Debug, Clone)]
-pub enum FieldType {
+pub struct ReturnRegion {
+    return_type: ReturnType,
+    return_str: String,
+    keyword: String,
+    available_data: Vec<AvailData>,
+}
+
+impl RegionImpl for ReturnRegion {
+    fn combine(&mut self) -> &str {
+        let res = self.available_data[0].value();
+        self.return_str = format!("{}{}{}", self.keyword, COMMON_SEPARATOR, res);
+        self.return_str.as_str()
+    }
+}
+
+
+#[derive(Debug, Clone)]
+pub struct ContentRegion {
+    content_type: ContentType,
+    content_str: String,
+    available_data: Vec<AvailData>,
+    keyword: String,
+}
+
+impl RegionImpl for ContentRegion {
+    fn combine(&mut self) -> &str {
+        match self.content_type {
+            ContentType::SET => {
+                let mut counter = 0;
+                let mut stmt = String::new();
+                for data in &self.available_data {
+                    counter += 1;
+                    if counter == self.available_data.len() {
+                        stmt.push_str(data.value());
+                    } else {
+                        stmt.push_str(data.value());
+                        stmt.push_str(NEXT_SEPARATOR);
+                    }
+                }
+                self.content_str = format!("{}{}{}", SET, COMMON_SEPARATOR, stmt);
+            }
+            ContentType::CONTENT => {
+                self.content_str = format!("{}{}{}",CONTENT,COMMON_SEPARATOR,self.available_data[0].value())
+            }
+            ContentType::NONE => panic!("{}", "you must create a content")
+        };
+
+
+        self.content_str.as_str()
+    }
+}
+
+
+#[derive(Debug, Clone)]
+pub enum ContentType {
     SET,
     CONTENT,
     NONE,
@@ -51,53 +124,52 @@ pub enum ReturnType {
     BEFORE,
     AFTER,
     DIFF,
-    FIELD(String),
+    FIELD,
 }
 
 impl Wrapper for CreateWrapper {
     fn new() -> Self {
-        let mut available: Vec<AvailData> = Vec::new();
-        let tmp1 = AvailData::new(0, String::from(CREATE), String::from(CREATE), false, false);
-        let tmp2 = AvailData::new(1, "COMMON_SEPARATOR".to_string(), String::from(COMMON_SEPARATOR), true, false);
-        available.push(tmp1);
-        available.push(tmp2);
         CreateWrapper {
             keyword: String::from(CREATE),
-            available,
+            available: Vec::new(),
             stmt: String::new(),
-            field_type: FieldType::NONE,
-            return_type: ReturnType::AFTER,
+            content_region: ContentRegion {
+                content_type: ContentType::NONE,
+                content_str: String::new(),
+                available_data: Vec::new(),
+                keyword: String::from(NONE),
+            },
+            create_region: CreateRegion {
+                id: String::from(RAND),
+                table: String::new(),
+                keyword: String::from(CREATE),
+                create_str: String::new(),
+                available_data: Vec::new(),
+            },
+            return_region: ReturnRegion {
+                return_type: ReturnType::NONE,
+                return_str: String::new(),
+                keyword: String::from(RETURN),
+                available_data: Vec::new(),
+            },
         }
-    }
-
-    fn and(&mut self) -> &mut Self {
-        let len = self.get_available().len();
-        let tmp = AvailData::new(len, "COMMON_SEPARATOR".to_string(), String::from(COMMON_SEPARATOR), true, false);
-        self.available.push(tmp);
-        self
-    }
-
-    fn build(&mut self) -> &mut Self {
-
-        let len = self.get_available().len();
-        let tmp = AvailData::new(len, "END_SEPARATOR".to_string(), END_SEPARATOR.to_string(), false, true);
-        self.available.push(tmp);
-        self
     }
 
     fn commit(&mut self) -> &str {//匹配解析SET或CONTENT
-        match self.field_type {
-            FieldType::NONE => error!("{}","you must use SET or CONTENT to create the table"),
-            _=>(),
-        }
+        // match self.field_type {
+        //     FieldType::NONE => error!("{}","you must use SET or CONTENT to create the table"),
+        //     _ => (),
+        // }
+        //
+        // let tmp = self.get_available().clone();
+        // if check_available_order(&tmp) {
+        //     let len = tmp.len();
+        //     for t in tmp {
+        //         self.stmt.push_str(t.value());
+        //     }
+        // }
 
-        let tmp = self.get_available().clone();
-        if check_available_order(&tmp) {
-            let len = tmp.len();
-            for t in tmp {
-                self.stmt.push_str(t.value());
-            }
-        }
+        self.stmt = format!("{}{}{}{}{}{}", self.create_region.combine(), COMMON_SEPARATOR, self.content_region.combine(), COMMON_SEPARATOR, self.return_region.combine(), END_SEPARATOR);
         &self.stmt
     }
 
@@ -114,15 +186,12 @@ impl CreateWrapper {
     ///创建表名称
     /// create table with name
     pub fn create(&mut self, table_name: &str) -> &mut Self {
-        let len = self.get_available().len();
-        let tmp1 = AvailData::new(len, String::from("table"), String::from(table_name), false, false);
-        self.available.push(tmp1);
+        self.create_region.table = String::from(table_name);
         self
     }
     /// 创建表的ID , ID使用TableId进行构建!
     /// create table with id , use TableId enum to create!
-    pub fn id<'a, T: Serialize>(&mut self, table_id: TableId<'a, T>) -> &mut Self {
-        let len = self.get_available().len();
+    pub fn id<T: Serialize>(&mut self, table_id: TableId<T>) -> &mut Self {
         let mut tmp_res = String::new();
         match table_id {
             TableId::Array(arr) => {
@@ -153,7 +222,7 @@ impl CreateWrapper {
                 tmp_res = format!("{}{}{}", min_str, "..", max_str);
             }
             TableId::Num(n) => {
-                tmp_res =n.to_string();
+                tmp_res = n.to_string();
             }
             TableId::Str(s) => {
                 tmp_res = String::from(s);
@@ -162,56 +231,39 @@ impl CreateWrapper {
                 panic!("{}", "Cannot find type in TableId enum")
             }
         }
-        let tmp1 = AvailData::new(len, "IS_SEPARATOR".to_string(), String::from(IS_SEPARATOR), false, false);
-        let tmp2 = AvailData::new(len + 1, String::from("table"), tmp_res, false, false);
-        // let tmp3 = AvailData::new(len + 2, "COMMON_SEPARATOR".to_string(), String::from(COMMON_SEPARATOR), true, false);
-        self.available.push(tmp1);
-        self.available.push(tmp2);
-        // self.available.push(tmp3);
+        self.create_region.id = tmp_res;
         self
     }
     ///SET方式构建字段
     pub fn set<T: Serialize>(&mut self, field_name: &'static str, value: T) -> &mut Self {
         let len = self.get_available().len();
-        match self.field_type {
-            FieldType::NONE => {
-                self.field_type = FieldType::SET;
-                let tmp1 = AvailData::new(len, String::from(SET), String::from(SET), false, false);
-                let tmp2 = AvailData::new(len+1, "COMMON_SEPARATOR".to_string(), String::from(COMMON_SEPARATOR), false, false);
-                self.available.push(tmp1);
-                self.available.push(tmp2);
+        match self.content_region.content_type {
+            ContentType::CONTENT => panic!("you cannot use set and content together!"),
+            ContentType::SET => (),
+            ContentType::NONE => {
+                self.content_region.content_type = ContentType::SET;
+                self.content_region.keyword = String::from(SET);
             }
-            FieldType::SET => {
-                let tmp = AvailData::new(len, "NEXT_SEPARATOR".to_string(), String::from(NEXT_SEPARATOR), false, false);
-                self.available.push(tmp);
-            },
-            FieldType::CONTENT => panic!("you cannot use set and content together!")
         };
-        let len = self.get_available().len();
-        let tmp1 = AvailData::new(len, String::from("field_name"), String::from(field_name), false, false);
-        let tmp2 = AvailData::new(len + 1, "EQUAL_SEPARATOR".to_string(), String::from(EQUAL_SEPARATOR), true, false);
-        let tmp3 = AvailData::new(len + 2, String::from("field_value"), handle_str(serde_json::to_string(&value).unwrap().as_str()), true, false);
-        self.available.push(tmp1);
-        self.available.push(tmp2);
-        self.available.push(tmp3);
+        let value = AvailData::new(len, String::from("set_value"), format!("{}{}{}", field_name, EQUAL_SEPARATOR, handle_str(serde_json::to_string(&value).unwrap().as_str())), false, false);
+        self.content_region.available_data.push(value);
         self
     }
     ///CONTENT方式构建字段
     pub fn content<T: Serialize + SQLParser>(&mut self, content_obj: T) -> &mut Self {
-        match self.field_type {
-            FieldType::NONE => self.field_type = FieldType::CONTENT,
-            FieldType::SET => panic!("you cannot use set and content together!"),
-            FieldType::CONTENT => panic!("you cannot use content twice!"),
+        match self.content_region.content_type {
+            ContentType::SET => panic!("you cannot use set and content together!"),
+            ContentType::CONTENT => panic!("you cannot use content twice!"),
+            ContentType::NONE => {
+                self.content_region.content_type = ContentType::CONTENT;
+                self.content_region.keyword = String::from(CONTENT);
+            }
         };
 
         let obj_str = content_obj.parse_sql();
         let len = self.get_available().len();
-        let tmp1 = AvailData::new(len, String::from(CONTENT), String::from(CONTENT), false, false);
-        let tmp2 = AvailData::new(len + 1, "COMMON_SEPARATOR".to_string(), String::from(COMMON_SEPARATOR), true, false);
-        let tmp3 = AvailData::new(len + 2, String::from("content_value"), obj_str, true, false);
-        self.available.push(tmp1);
-        self.available.push(tmp2);
-        self.available.push(tmp3);
+        let value = AvailData::new(len, String::from("content_value"), obj_str, false, false);
+        self.content_region.available_data.push(value);
         self
     }
     ///返回NONE
@@ -219,14 +271,10 @@ impl CreateWrapper {
         if self.check_return() {
             panic!("{}", "you cannot use return twice!");
         } else {
-            self.return_type = ReturnType::NONE;
+            self.return_region.return_type = ReturnType::NONE;
             let len = self.get_available().len();
-            let tmp1 = AvailData::new(len, String::from(RETURN), String::from(RETURN), false, false);
-            let tmp2 = AvailData::new(len + 1, "COMMON_SEPARATOR".to_string(), String::from(COMMON_SEPARATOR), true, false);
-            let tmp3 = AvailData::new(len + 2, String::from("return_type"), String::from(NONE), true, false);
-            self.available.push(tmp1);
-            self.available.push(tmp2);
-            self.available.push(tmp3);
+            let value = AvailData::new(len, String::from("return_value"), String::from(NONE), false, false);
+            self.return_region.available_data.push(value);
         }
         self
     }
@@ -235,14 +283,10 @@ impl CreateWrapper {
         if self.check_return() {
             panic!("{}", "you cannot use return twice!");
         } else {
-            self.return_type = ReturnType::DIFF;
+            self.return_region.return_type = ReturnType::DIFF;
             let len = self.get_available().len();
-            let tmp1 = AvailData::new(len, String::from(RETURN), String::from(RETURN), false, false);
-            let tmp2 = AvailData::new(len + 1, "COMMON_SEPARATOR".to_string(), String::from(COMMON_SEPARATOR), true, false);
-            let tmp3 = AvailData::new(len + 2, String::from("return_type"), String::from(DIFF), true, false);
-            self.available.push(tmp1);
-            self.available.push(tmp2);
-            self.available.push(tmp3);
+            let value = AvailData::new(len, String::from("return_value"), String::from(DIFF), false, false);
+            self.return_region.available_data.push(value);
         }
         self
     }
@@ -251,14 +295,10 @@ impl CreateWrapper {
         if self.check_return() {
             panic!("{}", "you cannot use return twice!");
         } else {
-            self.return_type = ReturnType::BEFORE;
+            self.return_region.return_type = ReturnType::BEFORE;
             let len = self.get_available().len();
-            let tmp1 = AvailData::new(len, String::from(RETURN), String::from(RETURN), false, false);
-            let tmp2 = AvailData::new(len + 1, "COMMON_SEPARATOR".to_string(), String::from(COMMON_SEPARATOR), true, false);
-            let tmp3 = AvailData::new(len + 2, String::from("return_type"), String::from(BEFORE), true, false);
-            self.available.push(tmp1);
-            self.available.push(tmp2);
-            self.available.push(tmp3);
+            let value = AvailData::new(len, String::from("return_value"), String::from(BEFORE), false, false);
+            self.return_region.available_data.push(value);
         }
         self
     }
@@ -267,42 +307,28 @@ impl CreateWrapper {
         if self.check_return() {
             panic!("{}", "you cannot use return twice!");
         } else {
-            self.return_type = ReturnType::AFTER;
+            self.return_region.return_type = ReturnType::AFTER;
             let len = self.get_available().len();
-            let tmp1 = AvailData::new(len, String::from(RETURN), String::from(RETURN), false, false);
-            let tmp2 = AvailData::new(len + 1, "COMMON_SEPARATOR".to_string(), String::from(COMMON_SEPARATOR), true, false);
-            let tmp3 = AvailData::new(len + 2, String::from("return_type"), String::from(AFTER), true, false);
-            self.available.push(tmp1);
-            self.available.push(tmp2);
-            self.available.push(tmp3);
+            let value = AvailData::new(len, String::from("return_value"), String::from(AFTER), false, false);
+            self.return_region.available_data.push(value);
         }
         self
     }
     ///返回某个字段
-    pub fn return_field(&mut self, field_name: &'static str) -> &mut Self {
+    pub fn return_field(&mut self, field_name: &str) -> &mut Self {
         if self.check_return() {
             panic!("{}", "you cannot use return twice!");
         } else {
-            self.return_type = ReturnType::AFTER;
+            self.return_region.return_type = ReturnType::FIELD;
             let len = self.get_available().len();
-            let tmp1 = AvailData::new(len, String::from(RETURN), String::from(RETURN), false, false);
-            let tmp2 = AvailData::new(len + 1, "COMMON_SEPARATOR".to_string(), String::from(COMMON_SEPARATOR), true, false);
-            let tmp3 = AvailData::new(len + 2, String::from("return_type"), String::from(field_name), true, false);
-            self.available.push(tmp1);
-            self.available.push(tmp2);
-            self.available.push(tmp3);
+            let value = AvailData::new(len, String::from("return_value"), String::from(field_name), false, false);
+            self.return_region.available_data.push(value);
         }
         self
     }
     ///检查是否设置了返回，设置了：true，未设置：false
     fn check_return(&mut self) -> bool {
-        let mut exist: bool = false;
-        for i in &self.available {
-            if i.key() == String::from("return_type") {
-                exist = true;
-            }
-        }
-        return exist.clone();
+        return !self.return_region.available_data.is_empty();
     }
 }
 

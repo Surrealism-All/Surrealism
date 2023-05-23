@@ -27,6 +27,9 @@ pub const SET: &'static str = "SET";
 pub const UUID: &'static str = "uuid()";
 pub const ULID: &'static str = "ulid()";
 pub const RAND: &'static str = "rand()";
+pub const SELECT: &'static str = "SELECT";
+pub const FROM: &'static str = "FROM";
+pub const AS: &'static str = "AS";
 
 ///SurrealCore是应用核心结构体，连接使用的是Surreal<Client>
 /// operator: SurrealOperator 暂时并未有任何具体有用实现
@@ -83,8 +86,6 @@ impl SurrealOperator {
 /// get_available:获取可用参数Map
 pub trait Wrapper {
     fn new() -> Self;
-    fn and(&mut self) -> &mut Self;
-    fn build(&mut self) -> &mut Self;
     fn commit(&mut self) -> &str;
     fn get_keyword(&self) -> &str;
     fn get_available(&self) -> &Vec<AvailData>;
@@ -96,7 +97,7 @@ pub trait Wrapper {
 /// value:语句值
 /// repeat:是否可重复
 /// end:结束标识,end = true 说明语句结束
-#[derive(Debug,Clone)]
+#[derive(Debug, Clone)]
 pub struct AvailData {
     order: usize,
     key: String,
@@ -174,9 +175,9 @@ impl AvailData {
 /// Range: 范围类型(使用IdRange进行指定)
 /// Fun: 对应Surreal的内置生成ID的方法,包含:rand(),uuid(),ulid()三种
 #[derive(Debug, Clone, Serialize)]
-pub enum TableId<'a, T: Serialize> {
+pub enum TableId<T: Serialize> {
     Num(isize),
-    Str(&'a str),
+    Str(String),
     Object(T),
     Array(Vec<T>),
     Range {
@@ -197,5 +198,10 @@ pub enum IdFunction {
 pub enum IdRange<T> {
     Num(isize),
     Arr(Vec<T>),
+}
+
+
+pub trait RegionImpl{
+    fn combine(&mut self)->&str;
 }
 

@@ -13,65 +13,46 @@ pub struct UseWrapper {
     pub keyword: String,
     pub available: Vec<AvailData>,
     pub stmt: String,
+    pub namespace: String,
+    pub database: String,
 }
 
 impl UseWrapper {
     pub fn use_ns(&mut self, namespace: &str) -> &mut Self {
-        let len = self.get_available().len();
-        let tmp1 = AvailData::new(len, String::from(NS), String::from(NS), false, false);
-        let tmp2 = AvailData::new(len+1, "COMMON_SEPARATOR".to_string(), String::from(COMMON_SEPARATOR), true, false);
-        let tmp3 = AvailData::new(len+2, String::from("namespace"), String::from(namespace), false, false);
-        self.available.push(tmp1);
-        self.available.push(tmp2);
-        self.available.push(tmp3);
+        self.namespace = String::from(namespace);
         self
     }
     pub fn use_db(&mut self, database: &str) -> &mut Self {
-        let len = self.get_available().len();
-        let tmp1 = AvailData::new(len, String::from(DB), String::from(NS), false, false);
-        let tmp2 = AvailData::new(len+1, "COMMON_SEPARATOR".to_string(), String::from(COMMON_SEPARATOR), true, false);
-        let tmp3 = AvailData::new(len+2, String::from("database"), String::from(database), false, false);
-        self.available.push(tmp1);
-        self.available.push(tmp2);
-        self.available.push(tmp3);
+        self.database = String::from(database);
         self
+    }
+    fn get_namespace(&self) -> &str {
+        &self.namespace
+    }
+    fn get_database(&self) -> &str {
+        &self.database
     }
 }
 
 impl Wrapper for UseWrapper {
     fn new() -> Self {
-        let mut available = Vec::new();
-        let tmp1 = AvailData::new(0, String::from(USE), String::from(USE), false, false);
-        let tmp2 = AvailData::new(1, "COMMON_SEPARATOR".to_string(), String::from(COMMON_SEPARATOR), true, false);
-        available.push(tmp1);
-        available.push(tmp2);
         UseWrapper {
             keyword: String::from(USE),
-            available,
+            available: Vec::new(),
             stmt: String::new(),
+            namespace: String::new(),
+            database: String::new(),
         }
     }
 
-    fn and(&mut self) -> &mut Self {
-        let len = self.get_available().len();
-        let tmp = AvailData::new(len, "COMMON_SEPARATOR".to_string(), COMMON_SEPARATOR.to_string(), true, false);
-        self.available.push(tmp);
-        self
-    }
-    fn build(&mut self) -> &mut Self {
-        let len = self.get_available().len();
-        let tmp = AvailData::new(len, "END_SEPARATOR".to_string(), END_SEPARATOR.to_string(), false, true);
-        self.available.push(tmp);
-        self
-    }
+
     fn commit(&mut self) -> &str {
-        let tmp = self.get_available().clone();
-        if check_available_order(&tmp) {
-            let len = tmp.len();
-            for t in tmp {
-                self.stmt.push_str(t.value());
-            }
-        }
+        let ns = self.get_namespace();
+        let db = self.get_database();
+        let t_node1 =  AvailData::new(0, String::from(NS), String::from(ns), false, false);
+        let t_node2 =  AvailData::new(1, String::from(DB), String::from(db), false, false);
+        self.available.push(t_node1);
+        self.available.push(t_node2);
         &self.stmt
     }
     fn get_keyword(&self) -> &str {

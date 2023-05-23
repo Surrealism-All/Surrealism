@@ -22,7 +22,7 @@ use syn::{parse_macro_input, DeriveInput, Data};
 ///             email: "syf20020816".to_string(),
 ///         }
 /// user.parse_sql();
-///
+///简单来说最后会转化为：{userId:'123',name:'zhangsan','email':'syf20020816'}
 #[proc_macro_derive(ParseSQL)]
 pub fn parse_sql(item: TokenStream) -> TokenStream {
     let input = parse_macro_input!(item as DeriveInput);

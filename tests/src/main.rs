@@ -1,14 +1,9 @@
 use surrealdb::engine::remote::ws::Client;
 use surrealdb::Surreal;
-use surrealism::{SurrealRes, InitServiceImpl, SurrealDB, UseWrapper, Wrapper, TableId, IdFunction, SQLParser, ParseSQL, CreateWrapper};
+use surrealism::{SurrealRes, InitServiceImpl, SurrealDB, UseWrapper, Wrapper, TableId, IdFunction, SQLParser, Field, ParseSQL, CreateWrapper, SelectWrapper};
 use serde::{Serialize, Deserialize};
-use surrealdb::sql::Thing;
-use lazy_static::lazy_static;
 
 
-// lazy_static! {
-//     static ref DB: Surreal<Client> = InitServiceImpl::new().init().unwrap();
-// }
 #[derive(Debug, Serialize, Deserialize, ParseSQL)]
 struct User {
     pub userId: String,
@@ -16,11 +11,6 @@ struct User {
     pub email: String,
 }
 
-#[derive(Debug, Deserialize)]
-struct Record {
-    #[allow(dead_code)]
-    id: Thing,
-}
 
 #[tokio::main]
 async fn main() -> SurrealRes<()> {
@@ -28,49 +18,46 @@ async fn main() -> SurrealRes<()> {
     let db: SurrealDB = InitServiceImpl::new().init().unwrap();
     //选择命名空间和数据库
     let mut stmt = UseWrapper::new();
-    stmt.use_ns("test").and().use_db("test").build();
+    stmt.use_ns("test").use_db("test");
     //提交
-    let r = db.use_commit(stmt).await;
-    dbg!(r);
-
+    let res = db.use_commit(stmt).await;
+    dbg!(res);
     //创建表
     let mut create_table = CreateWrapper::new();
-
+    //使用SET方式
     // create_table.create("user")
     //     .id(TableId::<IdFunction>::Fun(IdFunction::RAND))
-    //     .and()
     //     .set("name", "zhangsan")
     //     .set("email", "syf2002@out.com")
-    //     .and()
-    //     .return_field("name")
-    //     .build();
+    //     .return_diff();
 
 
+    //使用CONTENT方式
     create_table.create("user")
         .id(TableId::<IdFunction>::Fun(IdFunction::RAND))
-        .and()
         .content(User {
             userId: "123".to_string(),
             name: "zhangsan".to_string(),
             email: "syf20020816".to_string(),
         })
-        .and()
-        .return_after()
-        .build();
+        .return_after();
 
 
+    //提交
     let res = db.commit(create_table).await?;
     dbg!(res);
-    let q = db.core.cn.query("SELECT * FROM user").await?;
-    dbg!(q);
+    // let mut queryWrapper = SelectWrapper::new();
+    // let mut f_v = Vec::new();
+    // let mut f1= Field::new("userId");
+    // f1.as_name("stuID");
+    // let mut f2= Field::new("name");
+    // f2.as_name("stuName");
+    // f_v.push(f1);
+    // f_v.push(f2);
+    // queryWrapper.select_fields(&f_v).and().from("user").build();
+    // dbg!(queryWrapper.commit());
+    // let query_res = db.commit(queryWrapper).await?;
+    // dbg!(query_res);
     Ok(())
 }
 
-//[default]
-//surreal = "Single"
-//username = "root"
-//password = "syf20020816"
-//url = "127.0.0.1"
-//port = "10086"
-//mode = "Memory"
-//path = "E:/Rust/surreal"
