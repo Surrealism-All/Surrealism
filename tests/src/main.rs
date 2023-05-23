@@ -44,20 +44,20 @@ async fn main() -> SurrealRes<()> {
 
 
     //提交
-    let res = db.commit(create_table).await?;
-    dbg!(res);
-    // let mut queryWrapper = SelectWrapper::new();
-    // let mut f_v = Vec::new();
-    // let mut f1= Field::new("userId");
-    // f1.as_name("stuID");
-    // let mut f2= Field::new("name");
-    // f2.as_name("stuName");
-    // f_v.push(f1);
-    // f_v.push(f2);
-    // queryWrapper.select_fields(&f_v).and().from("user").build();
+    // let res = db.commit(create_table).await?;
+    // dbg!(res);
+    let mut queryWrapper = SelectWrapper::new();
+    let mut f_v = Vec::new();
+    let mut f1= Field::new("userId");
+    f1.as_name("stuID");
+    let mut f2= Field::new("name");
+    f2.as_name("stuName");
+    f_v.push(f1);
+    f_v.push(f2);
+    queryWrapper.select_fields(&f_v).from("user");
     // dbg!(queryWrapper.commit());
-    // let query_res = db.commit(queryWrapper).await?;
-    // dbg!(query_res);
+    let query_res = db.commit(queryWrapper).await?;
+    dbg!(query_res);
     Ok(())
 }
 

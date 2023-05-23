@@ -1,7 +1,7 @@
 use std::collections::HashMap;
 use std::ops::Add;
 use std::sync::{Arc, Mutex};
-use super::{COMMON_SEPARATOR, END_SEPARATOR, EQUAL_SEPARATOR, NEXT_SEPARATOR, AS, IS_SEPARATOR, SELECT, FROM, AvailData, Wrapper};
+use super::{RegionImpl, COMMON_SEPARATOR, END_SEPARATOR, EQUAL_SEPARATOR, NEXT_SEPARATOR, AS, IS_SEPARATOR, SELECT, FROM, WHERE, AvailData, Wrapper};
 use log::error;
 use crate::{ParseSQL, SQLParser, handle_str, check_available_order};
 use serde::{Deserialize, Serialize};
@@ -9,19 +9,21 @@ use serde::{Deserialize, Serialize};
 
 ///Select语句包装器
 /// 生成select语句，实现查询数据操作
-/// keywords:关键词
-/// available:参数存储器
-/// stmt:具体语句
-/// field_type:设置构建类型(SET,CONTENT)
-/// return_type:返回类型
 /// example:
 #[derive(Debug, Clone)]
 pub struct SelectWrapper {
+    ///关键字
     pub keyword: String,
     pub available: Vec<AvailData>,
     pub stmt: String,
-    pub fieldList: Vec<Field>,
-    pub criteriaList: Vec<Criteria>,
+    ///表区域（生成FROM @TableName）
+    pub table_region: TableRegion,
+    ///字段区域（生成SELECT @Fields...）
+    pub field_region: FieldRegion,
+    ///条件区域，where子句（生成WHERE @Condition）
+    pub where_region: WhereRegion,
+    ///处理区域（生成ORDER BY，GROUP BY等子句）
+    pub handle_region: Vec<HandleRegion>,
 
 }
 
@@ -52,6 +54,60 @@ impl Field {
         &self.name
     }
 }
+
+#[derive(Debug, Clone)]
+pub struct FieldRegion {
+    field_str: String,
+    available_data: Vec<AvailData>,
+    keyword: String,
+}
+
+impl RegionImpl for FieldRegion {
+    fn combine(&mut self) -> &str {
+        let mut stmt = String::new();
+        let mut counter = 0;
+        for data in &self.available_data {
+            counter += 1;
+            if counter == self.available_data.len() {
+                stmt.push_str(data.value());
+            } else {
+                stmt.push_str(data.value());
+                stmt.push_str(NEXT_SEPARATOR);
+            }
+        }
+        self.field_str = format!("{}{}{}", self.keyword,COMMON_SEPARATOR, stmt);
+        self.field_str.as_str()
+    }
+}
+
+#[derive(Debug, Clone)]
+pub struct TableRegion {
+    table: String,
+    table_str: String,
+    keyword: String,
+}
+
+impl RegionImpl for TableRegion {
+    fn combine(&mut self) -> &str {
+        self.table_str = format!("{}{}{}", self.keyword, COMMON_SEPARATOR, self.table);
+        self.table_str.as_str()
+    }
+}
+
+#[derive(Debug, Clone)]
+pub struct WhereRegion {
+    available_data: Vec<AvailData>,
+    where_str: String,
+    keyword: String,
+}
+
+#[derive(Debug, Clone)]
+pub struct HandleRegion {
+    available_data: Vec<AvailData>,
+    handle_str: String,
+    keyword: String,
+}
+
 #[derive(Debug, Clone)]
 pub struct Criteria {
     ///比较符
@@ -62,6 +118,7 @@ pub struct Criteria {
     core: String,
     comparator: String,
 }
+
 #[derive(Debug, Clone)]
 pub enum JudgeCriteria {
     Eq,
@@ -98,33 +155,36 @@ impl Wrapper for SelectWrapper {
             keyword: String::from(SELECT),
             available,
             stmt: String::new(),
-            fieldList: Vec::new(),
-            criteriaList: Vec::new()
+            table_region: TableRegion {
+                table: String::new(),
+                table_str: String::new(),
+                keyword: String::from(FROM),
+            },
+            field_region: FieldRegion {
+                field_str: String::new(),
+                available_data: vec![],
+                keyword: String::from(SELECT),
+            },
+            where_region: WhereRegion {
+                available_data: vec![],
+                where_str: String::new(),
+                keyword: String::from(WHERE),
+            },
+            handle_region: vec![],
         }
     }
 
-    // fn and(&mut self) -> &mut Self {
-    //     let len = self.get_available().len();
-    //     let tmp = AvailData::new(len, "COMMON_SEPARATOR".to_string(), String::from(COMMON_SEPARATOR), true, false);
-    //     self.available.push(tmp);
-    //     self
-    // }
-    //
-    // fn build(&mut self) -> &mut Self {
-    //     let len = self.get_available().len();
-    //     let tmp = AvailData::new(len, "END_SEPARATOR".to_string(), END_SEPARATOR.to_string(), false, true);
-    //     self.available.push(tmp);
-    //     self
-    // }
 
     fn commit(&mut self) -> &str {
-        let tmp = self.get_available().clone();
-        if check_available_order(&tmp) {
-            let len = tmp.len();
-            for t in tmp {
-                self.stmt.push_str(t.value());
-            }
-        }
+        // let tmp = self.get_available().clone();
+        // if check_available_order(&tmp) {
+        //     let len = tmp.len();
+        //     for t in tmp {
+        //         self.stmt.push_str(t.value());
+        //     }
+        // }
+
+        self.stmt = format!("{}{}{}", self.field_region.combine(),COMMON_SEPARATOR,self.table_region.combine());
         &self.stmt
     }
 
@@ -147,51 +207,26 @@ impl SelectWrapper {
     }
     ///查询字段
     pub fn select_fields(&mut self, fields: &Vec<Field>) -> &mut Self {
-        // for field in fields {
-        //     match self.fields {
-        //         true => {
-        //             let len = self.get_available().len();
-        //             let tmp = AvailData::new(len, "NEXT_SEPARATOR".to_string(), String::from(NEXT_SEPARATOR), true, false);
-        //             self.available.push(tmp);
-        //         }
-        //         false => {
-        //             self.fields = true;
-        //         }
-        //     }
-        //     self.select_field(field);
-        // }
-
+        for field in fields {
+            self.select_field(field);
+        }
         self
     }
     ///查询字段
     pub fn select_field(&mut self, field: &Field) -> &mut Self {
         let len = self.get_available().len();
-        if field.get_as_name() != "" {
-            let tmp1 = AvailData::new(len, String::from("field"), String::from(field.get_name()), false, false);
-            let tmp2 = AvailData::new(len + 1, "COMMON_SEPARATOR".to_string(), String::from(COMMON_SEPARATOR), true, false);
-            let tmp3 = AvailData::new(len + 2, String::from(AS), String::from(AS), true, false);
-            let tmp4 = AvailData::new(len + 3, "COMMON_SEPARATOR".to_string(), String::from(COMMON_SEPARATOR), true, false);
-            let tmp5 = AvailData::new(len + 4, String::from("as_field"), String::from(field.get_as_name()), false, false);
-            self.available.push(tmp1);
-            self.available.push(tmp2);
-            self.available.push(tmp3);
-            self.available.push(tmp4);
-            self.available.push(tmp5);
+        let mut field_stmt = String::new();
+        if field.get_as_name().is_empty() {
+            field_stmt = format!("{}", field.get_name());
         } else {
-            let tmp = AvailData::new(len, String::from("field"), String::from(field.get_name()), false, false);
-            self.available.push(tmp);
+            field_stmt = format!("{}{}{}{}{}", field.get_name(), COMMON_SEPARATOR, AS, COMMON_SEPARATOR, field.get_as_name());
         }
-
+        let value = AvailData::new(len, String::from("field"), field_stmt, false, false);
+        self.field_region.available_data.push(value);
         self
     }
     pub fn from(&mut self, table_name: &str) -> &mut Self {
-        let len = self.get_available().len();
-        let tmp1 = AvailData::new(len, String::from(FROM), String::from(FROM), false, false);
-        let tmp2 = AvailData::new(len + 1, "COMMON_SEPARATOR".to_string(), String::from(COMMON_SEPARATOR), true, false);
-        let tmp3 = AvailData::new(len + 2, String::from("table"), String::from(table_name), false, false);
-        self.available.push(tmp1);
-        self.available.push(tmp2);
-        self.available.push(tmp3);
+        self.table_region.table = String::from(table_name);
         self
     }
 }

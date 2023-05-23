@@ -30,6 +30,7 @@ pub const RAND: &'static str = "rand()";
 pub const SELECT: &'static str = "SELECT";
 pub const FROM: &'static str = "FROM";
 pub const AS: &'static str = "AS";
+pub const WHERE: &'static str = "WHERE";
 
 ///SurrealCore是应用核心结构体，连接使用的是Surreal<Client>
 /// operator: SurrealOperator 暂时并未有任何具体有用实现

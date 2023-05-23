@@ -156,18 +156,7 @@ impl Wrapper for CreateWrapper {
     }
 
     fn commit(&mut self) -> &str {//匹配解析SET或CONTENT
-        // match self.field_type {
-        //     FieldType::NONE => error!("{}","you must use SET or CONTENT to create the table"),
-        //     _ => (),
-        // }
-        //
-        // let tmp = self.get_available().clone();
-        // if check_available_order(&tmp) {
-        //     let len = tmp.len();
-        //     for t in tmp {
-        //         self.stmt.push_str(t.value());
-        //     }
-        // }
+
 
         self.stmt = format!("{}{}{}{}{}{}", self.create_region.combine(), COMMON_SEPARATOR, self.content_region.combine(), COMMON_SEPARATOR, self.return_region.combine(), END_SEPARATOR);
         &self.stmt
