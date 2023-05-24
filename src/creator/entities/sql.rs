@@ -1,11 +1,6 @@
 use surrealdb::engine::remote::ws::Client;
 use surrealdb::Surreal;
 use serde::{Deserialize, Serialize};
-use serde_json;
-use log::error;
-use crate::utils::handle_str;
-use std::collections::HashMap;
-use std::sync::{Arc, Mutex};
 
 ///==========================构建语句所需的常量================================
 pub const COMMON_SEPARATOR: &'static str = " ";
@@ -13,6 +8,13 @@ pub const IS_SEPARATOR: &'static str = ":";
 pub const END_SEPARATOR: &'static str = ";";
 pub const EQUAL_SEPARATOR: &'static str = "=";
 pub const NEXT_SEPARATOR: &'static str = ",";
+pub const EQ:&'static str = "=";
+pub const NEQ:&'static str = "!=";
+pub const GT:&'static str = ">";
+pub const LT:&'static str = "<";
+pub const GTE:&'static str = ">=";
+pub const LTE:&'static str = "<=";
+
 pub const USE: &'static str = "USE";
 pub const NS: &'static str = "NS";
 pub const DB: &'static str = "DB";

@@ -1,7 +1,7 @@
 use std::collections::HashMap;
 use std::ops::Add;
 use std::sync::{Arc, Mutex};
-use super::{RegionImpl, COMMON_SEPARATOR, END_SEPARATOR, EQUAL_SEPARATOR, NEXT_SEPARATOR, AS, IS_SEPARATOR, SELECT, FROM, WHERE, AvailData, Wrapper};
+use super::{RegionImpl, COMMON_SEPARATOR, END_SEPARATOR, EQUAL_SEPARATOR, NEXT_SEPARATOR, AS, IS_SEPARATOR, SELECT, FROM, WHERE, AvailData, Wrapper, EQ, NEQ, LT, GT, LTE, GTE};
 use log::error;
 use crate::{ParseSQL, SQLParser, handle_str, check_available_order};
 use serde::{Deserialize, Serialize};
@@ -75,7 +75,7 @@ impl RegionImpl for FieldRegion {
                 stmt.push_str(NEXT_SEPARATOR);
             }
         }
-        self.field_str = format!("{}{}{}", self.keyword,COMMON_SEPARATOR, stmt);
+        self.field_str = format!("{}{}{}", self.keyword, COMMON_SEPARATOR, stmt);
         self.field_str.as_str()
     }
 }
@@ -101,6 +101,13 @@ pub struct WhereRegion {
     keyword: String,
 }
 
+impl RegionImpl for WhereRegion {
+    fn combine(&mut self) -> &str {
+        self.where_str = format!("{}{}{}", self.keyword, COMMON_SEPARATOR, self.available_data[0].value());
+        self.where_str.as_str()
+    }
+}
+
 #[derive(Debug, Clone)]
 pub struct HandleRegion {
     available_data: Vec<AvailData>,
@@ -119,6 +126,87 @@ pub struct Criteria {
     comparator: String,
 }
 
+impl Criteria {
+    pub fn new() -> Self {
+        Criteria {
+            judge: JudgeCriteria::NONE,
+            define: String::new(),
+            core: String::new(),
+            comparator: String::new(),
+        }
+    }
+    pub fn combine(&self) -> String {
+        let mut res = String::new();
+        if self.define.is_empty() {
+            let mut sign: &str = "";
+            match self.judge {
+                JudgeCriteria::Eq => {
+                    sign = EQ;
+                }
+                JudgeCriteria::Neq => {
+                    sign = NEQ;
+                }
+                JudgeCriteria::Lt => {
+                    sign = LT;
+                }
+                JudgeCriteria::Gt => {
+                    sign = GT;
+                }
+                JudgeCriteria::Lte => {
+                    sign = LTE;
+                }
+                JudgeCriteria::Gte => {
+                    sign = GTE;
+                }
+                JudgeCriteria::NONE => ()
+            }
+            res = format!("{}{}{}{}{}", self.core, COMMON_SEPARATOR, sign, COMMON_SEPARATOR, self.comparator);
+        } else {
+            res = String::from(&self.define);
+        }
+        res
+    }
+    pub fn define(&mut self, define_str: &str) {
+        self.define = String::from(define_str);
+    }
+    pub fn eq(&mut self, core: &str, comparator: &str) -> &mut Self {
+        self.judge = JudgeCriteria::Eq;
+        self.core = String::from(core);
+        self.comparator = String::from(comparator);
+        self
+    }
+    pub fn gt(&mut self, core: &str, comparator: &str) -> &mut Self {
+        self.judge = JudgeCriteria::Eq;
+        self.core = String::from(core);
+        self.comparator = String::from(comparator);
+        self
+    }
+    pub fn lt(&mut self, core: &str, comparator: &str) -> &mut Self {
+        self.judge = JudgeCriteria::Eq;
+        self.core = String::from(core);
+        self.comparator = String::from(comparator);
+        self
+    }
+    pub fn neq(&mut self, core: &str, comparator: &str) -> &mut Self {
+        self.judge = JudgeCriteria::Eq;
+        self.core = String::from(core);
+        self.comparator = String::from(comparator);
+        self
+    }
+    pub fn lte(&mut self, core: &str, comparator: &str) -> &mut Self {
+        self.judge = JudgeCriteria::Eq;
+        self.core = String::from(core);
+        self.comparator = String::from(comparator);
+        self
+    }
+    pub fn gte(&mut self, core: &str, comparator: &str) -> &mut Self {
+        self.judge = JudgeCriteria::Eq;
+        self.core = String::from(core);
+        self.comparator = String::from(comparator);
+        self
+    }
+}
+
 #[derive(Debug, Clone)]
 pub enum JudgeCriteria {
     Eq,
@@ -127,22 +215,23 @@ pub enum JudgeCriteria {
     Neq,
     Lte,
     Gte,
+    NONE,
 }
 
-impl Criteria {
-    pub fn new(judge: JudgeCriteria, core: &str, comparator: &str) -> Self {
-        Criteria {
-            judge,
-            define: String::new(),
-            core: String::from(core),
-            comparator: String::from(comparator),
-        }
-    }
-    pub fn define(&mut self, df: &str) -> &mut Self {
-        self.define = String::from(df);
-        self
-    }
-}
+// impl Criteria {
+//     pub fn new(judge: JudgeCriteria, core: &str, comparator: &str) -> Self {
+//         Criteria {
+//             judge,
+//             define: String::new(),
+//             core: String::from(core),
+//             comparator: String::from(comparator),
+//         }
+//     }
+//     pub fn define(&mut self, df: &str) -> &mut Self {
+//         self.define = String::from(df);
+//         self
+//     }
+// }
 
 impl Wrapper for SelectWrapper {
     fn new() -> Self {
@@ -176,15 +265,7 @@ impl Wrapper for SelectWrapper {
 
 
     fn commit(&mut self) -> &str {
-        // let tmp = self.get_available().clone();
-        // if check_available_order(&tmp) {
-        //     let len = tmp.len();
-        //     for t in tmp {
-        //         self.stmt.push_str(t.value());
-        //     }
-        // }
-
-        self.stmt = format!("{}{}{}", self.field_region.combine(),COMMON_SEPARATOR,self.table_region.combine());
+        self.stmt = format!("{}{}{}{}{}{}", self.field_region.combine(), COMMON_SEPARATOR, self.table_region.combine(),COMMON_SEPARATOR,self.where_region.combine(),END_SEPARATOR);
         &self.stmt
     }
 
@@ -225,8 +306,28 @@ impl SelectWrapper {
         self.field_region.available_data.push(value);
         self
     }
+    ///from子句
     pub fn from(&mut self, table_name: &str) -> &mut Self {
         self.table_region.table = String::from(table_name);
+        self
+    }
+    ///where子句
+    pub fn where_condition(&mut self, condition: &Criteria) -> &mut Self {
+        let len = self.get_available().len();
+        let value = AvailData::new(len, String::from("where_criteria"), condition.combine(), false, false);
+        self.where_region.available_data.push(value);
+        self
+    }
+    pub fn order_by(&mut self, table_name: &str) -> &mut Self {
+        self
+    }
+    pub fn group_by(&mut self, table_name: &str) -> &mut Self {
+        self
+    }
+    pub fn limit_by(&mut self, table_name: &str) -> &mut Self {
+        self
+    }
+    pub fn start_at(&mut self, table_name: &str) -> &mut Self {
         self
     }
 }

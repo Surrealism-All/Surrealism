@@ -3,7 +3,7 @@ use serde::{Deserialize, Serialize};
 use super::SurrealCore;
 use crate::config::SurrealConfig;
 use crate::Wrapper;
-use log::error;
+
 
 ///
 #[derive(Debug, Deserialize, Serialize)]

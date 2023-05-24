@@ -1,6 +1,6 @@
 use surrealdb::engine::remote::ws::Client;
 use surrealdb::Surreal;
-use surrealism::{SurrealRes, InitServiceImpl, SurrealDB, UseWrapper, Wrapper, TableId, IdFunction, SQLParser, Field, ParseSQL, CreateWrapper, SelectWrapper};
+use surrealism::{SurrealRes, InitServiceImpl, SurrealDB, UseWrapper, Wrapper, TableId, IdFunction, SQLParser, Field, ParseSQL, CreateWrapper, SelectWrapper, Criteria};
 use serde::{Serialize, Deserialize};
 
 
@@ -48,13 +48,15 @@ async fn main() -> SurrealRes<()> {
     // dbg!(res);
     let mut queryWrapper = SelectWrapper::new();
     let mut f_v = Vec::new();
-    let mut f1= Field::new("userId");
+    let mut f1 = Field::new("userId");
     f1.as_name("stuID");
-    let mut f2= Field::new("name");
+    let mut f2 = Field::new("name");
     f2.as_name("stuName");
     f_v.push(f1);
-    f_v.push(f2);
-    queryWrapper.select_fields(&f_v).from("user");
+    // f_v.push(f2);
+    let mut cri = Criteria::new();
+    cri.eq("userId", "123");
+    queryWrapper.select_fields(&f_v).from("user").where_condition(&cri);
     // dbg!(queryWrapper.commit());
     let query_res = db.commit(queryWrapper).await?;
     dbg!(query_res);
