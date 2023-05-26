@@ -47,19 +47,27 @@ async fn main() -> SurrealRes<()> {
     // let res = db.commit(create_table).await?;
     // dbg!(res);
     let mut queryWrapper = SelectWrapper::new();
+    //准备查询条件
     let mut f_v = Vec::new();
     let mut f1 = Field::new("userId");
     f1.as_name("stuID");
     let mut f2 = Field::new("name");
     f2.as_name("stuName");
     f_v.push(f1);
-    // f_v.push(f2);
+    f_v.push(f2);
     let mut cri = Criteria::new();
-    cri.eq("userId", "123");
-    queryWrapper.select_fields(&f_v).from("user").where_condition(&cri);
-    // dbg!(queryWrapper.commit());
-    let query_res = db.commit(queryWrapper).await?;
-    dbg!(query_res);
+    // cri.eq("userId", "123");
+    cri.gte(&cri.and(&cri.or(&cri.and("a", "b"), "c"),"d"), "12345");
+    //查询
+    queryWrapper.select_fields(&f_v)
+        .from("user")
+        .where_condition(&cri);
+    // .group_by("userId")
+    // .order_by("userId");
+    dbg!(queryWrapper.commit());
+    // let query_res = db.commit(queryWrapper).await?;
+    // dbg!(query_res);
+
     Ok(())
 }
 

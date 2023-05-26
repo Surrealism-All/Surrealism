@@ -1,7 +1,8 @@
+use std::cell::RefCell;
 use std::collections::HashMap;
 use std::ops::Add;
 use std::sync::{Arc, Mutex};
-use super::{RegionImpl, COMMON_SEPARATOR, END_SEPARATOR, EQUAL_SEPARATOR, NEXT_SEPARATOR, AS, IS_SEPARATOR, SELECT, FROM, WHERE, AvailData, Wrapper, EQ, NEQ, LT, GT, LTE, GTE};
+use super::{RegionImpl, AND, OR, COMMON_SEPARATOR, END_SEPARATOR, EQUAL_SEPARATOR, NEXT_SEPARATOR, AS, IS_SEPARATOR, SELECT, FROM, WHERE, AvailData, Wrapper, EQ, NEQ, LT, GT, LTE, GTE, ORDER_BY, GROUP_BY, SPLIT_AT, START_AT, LIMIT_BY};
 use log::error;
 use crate::{ParseSQL, SQLParser, handle_str, check_available_order};
 use serde::{Deserialize, Serialize};
@@ -115,6 +116,17 @@ pub struct HandleRegion {
     keyword: String,
 }
 
+impl HandleRegion {
+    pub fn new() -> Self {
+        HandleRegion {
+            available_data: Vec::new(),
+            handle_str: String::new(),
+            keyword: String::new(),
+        }
+    }
+}
+
+///Where条件构建
 #[derive(Debug, Clone)]
 pub struct Criteria {
     ///比较符
@@ -124,7 +136,16 @@ pub struct Criteria {
     define: String,
     core: String,
     comparator: String,
+    complex: RefCell<Vec<String>>,
 }
+
+// ///构建复杂的条件语句
+// /// 例如需要AND,OR的条件语句
+// pub struct CriteriaComplex {
+//     core: String,
+//     comparator: String,
+//
+// }
 
 impl Criteria {
     pub fn new() -> Self {
@@ -133,6 +154,7 @@ impl Criteria {
             define: String::new(),
             core: String::new(),
             comparator: String::new(),
+            complex: RefCell::new(Vec::new()),
         }
     }
     pub fn combine(&self) -> String {
@@ -166,45 +188,93 @@ impl Criteria {
         }
         res
     }
+    /// 自定义写入条件
+    /// 由于有些条件通过Criteria当前提供的方法无法直接构建
+    /// 例如：count(->experience->organisation) > 3
+    /// 此时就需要调用者直接进行手写
     pub fn define(&mut self, define_str: &str) {
         self.define = String::from(define_str);
     }
+    fn buildCore(&mut self, core: &str) {
+        let res = self.complexBuild();
+        if res.is_empty() {
+            self.core = String::from(core);
+        } else {
+            self.core = res;
+        }
+    }
+    /// 相等条件
+    /// core = comparator
     pub fn eq(&mut self, core: &str, comparator: &str) -> &mut Self {
+        self.buildCore(core);
         self.judge = JudgeCriteria::Eq;
-        self.core = String::from(core);
         self.comparator = String::from(comparator);
         self
     }
+    /// 大于条件
+    /// core > comparator
     pub fn gt(&mut self, core: &str, comparator: &str) -> &mut Self {
-        self.judge = JudgeCriteria::Eq;
-        self.core = String::from(core);
+        self.buildCore(core);
+        self.judge = JudgeCriteria::Gt;
         self.comparator = String::from(comparator);
         self
     }
     pub fn lt(&mut self, core: &str, comparator: &str) -> &mut Self {
-        self.judge = JudgeCriteria::Eq;
-        self.core = String::from(core);
+        self.buildCore(core);
+        self.judge = JudgeCriteria::Lt;
         self.comparator = String::from(comparator);
         self
     }
     pub fn neq(&mut self, core: &str, comparator: &str) -> &mut Self {
-        self.judge = JudgeCriteria::Eq;
-        self.core = String::from(core);
+        self.buildCore(core);
+        self.judge = JudgeCriteria::Neq;
         self.comparator = String::from(comparator);
         self
     }
     pub fn lte(&mut self, core: &str, comparator: &str) -> &mut Self {
-        self.judge = JudgeCriteria::Eq;
-        self.core = String::from(core);
+        self.buildCore(core);
+        self.judge = JudgeCriteria::Lte;
         self.comparator = String::from(comparator);
         self
     }
     pub fn gte(&mut self, core: &str, comparator: &str) -> &mut Self {
-        self.judge = JudgeCriteria::Eq;
-        self.core = String::from(core);
+        self.buildCore(core);
+        self.judge = JudgeCriteria::Gte;
         self.comparator = String::from(comparator);
         self
     }
+    pub fn and(&self, left: &str, right: &str) -> String {
+        let res = format!("{}{}{}{}{}", left, COMMON_SEPARATOR, AND, COMMON_SEPARATOR, right);
+        self.complex.borrow_mut().push(res.clone());
+        res
+    }
+    pub fn or(&self, left: &str, right: &str) -> String {
+        let res = format!("{}{}{}{}{}", left, COMMON_SEPARATOR, OR, COMMON_SEPARATOR, right);
+        self.complex.borrow_mut().push(res.clone());
+        res
+    }
+    pub fn complexBuild(&mut self) -> String {
+        if !self.complex.borrow().is_empty() {
+            let mut counter: usize = 0;
+            for core_complex in &*self.complex.borrow() {
+                counter += 1;
+
+                if counter.eq(&self.complex.borrow().len()) {
+                    self.core = replace_str(&self.core, core_complex);
+                } else {
+                    let res = replace_str(&self.core, core_complex);
+                    self.core = format!("( {} )", res);
+                }
+            }
+        }
+        self.core.clone()
+    }
+}
+
+fn replace_str(core: &str, replace: &str) -> String {
+    let value = core.replace("( ", "").replace(" )", "");
+    let res = replace.replace(&value, core);
+    res.clone()
 }
 
 #[derive(Debug, Clone)]
@@ -265,7 +335,7 @@ impl Wrapper for SelectWrapper {
 
 
     fn commit(&mut self) -> &str {
-        self.stmt = format!("{}{}{}{}{}{}", self.field_region.combine(), COMMON_SEPARATOR, self.table_region.combine(),COMMON_SEPARATOR,self.where_region.combine(),END_SEPARATOR);
+        self.stmt = format!("{}{}{}{}{}{}", self.field_region.combine(), COMMON_SEPARATOR, self.table_region.combine(), COMMON_SEPARATOR, self.where_region.combine(), END_SEPARATOR);
         &self.stmt
     }
 
@@ -318,16 +388,21 @@ impl SelectWrapper {
         self.where_region.available_data.push(value);
         self
     }
-    pub fn order_by(&mut self, table_name: &str) -> &mut Self {
+    pub fn order_by(&mut self, conditions: &Vec<&str>) -> &mut Self {
+        // let mut tmp = HandleRegion::new();
+        // for condition in *conditions {
+        //     //TODO:
+        //     tmp.keyword = String::from(ORDER_BY);
+        // }
         self
     }
-    pub fn group_by(&mut self, table_name: &str) -> &mut Self {
+    pub fn group_by(&mut self, condition: &str) -> &mut Self {
         self
     }
-    pub fn limit_by(&mut self, table_name: &str) -> &mut Self {
+    pub fn limit_by(&mut self, condition: &str) -> &mut Self {
         self
     }
-    pub fn start_at(&mut self, table_name: &str) -> &mut Self {
+    pub fn start_at(&mut self, condition: &str) -> &mut Self {
         self
     }
 }

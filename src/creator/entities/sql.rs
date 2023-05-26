@@ -14,7 +14,6 @@ pub const GT:&'static str = ">";
 pub const LT:&'static str = "<";
 pub const GTE:&'static str = ">=";
 pub const LTE:&'static str = "<=";
-
 pub const USE: &'static str = "USE";
 pub const NS: &'static str = "NS";
 pub const DB: &'static str = "DB";
@@ -24,6 +23,7 @@ pub const NONE: &'static str = "NONE";
 pub const DIFF: &'static str = "DIFF";
 pub const BEFORE: &'static str = "BEFORE";
 pub const AFTER: &'static str = "AFTER";
+pub const WHERE: &'static str = "WHERE";
 pub const CONTENT: &'static str = "CONTENT";
 pub const SET: &'static str = "SET";
 pub const UUID: &'static str = "uuid()";
@@ -32,7 +32,13 @@ pub const RAND: &'static str = "rand()";
 pub const SELECT: &'static str = "SELECT";
 pub const FROM: &'static str = "FROM";
 pub const AS: &'static str = "AS";
-pub const WHERE: &'static str = "WHERE";
+pub const ORDER_BY: &'static str = "ORDER BY";
+pub const SPLIT_AT: &'static str = "SPLIT AT";
+pub const GROUP_BY: &'static str = "GROUP BY";
+pub const LIMIT_BY: &'static str = "LIMIT BY";
+pub const START_AT: &'static str = "START AT";
+pub const AND: &'static str = "AND";
+pub const OR: &'static str = "OR";
 
 ///SurrealCore是应用核心结构体，连接使用的是Surreal<Client>
 /// operator: SurrealOperator 暂时并未有任何具体有用实现
