@@ -1,8 +1,4 @@
-use std::collections::HashMap;
-use std::ops::Add;
-use std::sync::{Arc, Mutex};
-use super::{RegionImpl, COMMON_SEPARATOR, SET, END_SEPARATOR, CREATE, EQUAL_SEPARATOR, NEXT_SEPARATOR, IS_SEPARATOR, RETURN, NONE, DIFF, AFTER, BEFORE, RAND, ULID, UUID, CONTENT, AvailData, Wrapper, TableId, IdRange, IdFunction};
-use log::error;
+use super::{RegionImpl, COMMON_SEPARATOR, SET, END_SEPARATOR, CREATE, EQUAL_SEPARATOR, NEXT_SEPARATOR, IS_SEPARATOR, RETURN, NONE, DIFF, AFTER, BEFORE, RAND, ULID, UUID, CONTENT, AvailData, Wrapper, TableId, IdFunction};
 use crate::{ParseSQL, SQLParser, handle_str, check_available_order};
 use serde::{Deserialize, Serialize};
 

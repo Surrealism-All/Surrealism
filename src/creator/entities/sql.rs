@@ -8,12 +8,12 @@ pub const IS_SEPARATOR: &'static str = ":";
 pub const END_SEPARATOR: &'static str = ";";
 pub const EQUAL_SEPARATOR: &'static str = "=";
 pub const NEXT_SEPARATOR: &'static str = ",";
-pub const EQ:&'static str = "=";
-pub const NEQ:&'static str = "!=";
-pub const GT:&'static str = ">";
-pub const LT:&'static str = "<";
-pub const GTE:&'static str = ">=";
-pub const LTE:&'static str = "<=";
+pub const EQ: &'static str = "=";
+pub const NEQ: &'static str = "!=";
+pub const GT: &'static str = ">";
+pub const LT: &'static str = "<";
+pub const GTE: &'static str = ">=";
+pub const LTE: &'static str = "<=";
 pub const USE: &'static str = "USE";
 pub const NS: &'static str = "NS";
 pub const DB: &'static str = "DB";
@@ -35,10 +35,16 @@ pub const AS: &'static str = "AS";
 pub const ORDER_BY: &'static str = "ORDER BY";
 pub const SPLIT_AT: &'static str = "SPLIT AT";
 pub const GROUP_BY: &'static str = "GROUP BY";
-pub const LIMIT_BY: &'static str = "LIMIT BY";
-pub const START_AT: &'static str = "START AT";
+pub const LIMIT_BY: &'static str = "LIMIT";
+pub const START_AT: &'static str = "START";
+pub const TIMEOUT: &'static str = "TIMEOUT";
 pub const AND: &'static str = "AND";
 pub const OR: &'static str = "OR";
+pub const MILLISECOND: &'static str = "ms";
+pub const SECOND: &'static str = "s";
+pub const MINUTE: &'static str = "min";
+pub const HOUR: &'static str = "h";
+
 
 ///SurrealCore是应用核心结构体，连接使用的是Surreal<Client>
 /// operator: SurrealOperator 暂时并未有任何具体有用实现
@@ -210,7 +216,13 @@ pub enum IdRange<T> {
 }
 
 
-pub trait RegionImpl{
-    fn combine(&mut self)->&str;
+pub trait RegionImpl {
+    fn combine(&mut self) -> &str;
 }
 
+pub enum TimeUnit{
+    MILLISECOND,
+    SECOND,
+    MINUTE,
+    HOUR,
+}

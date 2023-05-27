@@ -1,8 +1,5 @@
-use std::collections::HashMap;
-use std::ops::Add;
-use std::sync::{Arc, Mutex};
-use super::{Wrapper, DB, NS, COMMON_SEPARATOR, END_SEPARATOR, USE, AvailData};
-use crate::check_available_order;
+use super::{Wrapper, DB, NS, USE, AvailData};
+
 
 ///USE语句包装器
 /// keywords:关键词

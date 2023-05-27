@@ -1,6 +1,6 @@
 use surrealdb::engine::remote::ws::Client;
 use surrealdb::Surreal;
-use surrealism::{SurrealRes, InitServiceImpl, SurrealDB, UseWrapper, Wrapper, TableId, IdFunction, SQLParser, Field, ParseSQL, CreateWrapper, SelectWrapper, Criteria};
+use surrealism::{SurrealRes, InitServiceImpl, SurrealDB, UseWrapper, Wrapper, TableId, IdFunction, SQLParser, Field, ParseSQL, TimeUnit, CreateWrapper, SelectWrapper, Criteria, OrderCondition, Ordered};
 use serde::{Serialize, Deserialize};
 
 
@@ -57,13 +57,24 @@ async fn main() -> SurrealRes<()> {
     f_v.push(f2);
     let mut cri = Criteria::new();
     // cri.eq("userId", "123");
-    cri.gte(&cri.and(&cri.or(&cri.and("a", "b"), "c"),"d"), "12345");
+    cri.gte(&cri.and(&cri.or(&cri.and("a", "b"), "c"), "d"), "12345");
+    let handles = vec!["userId", "name"];
+    let mut order_handles = Vec::new();
+    let mut order_handle1 = OrderCondition::new_no_args();
+    order_handle1.field("name").ordered(Ordered::DESC);
+    let mut order_handle2 = OrderCondition::new_no_args();
+    order_handle2.field("userId").ordered(Ordered::ASC);
+    order_handles.push(order_handle1);
+    order_handles.push(order_handle2);
     //查询
     queryWrapper.select_fields(&f_v)
         .from("user")
-        .where_condition(&cri);
-    // .group_by("userId")
-    // .order_by("userId");
+        .where_condition(&cri)
+        .group_by(&handles)
+        .split_at(&handles)
+        .order_by(&mut order_handles)
+        .timeout(50, TimeUnit::SECOND);
+
     dbg!(queryWrapper.commit());
     // let query_res = db.commit(queryWrapper).await?;
     // dbg!(query_res);
