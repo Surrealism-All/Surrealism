@@ -73,6 +73,9 @@ async fn main() -> SurrealRes<()> {
         .group_by(&handles)
         .split_at(&handles)
         .order_by(&mut order_handles)
+        .start_at(15)
+        .limit_by(30)
+        .fetch(&vec!["user.name"])
         .timeout(50, TimeUnit::SECOND);
 
     dbg!(queryWrapper.commit());

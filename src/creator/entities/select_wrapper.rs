@@ -2,7 +2,7 @@ use std::cell::RefCell;
 use std::collections::HashMap;
 use std::ops::Add;
 use std::sync::{Arc, Mutex};
-use super::{RegionImpl, TIMEOUT, AND, OR, COMMON_SEPARATOR, END_SEPARATOR, EQUAL_SEPARATOR, NEXT_SEPARATOR, AS, IS_SEPARATOR, SELECT, FROM, WHERE, AvailData, Wrapper, EQ, NEQ, LT, GT, LTE, GTE, ORDER_BY, GROUP_BY, SPLIT_AT, START_AT, LIMIT_BY, TimeUnit, MILLISECOND, SECOND, HOUR, MINUTE};
+use super::{RegionImpl, FETCH, TIMEOUT, AND, OR, COMMON_SEPARATOR, END_SEPARATOR, EQUAL_SEPARATOR, NEXT_SEPARATOR, AS, IS_SEPARATOR, SELECT, FROM, WHERE, AvailData, Wrapper, EQ, NEQ, LT, GT, LTE, GTE, ORDER_BY, GROUP_BY, SPLIT_AT, START_AT, LIMIT_BY, TimeUnit, MILLISECOND, SECOND, HOUR, MINUTE};
 use log::error;
 use crate::{ParseSQL, SQLParser, handle_str, check_available_order};
 use serde::{Deserialize, Serialize};
@@ -100,10 +100,9 @@ impl RegionImpl for FieldRegion {
         for data in &self.available_data {
             counter += 1;
             if counter == self.available_data.len() {
-                stmt.push_str(data.value());
+                stmt.push_str(format!("{}{}", COMMON_SEPARATOR, data.value()).as_str());
             } else {
-                stmt.push_str(data.value());
-                stmt.push_str(NEXT_SEPARATOR);
+                stmt.push_str(format!("{}{}{}", data.value(), COMMON_SEPARATOR, NEXT_SEPARATOR).as_str());
             }
         }
         self.field_str = format!("{}{}{}", self.keyword, COMMON_SEPARATOR, stmt);
@@ -186,7 +185,7 @@ impl RegionImpl for HandleCondition {
             counter += 1;
             res.push_str(data);
             if !counter.eq(&self.available_data.len()) {
-                res.push_str(",");
+                res.push_str(format!("{}{}{}", COMMON_SEPARATOR, NEXT_SEPARATOR, COMMON_SEPARATOR).as_str());
             }
         }
 
@@ -210,7 +209,7 @@ impl RegionImpl for HandleOrder {
             counter += 1;
             res.push_str(data);
             if !counter.eq(&self.available_data.len()) {
-                res.push_str(",");
+                res.push_str(format!("{}{}{}", COMMON_SEPARATOR, NEXT_SEPARATOR, COMMON_SEPARATOR).as_str());
             }
         }
 
@@ -312,6 +311,7 @@ pub struct HandleRegion {
     limit: HandleConditionSingle,
     start: HandleConditionSingle,
     timeout: HandleConditionSingle,
+    fetch: HandleCondition,
     handle_str: String,
 }
 
@@ -348,6 +348,11 @@ impl HandleRegion {
                 handle_str: String::new(),
                 keyword: String::from(TIMEOUT),
             },
+            fetch: HandleCondition {
+                available_data: Vec::new(),
+                handle_str: String::new(),
+                keyword: String::from(FETCH),
+            },
             handle_str: String::new(),
         }
     }
@@ -367,9 +372,22 @@ impl RegionImpl for HandleRegion {
             self.handle_str.push_str(self.order.combine());
         }
         self.handle_str.push_str(COMMON_SEPARATOR);
+        if !self.limit.available_data.is_empty() {
+            self.handle_str.push_str(self.limit.combine());
+        }
+        self.handle_str.push_str(COMMON_SEPARATOR);
+        if !self.start.available_data.is_empty() {
+            self.handle_str.push_str(self.start.combine());
+        }
+        self.handle_str.push_str(COMMON_SEPARATOR);
+        if !self.fetch.available_data.is_empty() {
+            self.handle_str.push_str(self.fetch.combine());
+        }
+        self.handle_str.push_str(COMMON_SEPARATOR);
         if !self.timeout.available_data.is_empty() {
             self.handle_str.push_str(self.timeout.combine());
         }
+
         self.handle_str.as_str()
     }
 }
@@ -519,12 +537,35 @@ impl Criteria {
     }
 }
 
+///=================================================<br>
+/// @params:
+/// <ol>
+///     <li>core:源目标</li>
+///     <li>replace:替换目标</li>
+/// </ol>
+/// @return:<br>
+/// @date:2023/5/28<br>
+/// @description:将Criteria的complexBuild方法中替换`()`<br>
+///=================================================
 fn replace_str(core: &str, replace: &str) -> String {
     let value = core.replace("( ", "").replace(" )", "");
     let res = replace.replace(&value, core);
     res.clone()
 }
 
+///=================================================<br>
+/// @params:
+/// <ol>
+///     <li>Eq:等于</li>
+///     <li>Lt:小于</li>
+///     <li>Gt:大于</li>
+///     <li>Neq:不等于</li>
+///     <li>Lte:小于等于</li>
+///     <li>Gte:大于等于</li>
+/// </ol>
+/// @date:2023/5/28<br>
+/// @description:JudgeCriteria判断符枚举
+///=================================================
 #[derive(Debug, Clone)]
 pub enum JudgeCriteria {
     Eq,
@@ -597,21 +638,45 @@ impl Wrapper for SelectWrapper {
 }
 
 impl SelectWrapper {
-    ///通用查询
+    ///=================================================<br>
+    /// @params:
+    /// <ol>
+    ///     <li>query:查询语句,全写</li>
+    /// </ol>
+    /// @return:<br>
+    /// @date:2023/5/28<br>
+    /// @description:通用查询<br>
+    ///=================================================
     pub fn select(&mut self, query: &str) -> &mut Self {
         let len = self.get_available().len();
         let tmp = AvailData::new(len, String::from("query"), String::from(query), false, false);
         self.available.push(tmp);
         self
     }
-    ///查询字段
+    ///=================================================<br>
+    /// @params:
+    /// <ol>
+    ///     <li>fields:字段</li>
+    /// </ol>
+    /// @return:SelectWrapper<br>
+    /// @date:2023/5/28<br>
+    /// @description:查询字段<br>
+    ///=================================================
     pub fn select_fields(&mut self, fields: &Vec<Field>) -> &mut Self {
         for field in fields {
             self.select_field(field);
         }
         self
     }
-    ///查询字段
+    ///=================================================<br>
+    /// @params:
+    /// <ol>
+    ///     <li>fields:字段</li>
+    /// </ol>
+    /// @return:<br>
+    /// @date:2023/5/28<br>
+    /// @description:查询字段-单个查询<br>
+    ///=================================================
     pub fn select_field(&mut self, field: &Field) -> &mut Self {
         let len = self.get_available().len();
         let mut field_stmt = String::new();
@@ -624,7 +689,15 @@ impl SelectWrapper {
         self.field_region.available_data.push(value);
         self
     }
-    ///from子句
+    ///=================================================<br>
+    /// @params:
+    /// <ol>
+    ///     <li>table_name:表名</li>
+    /// </ol>
+    /// @return:<br>
+    /// @date:2023/5/28<br>
+    /// @description:from子句<br>
+    ///=================================================
     pub fn from(&mut self, table_name: &str) -> &mut Self {
         self.table_region.table = String::from(table_name);
         self
@@ -636,6 +709,7 @@ impl SelectWrapper {
         self.where_region.available_data.push(value);
         self
     }
+    ///构建OrderBy子句
     pub fn order_by(&mut self, conditions: &mut Vec<OrderCondition>) -> &mut Self {
         for condition in conditions {
             let res = condition.combine();
@@ -643,6 +717,7 @@ impl SelectWrapper {
         }
         self
     }
+    ///构建GroupBy子句
     pub fn group_by(&mut self, conditions: &Vec<&str>) -> &mut Self {
         for group_condition in conditions.clone() {
             self.handle_region.group.available_data.push(String::from(group_condition))
@@ -655,6 +730,13 @@ impl SelectWrapper {
         }
         self
     }
+    pub fn fetch(&mut self, fields: &Vec<&str>) -> &mut Self {
+        for field in fields.clone() {
+            self.handle_region.fetch.available_data.push(String::from(field))
+        }
+        self
+    }
+    ///构建延时Timeout子句
     pub fn timeout(&mut self, time: usize, unit: TimeUnit) -> &mut Self {
         let mut res = String::new();
         match unit {
@@ -666,10 +748,14 @@ impl SelectWrapper {
         self.handle_region.timeout.available_data = format!("{}{}", time, res);
         self
     }
-    pub fn limit_by(&mut self, condition: &str) -> &mut Self {
+    ///构建limit子句
+    pub fn limit_by(&mut self, pieces: usize) -> &mut Self {
+        self.handle_region.limit.available_data = format!("{}", pieces);
         self
     }
-    pub fn start_at(&mut self, condition: &str) -> &mut Self {
+    ///构建Start子句
+    pub fn start_at(&mut self, pieces: usize) -> &mut Self {
+        self.handle_region.start.available_data = format!("{}", pieces);
         self
     }
 }

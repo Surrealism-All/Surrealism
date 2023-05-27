@@ -33,11 +33,12 @@ pub const SELECT: &'static str = "SELECT";
 pub const FROM: &'static str = "FROM";
 pub const AS: &'static str = "AS";
 pub const ORDER_BY: &'static str = "ORDER BY";
-pub const SPLIT_AT: &'static str = "SPLIT AT";
+pub const SPLIT_AT: &'static str = "SPLIT";
 pub const GROUP_BY: &'static str = "GROUP BY";
 pub const LIMIT_BY: &'static str = "LIMIT";
 pub const START_AT: &'static str = "START";
 pub const TIMEOUT: &'static str = "TIMEOUT";
+pub const FETCH: &'static str = "FETCH";
 pub const AND: &'static str = "AND";
 pub const OR: &'static str = "OR";
 pub const MILLISECOND: &'static str = "ms";
@@ -220,7 +221,7 @@ pub trait RegionImpl {
     fn combine(&mut self) -> &str;
 }
 
-pub enum TimeUnit{
+pub enum TimeUnit {
     MILLISECOND,
     SECOND,
     MINUTE,
