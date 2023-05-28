@@ -20,17 +20,17 @@ use serde::{Deserialize, Serialize};
 #[derive(Debug, Clone)]
 pub struct CreateWrapper {
     ///关键词
-    pub keyword: String,
+    keyword: String,
     ///可获取值
-    pub available: Vec<AvailData>,
+    available: Vec<AvailData>,
     ///语句
-    pub stmt: String,
+    stmt: String,
     ///内容区域
-    pub content_region: ContentRegion,
+    content_region: ContentRegion,
     ///构建区域
-    pub create_region: CreateRegion,
+    create_region: CreateRegion,
     ///返回区域
-    pub return_region: ReturnRegion,
+    return_region: ReturnRegion,
 }
 
 ///构建第一部分tablename和Id
@@ -95,7 +95,7 @@ impl RegionImpl for ContentRegion {
                 self.content_str = format!("{}{}{}", SET, COMMON_SEPARATOR, stmt);
             }
             ContentType::CONTENT => {
-                self.content_str = format!("{}{}{}",CONTENT,COMMON_SEPARATOR,self.available_data[0].value())
+                self.content_str = format!("{}{}{}", CONTENT, COMMON_SEPARATOR, self.available_data[0].value())
             }
             ContentType::NONE => panic!("{}", "you must create a content")
         };
@@ -220,6 +220,7 @@ impl CreateWrapper {
         self
     }
     ///SET方式构建字段
+    /// SET method for constructing fields
     pub fn set<T: Serialize>(&mut self, field_name: &'static str, value: T) -> &mut Self {
         let len = self.get_available().len();
         match self.content_region.content_type {
@@ -235,6 +236,7 @@ impl CreateWrapper {
         self
     }
     ///CONTENT方式构建字段
+    /// CONTENT method for constructing fields
     pub fn content<T: Serialize + SQLParser>(&mut self, content_obj: T) -> &mut Self {
         match self.content_region.content_type {
             ContentType::SET => panic!("you cannot use set and content together!"),

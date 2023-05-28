@@ -25,17 +25,17 @@ use serde::{Deserialize, Serialize};
 #[derive(Debug, Clone)]
 pub struct SelectWrapper {
     ///关键字
-    pub keyword: String,
-    pub available: Vec<AvailData>,
-    pub stmt: String,
+    keyword: String,
+    available: Vec<AvailData>,
+    stmt: String,
     ///表区域（生成FROM @TableName）
-    pub table_region: TableRegion,
+    table_region: TableRegion,
     ///字段区域（生成SELECT @Fields...）
-    pub field_region: FieldRegion,
+    field_region: FieldRegion,
     ///条件区域，where子句（生成WHERE @Condition）
-    pub where_region: WhereRegion,
+    where_region: WhereRegion,
     ///处理区域（生成ORDER BY，GROUP BY等子句）
-    pub handle_region: HandleRegion,
+    handle_region: HandleRegion,
 
 }
 
@@ -51,8 +51,8 @@ pub struct SelectWrapper {
 ///=================================================
 #[derive(Debug, Clone)]
 pub struct Field {
-    pub name: String,
-    pub as_name: String,
+    name: String,
+    as_name: String,
 }
 
 impl Field {
@@ -143,7 +143,9 @@ pub struct WhereRegion {
 
 impl RegionImpl for WhereRegion {
     fn combine(&mut self) -> &str {
-        self.where_str = format!("{}{}{}", self.keyword, COMMON_SEPARATOR, self.available_data[0].value());
+        if !self.available_data.is_empty() {
+            self.where_str = format!("{}{}{}", self.keyword, COMMON_SEPARATOR, self.available_data[0].value());
+        }
         self.where_str.as_str()
     }
 }
@@ -363,28 +365,34 @@ impl RegionImpl for HandleRegion {
         if !self.split.available_data.is_empty() {
             self.handle_str.push_str(self.split.combine());
         }
-        self.handle_str.push_str(COMMON_SEPARATOR);
+
         if !self.group.available_data.is_empty() {
+            self.handle_str.push_str(COMMON_SEPARATOR);
             self.handle_str.push_str(self.group.combine());
         }
-        self.handle_str.push_str(COMMON_SEPARATOR);
+
         if !self.order.available_data.is_empty() {
+            self.handle_str.push_str(COMMON_SEPARATOR);
             self.handle_str.push_str(self.order.combine());
         }
-        self.handle_str.push_str(COMMON_SEPARATOR);
+
         if !self.limit.available_data.is_empty() {
+            self.handle_str.push_str(COMMON_SEPARATOR);
             self.handle_str.push_str(self.limit.combine());
         }
-        self.handle_str.push_str(COMMON_SEPARATOR);
+
         if !self.start.available_data.is_empty() {
+            self.handle_str.push_str(COMMON_SEPARATOR);
             self.handle_str.push_str(self.start.combine());
         }
-        self.handle_str.push_str(COMMON_SEPARATOR);
+
         if !self.fetch.available_data.is_empty() {
+            self.handle_str.push_str(COMMON_SEPARATOR);
             self.handle_str.push_str(self.fetch.combine());
         }
-        self.handle_str.push_str(COMMON_SEPARATOR);
+
         if !self.timeout.available_data.is_empty() {
+            self.handle_str.push_str(COMMON_SEPARATOR);
             self.handle_str.push_str(self.timeout.combine());
         }
 
@@ -577,20 +585,6 @@ pub enum JudgeCriteria {
     NONE,
 }
 
-// impl Criteria {
-//     pub fn new(judge: JudgeCriteria, core: &str, comparator: &str) -> Self {
-//         Criteria {
-//             judge,
-//             define: String::new(),
-//             core: String::from(core),
-//             comparator: String::from(comparator),
-//         }
-//     }
-//     pub fn define(&mut self, df: &str) -> &mut Self {
-//         self.define = String::from(df);
-//         self
-//     }
-// }
 
 impl Wrapper for SelectWrapper {
     fn new() -> Self {
@@ -624,7 +618,9 @@ impl Wrapper for SelectWrapper {
 
 
     fn commit(&mut self) -> &str {
-        self.stmt = format!("{}{}{}{}{}{}{}{}", self.field_region.combine(), COMMON_SEPARATOR, self.table_region.combine(), COMMON_SEPARATOR, self.where_region.combine(), COMMON_SEPARATOR, self.handle_region.combine(), END_SEPARATOR);
+        if self.stmt.is_empty() {
+            self.stmt = format!("{}{}{}{}{}{}{}{}", self.field_region.combine(), COMMON_SEPARATOR, self.table_region.combine(), COMMON_SEPARATOR, self.where_region.combine(), COMMON_SEPARATOR, self.handle_region.combine(), END_SEPARATOR);
+        }
         &self.stmt
     }
 
@@ -648,9 +644,10 @@ impl SelectWrapper {
     /// @description:通用查询<br>
     ///=================================================
     pub fn select(&mut self, query: &str) -> &mut Self {
-        let len = self.get_available().len();
-        let tmp = AvailData::new(len, String::from("query"), String::from(query), false, false);
-        self.available.push(tmp);
+        // let len = self.get_available().len();
+        // let tmp = AvailData::new(len, String::from("query"), String::from(query), false, false);
+        // self.available.push(tmp);
+        self.stmt = String::from(query);
         self
     }
     ///=================================================<br>
@@ -696,13 +693,16 @@ impl SelectWrapper {
     /// </ol>
     /// @return:<br>
     /// @date:2023/5/28<br>
-    /// @description:from子句<br>
+    /// @description:
+    /// 设置查询的表<br />
+    /// set table name which you wanna select<br>
     ///=================================================
     pub fn from(&mut self, table_name: &str) -> &mut Self {
         self.table_region.table = String::from(table_name);
         self
     }
-    ///where子句
+    /// 构建where子句
+    /// build a where statement
     pub fn where_condition(&mut self, condition: &Criteria) -> &mut Self {
         let len = self.get_available().len();
         let value = AvailData::new(len, String::from("where_criteria"), condition.combine(), false, false);
@@ -710,6 +710,7 @@ impl SelectWrapper {
         self
     }
     ///构建OrderBy子句
+    /// build an OrderBy statement
     pub fn order_by(&mut self, conditions: &mut Vec<OrderCondition>) -> &mut Self {
         for condition in conditions {
             let res = condition.combine();
@@ -718,18 +719,21 @@ impl SelectWrapper {
         self
     }
     ///构建GroupBy子句
+    ///
     pub fn group_by(&mut self, conditions: &Vec<&str>) -> &mut Self {
         for group_condition in conditions.clone() {
             self.handle_region.group.available_data.push(String::from(group_condition))
         }
         self
     }
+    /// 构建SplitAt子句
     pub fn split_at(&mut self, conditions: &Vec<&str>) -> &mut Self {
         for split_condition in conditions.clone() {
             self.handle_region.split.available_data.push(String::from(split_condition))
         }
         self
     }
+    ///构建Fetch子句
     pub fn fetch(&mut self, fields: &Vec<&str>) -> &mut Self {
         for field in fields.clone() {
             self.handle_region.fetch.available_data.push(String::from(field))

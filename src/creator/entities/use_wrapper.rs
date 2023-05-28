@@ -7,14 +7,23 @@ use super::{Wrapper, DB, NS, USE, AvailData};
 /// stmt:具体语句
 #[derive(Debug, Clone)]
 pub struct UseWrapper {
-    pub keyword: String,
-    pub available: Vec<AvailData>,
-    pub stmt: String,
-    pub namespace: String,
-    pub database: String,
+    keyword: String,
+    available: Vec<AvailData>,
+    stmt: String,
+    namespace: String,
+    database: String,
 }
 
 impl UseWrapper {
+    ///=================================================<br>
+    /// @params:
+    /// <ol>
+    ///     <li>namespace:使用的命名空间</li>
+    /// </ol>
+    /// @return:<br>
+    /// @date:2023/5/28<br>
+    /// @description:设置SurrealDB使用命名空间<br>
+    ///=================================================
     pub fn use_ns(&mut self, namespace: &str) -> &mut Self {
         self.namespace = String::from(namespace);
         self
