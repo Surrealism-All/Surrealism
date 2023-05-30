@@ -1,8 +1,9 @@
-use surrealdb::sql::Thing;
+use std::cell::RefCell;
+use std::fmt::Debug;
+use surrealdb::sql::{Thing};
 use serde::{Deserialize, Serialize};
-use super::SurrealCore;
+use super::{SurrealCore, Statements, RegionField, NS, DB, Wrapper};
 use crate::config::SurrealConfig;
-use crate::Wrapper;
 
 
 ///
@@ -25,32 +26,41 @@ impl SurrealDB {
         self.core.cn.query(sql).await
     }
     ///提交USE语句
-    pub async fn use_commit(&self,mut wrapper: impl Wrapper) -> Result<(), Box<&'static str>> {
+    pub async fn use_commit(&self, mut wrapper: impl Wrapper) -> Result<(), surrealdb::Error> {
         match wrapper.get_keyword() {
-            "USE" => {
+            Statements::USE => {
                 wrapper.commit();
-                let attrs = wrapper.get_available();
-                if attrs.is_empty() {
-                    Err(Box::new("命名空间，数据库构建异常"))
-                } else if attrs.len() > 10 {
-                    let e = "USE语句参数长度异常";
-                    Err(Box::new(e))
-                } else {
-                    let mut use_attrs: Vec<String> = Vec::new();
-
-                    for attr in attrs {
-                        let value = attr.value().clone().to_string();
-                        use_attrs.push(value);
+                let sql_region = RefCell::new(wrapper.get_available());
+                let region_field = sql_region.borrow_mut().get_region_field();
+                match region_field {
+                    RegionField::Single(_filed) => {
+                        panic!("USE Statement use `RegionField::Multi` if you see this mistake please send email to developer:syf20020816@outlook.com");
                     }
-
-                    self.core.cn.use_ns(&use_attrs[0]).use_db(&use_attrs[1]).await;
-                    Ok(())
+                    RegionField::Multi(field_list) => {
+                        let mut ns = "";
+                        let mut db = "";
+                        for field in field_list {
+                            match field.get(NS) {
+                                Some(res) => {
+                                    ns = res;
+                                }
+                                None => ()
+                            }
+                            match field.get(DB) {
+                                Some(res) => {
+                                    db = res;
+                                }
+                                None => ()
+                            }
+                        }
+                        self.core.cn.use_ns(ns).use_db(db).await
+                    }
                 }
             }
             _ => {
-                let e = "非USE语句请使用commit方法";
-                Err(Box::new(e))
+                panic!("{}", "非USE语句请使用commit方法")
             }
         }
     }
 }
+

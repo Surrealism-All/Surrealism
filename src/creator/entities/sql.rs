@@ -65,7 +65,8 @@ impl SurrealCore {
 
 /// 语句枚举
 /// 考虑结合包装器,也许可以将包装器的keyword字段使用Statements枚举
-enum Statements {
+#[derive(Debug, Clone)]
+pub enum Statements {
     USE,
     LET,
     BEGIN,
@@ -103,8 +104,8 @@ impl SurrealOperator {
 pub trait Wrapper {
     fn new() -> Self;
     fn commit(&mut self) -> &str;
-    fn get_keyword(&self) -> &str;
-    fn get_available(&self) -> &Vec<AvailData>;
+    fn get_keyword(&self) -> &Statements;
+    fn get_available(&self) -> &SQLRegion;
 }
 
 ///语句可用参数
@@ -217,13 +218,110 @@ pub enum IdRange<T> {
 }
 
 
-pub trait RegionImpl {
-    fn combine(&mut self) -> &str;
-}
-
 pub enum TimeUnit {
     MILLISECOND,
     SECOND,
     MINUTE,
     HOUR,
+}
+
+pub trait RegionImpl {
+    ///组合region_fields得到region_statement
+    fn combine(&mut self, function: dyn FnMut()) -> &str;
+}
+
+///核心设计!
+#[derive(Debug, Clone)]
+pub struct SQLRegion {
+    region_field: RegionField,
+    region_statement: String,
+    keyword: String,
+}
+
+impl SQLRegion {
+    pub fn new(region_field: RegionField, keyword: &str) -> Self {
+        SQLRegion {
+            region_field,
+            region_statement: String::new(),
+            keyword: String::from(keyword),
+        }
+    }
+    pub fn new_no_arg(keyword: &str) -> Self {
+        SQLRegion {
+            region_field: RegionField::Single(String::new()),
+            region_statement: String::new(),
+            keyword: String::from(keyword),
+        }
+    }
+    pub fn get_region_field(&self) ->&RegionField {
+        &self.region_field
+    }
+    pub fn get_keyword(&self) -> &str {
+        &self.keyword
+    }
+    pub fn get_region_statement(&self) -> &str {
+        &self.region_statement
+    }
+    pub fn set_keyword(&mut self, keyword: &str) {
+        self.keyword = String::from(keyword);
+    }
+    pub fn set_region_statement(&mut self, region_statement: &str) {
+        self.region_statement = String::from(region_statement);
+    }
+    pub fn set_region_field(&mut self, region_field: &RegionField) {
+        self.region_field = region_field.clone();
+    }
+    ///如果是Multi就是push，Single就是Set
+    pub fn push_set(&mut self, item: &SQLField) {
+        match &mut self.region_field {
+            RegionField::Multi( field_list) => {
+                field_list.push(item.clone())
+            }
+            RegionField::Single( field) => {
+                *field = String::from(item.get_field_value());
+            }
+        };
+    }
+}
+
+
+#[derive(Debug, Clone)]
+pub enum RegionField {
+    Multi(Vec<SQLField>),
+    Single(String),
+}
+
+
+#[derive(Debug, Clone)]
+pub struct SQLField {
+    keyword: String,
+    field_value: String,
+}
+
+impl SQLField {
+    pub fn new(keyword: &str, field_value: &str) -> SQLField {
+        SQLField {
+            keyword: String::from(keyword),
+            field_value: String::from(field_value),
+        }
+    }
+    pub fn get_field_value(&self) -> &str {
+        &self.field_value
+    }
+    pub fn get_keyword(&self) -> &str {
+        &self.keyword
+    }
+    pub fn set_keyword(&mut self, keyword: &str) {
+        self.keyword = String::from(keyword);
+    }
+    pub fn set_field_value(&mut self, value: &str) {
+        self.field_value = String::from(value);
+    }
+    ///匹配传入的keyword，相同则返回field_value
+    pub fn get(&self, keyword: &str) -> Option<&str> {
+        if !&self.get_keyword().eq(keyword) {
+            return None;
+        }
+        Some(&self.get_keyword())
+    }
 }

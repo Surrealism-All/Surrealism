@@ -1,4 +1,4 @@
-use super::{Wrapper, DB, NS, USE, AvailData};
+use super::{Wrapper, DB, NS, USE, SQLField, SQLRegion, Statements, RegionField};
 
 
 ///USE语句包装器
@@ -7,8 +7,8 @@ use super::{Wrapper, DB, NS, USE, AvailData};
 /// stmt:具体语句
 #[derive(Debug, Clone)]
 pub struct UseWrapper {
-    keyword: String,
-    available: Vec<AvailData>,
+    keyword: Statements,
+    available: SQLRegion,
     stmt: String,
     namespace: String,
     database: String,
@@ -43,8 +43,8 @@ impl UseWrapper {
 impl Wrapper for UseWrapper {
     fn new() -> Self {
         UseWrapper {
-            keyword: String::from(USE),
-            available: Vec::new(),
+            keyword: Statements::USE,
+            available: SQLRegion::new(RegionField::Multi(Vec::new()), USE),
             stmt: String::new(),
             namespace: String::new(),
             database: String::new(),
@@ -53,18 +53,21 @@ impl Wrapper for UseWrapper {
 
 
     fn commit(&mut self) -> &str {
-        let ns = self.get_namespace();
-        let db = self.get_database();
-        let t_node1 =  AvailData::new(0, String::from(NS), String::from(ns), false, false);
-        let t_node2 =  AvailData::new(1, String::from(DB), String::from(db), false, false);
-        self.available.push(t_node1);
-        self.available.push(t_node2);
+        // let ns =;
+        // let db = ;
+        let ns_field = SQLField::new(NS,  self.get_namespace());
+        let db_field = SQLField::new(DB, self.get_database());
+        self.available.push_set(&ns_field);
+        self.available.push_set(&db_field);
         &self.stmt
     }
-    fn get_keyword(&self) -> &str {
+
+    fn get_keyword(&self) -> &Statements {
         &self.keyword
     }
-    fn get_available(&self) -> &Vec<AvailData> {
+
+
+    fn get_available(&self) -> &SQLRegion {
         &self.available
     }
 }
