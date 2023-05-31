@@ -6,7 +6,8 @@
 ///  █▄▄▄▄▄█▀  ██▄▄▄███   ██        ██       ▀██▄▄▄▄█  ██▄▄▄███    ██▄▄▄   ▄▄▄██▄▄▄  █▄▄▄▄▄██  ██ ██ ██
 ///   ▀▀▀▀▀     ▀▀▀▀ ▀▀   ▀▀        ▀▀         ▀▀▀▀▀    ▀▀▀▀ ▀▀     ▀▀▀▀   ▀▀▀▀▀▀▀▀   ▀▀▀▀▀▀   ▀▀ ▀▀ ▀▀
 
-use surrealism::{InitServiceImpl, SurrealRes, UseWrapper, Wrapper};
+
+use surrealism::{InitServiceImpl, SurrealRes, UseWrapper, Wrapper, CreateWrapper, TableId};
 
 #[tokio::main]
 async fn main() -> SurrealRes<()> {
@@ -23,7 +24,25 @@ async fn main() -> SurrealRes<()> {
     /// commit statement
     let res_use = db.use_commit(use_wrapper).await;
     dbg!(res_use);
+    ///创建CreateWrapper
+    /// new CreateWrapper
+    let mut create_wrapper = CreateWrapper::new();
+    /// 设置构建语句
+    /// set create statement
+    /// CREATE user:t10086 SET name='Jack',userId='jack001' RETURN NONE;
+    create_wrapper.create("user")
+        .id(TableId::<String>::Str("t10086".to_string()))
+        .set("name", "Jack")
+        .set("userId", "jack001")
+        .return_field("name");
+    dbg!(create_wrapper.commit());
+    /// 提交语句
+    /// commit statement
+    // let create_res = db.commit(create_wrapper).await;
+    // dbg!(create_res.unwrap());
     Ok(())
 }
+
+
 
 

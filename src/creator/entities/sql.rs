@@ -6,14 +6,14 @@ use serde::{Deserialize, Serialize};
 pub const COMMON_SEPARATOR: &'static str = " ";
 pub const IS_SEPARATOR: &'static str = ":";
 pub const END_SEPARATOR: &'static str = ";";
-pub const EQUAL_SEPARATOR: &'static str = "=";
-pub const NEXT_SEPARATOR: &'static str = ",";
-pub const EQ: &'static str = "=";
-pub const NEQ: &'static str = "!=";
-pub const GT: &'static str = ">";
-pub const LT: &'static str = "<";
-pub const GTE: &'static str = ">=";
-pub const LTE: &'static str = "<=";
+pub const EQUAL_SEPARATOR: &'static str = " = ";
+pub const NEXT_SEPARATOR: &'static str = " , ";
+pub const EQ: &'static str = " = ";
+pub const NEQ: &'static str = " != ";
+pub const GT: &'static str = " > ";
+pub const LT: &'static str = " < ";
+pub const GTE: &'static str = " >= ";
+pub const LTE: &'static str = " <= ";
 pub const USE: &'static str = "USE";
 pub const NS: &'static str = "NS";
 pub const DB: &'static str = "DB";
@@ -227,7 +227,7 @@ pub enum TimeUnit {
 
 pub trait RegionImpl {
     ///组合region_fields得到region_statement
-    fn combine(&mut self, function: dyn FnMut()) -> &str;
+    fn combine(&mut self, stmt: &str) -> &str;
 }
 
 ///核心设计!
@@ -237,6 +237,14 @@ pub struct SQLRegion {
     region_statement: String,
     keyword: String,
 }
+
+impl RegionImpl for SQLRegion {
+    fn combine(&mut self, stmt: &str) -> &str {
+        self.region_statement = String::from(stmt);
+        self.region_statement.as_str()
+    }
+}
+
 
 impl SQLRegion {
     pub fn new(region_field: RegionField, keyword: &str) -> Self {
@@ -253,14 +261,23 @@ impl SQLRegion {
             keyword: String::from(keyword),
         }
     }
-    pub fn get_region_field(&self) ->&RegionField {
+    pub fn get_region_field(&self) -> &RegionField {
         &self.region_field
+    }
+    pub fn get_region_field_mut(&mut self) -> &mut RegionField {
+        &mut self.region_field
     }
     pub fn get_keyword(&self) -> &str {
         &self.keyword
     }
+    pub fn get_keyword_mut(&mut self) -> &mut str {
+        &mut self.keyword
+    }
     pub fn get_region_statement(&self) -> &str {
         &self.region_statement
+    }
+    pub fn get_region_statement_mut(&mut self) -> &mut str {
+        &mut self.region_statement
     }
     pub fn set_keyword(&mut self, keyword: &str) {
         self.keyword = String::from(keyword);
@@ -274,13 +291,43 @@ impl SQLRegion {
     ///如果是Multi就是push，Single就是Set
     pub fn push_set(&mut self, item: &SQLField) {
         match &mut self.region_field {
-            RegionField::Multi( field_list) => {
+            RegionField::Multi(field_list) => {
                 field_list.push(item.clone())
             }
-            RegionField::Single( field) => {
+            RegionField::Single(field) => {
                 *field = String::from(item.get_field_value());
             }
         };
+    }
+    pub fn get_region_multi(&self) -> &Vec<SQLField> {
+        match self.get_region_field() {
+            RegionField::Multi(fields) => {
+                return fields;
+            }
+            RegionField::Single(_) => {
+                panic!("this fn is used for get region_field(RegionField::Multi)!")
+            }
+        }
+    }
+    pub fn get_region_multi_mut(&mut self) -> &mut Vec<SQLField> {
+        match self.get_region_field_mut() {
+            RegionField::Multi(ref mut fields) => {
+                return fields;
+            }
+            RegionField::Single(_) => {
+                panic!("this fn is used for get region_field(RegionField::Multi)!")
+            }
+        }
+    }
+    pub fn get_region_single(&self) -> &str {
+        match self.get_region_field() {
+            RegionField::Multi(_) => {
+                panic!("this fn is used for get region_field(RegionField::Single)!")
+            }
+            RegionField::Single(field) => {
+                field
+            }
+        }
     }
 }
 
@@ -322,6 +369,6 @@ impl SQLField {
         if !&self.get_keyword().eq(keyword) {
             return None;
         }
-        Some(&self.get_keyword())
+        Some(&self.get_field_value())
     }
 }
