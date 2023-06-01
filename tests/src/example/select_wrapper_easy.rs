@@ -23,7 +23,7 @@ async fn main() -> SurrealRes<()> {
     /// Used to build queries that SelectWrapper currently cannot perform
     /// example:SELECT count() AS total, math::sum(age), gender, country FROM person GROUP BY gender, country;
     let mut select_wrapper = SelectWrapper::new();
-    select_wrapper.select("SELECT * FROM user");
+    select_wrapper.select("SELECT * FROM user;");
     /// 提交语句
     /// commit statement
     let create_res = db.commit(select_wrapper).await;

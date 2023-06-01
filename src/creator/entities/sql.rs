@@ -309,6 +309,27 @@ impl SQLRegion {
             }
         }
     }
+    pub fn set_region_multi(&mut self, value: Vec<SQLField>) {
+        match self.get_region_field_mut() {
+            RegionField::Multi(fields) => {
+                *fields = value;
+            }
+            RegionField::Single(_) => {
+                panic!("this fn is used for get region_field(RegionField::Multi)!")
+            }
+        }
+    }
+    pub fn region_multi_push(&mut self, value: SQLField) {
+        match self.get_region_field_mut() {
+            RegionField::Multi( fields) => {
+                fields.push(value);
+            }
+            RegionField::Single(_) => {
+                panic!("this fn is used for get region_field(RegionField::Multi)!")
+            }
+            _ => {}
+        }
+    }
     pub fn get_region_multi_mut(&mut self) -> &mut Vec<SQLField> {
         match self.get_region_field_mut() {
             RegionField::Multi(ref mut fields) => {
@@ -326,6 +347,16 @@ impl SQLRegion {
             }
             RegionField::Single(field) => {
                 field
+            }
+        }
+    }
+    pub fn set_region_single(&mut self, value: &str) {
+        match self.get_region_field_mut() {
+            RegionField::Multi(_) => {
+                panic!("this fn is used for get region_field(RegionField::Single)!");
+            }
+            RegionField::Single(field) => {
+                *field = String::from(value);
             }
         }
     }

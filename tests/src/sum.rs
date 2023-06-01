@@ -66,6 +66,7 @@ async fn main() -> SurrealRes<()> {
     order_handles.push(order_handle1);
     order_handles.push(order_handle2);
     //查询
+    //SELECT userId AS stuID , name AS stuName FROM user WHERE ( ( a AND b ) OR c ) AND d  >=  12345  SPLIT userId , name GROUP BY userId , name ORDER BY name DESC , userId ASC LIMIT 30 START 15 FETCH user.name TIMEOUT 50s ;
     queryWrapper.select_fields(&f_v)
         .from("user")
         .where_condition(&cri)

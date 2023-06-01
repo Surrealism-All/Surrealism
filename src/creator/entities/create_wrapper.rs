@@ -32,35 +32,6 @@ pub struct CreateWrapper {
     return_region: SQLRegion,
 }
 
-///构建第一部分tablename和Id
-/// 形如：
-///person:100
-#[derive(Debug, Clone)]
-pub struct CreateRegion {
-    id: String,
-    table: String,
-    keyword: String,
-    create_str: String,
-    available_data: Vec<AvailData>,
-}
-
-
-#[derive(Debug, Clone)]
-pub struct ReturnRegion {
-    return_type: ReturnType,
-    return_str: String,
-    keyword: String,
-    available_data: Vec<AvailData>,
-}
-
-#[derive(Debug, Clone)]
-pub struct ContentRegion {
-    content_type: ContentType,
-    content_str: String,
-    available_data: Vec<AvailData>,
-    keyword: String,
-}
-
 
 #[derive(Debug, Clone)]
 pub enum ContentType {
@@ -117,7 +88,6 @@ impl Wrapper for CreateWrapper {
         let mut available_copy = self.available.clone();
         let complete_stmt = available_copy.combine(&stmt_fn());
         self.available.set_region_statement(format!("{}{}", complete_stmt, END_SEPARATOR).as_str());
-        // self.stmt = format!("{}{}{}{}{}{}", self.create_region.combine(), COMMON_SEPARATOR, self.content_region.combine(), COMMON_SEPARATOR, self.return_region.combine(), END_SEPARATOR);
         self.available.get_region_statement()
     }
 

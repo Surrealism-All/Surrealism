@@ -7,7 +7,8 @@
 ///   ▀▀▀▀▀     ▀▀▀▀ ▀▀   ▀▀        ▀▀         ▀▀▀▀▀    ▀▀▀▀ ▀▀     ▀▀▀▀   ▀▀▀▀▀▀▀▀   ▀▀▀▀▀▀   ▀▀ ▀▀ ▀▀
 
 
-use surrealism::{InitServiceImpl, SurrealRes, UseWrapper, Wrapper, CreateWrapper, TableId};
+use surrealism::{InitServiceImpl, SurrealRes, UseWrapper, Wrapper, CreateWrapper, TableId, ParseSQL, SQLParser, SelectWrapper};
+use serde::{Serialize, Deserialize};
 
 #[tokio::main]
 async fn main() -> SurrealRes<()> {
@@ -24,25 +25,18 @@ async fn main() -> SurrealRes<()> {
     /// commit statement
     let res_use = db.use_commit(use_wrapper).await;
     dbg!(res_use);
-    ///创建CreateWrapper
-    /// new CreateWrapper
-    let mut create_wrapper = CreateWrapper::new();
-    /// 设置构建语句
-    /// set create statement
-    /// CREATE user:t10086 SET name='Jack',userId='jack001' RETURN NONE;
-    create_wrapper.create("user")
-        .id(TableId::<String>::Str("t10086".to_string()))
-        .set("name", "Jack")
-        .set("userId", "jack001")
-        .return_field("name");
-    dbg!(create_wrapper.commit());
+    /// 最简单的查询也是最复杂的查询,需要自己手写SQL语句
+    /// 用于构建一些SelectWrapper目前做不到的查询
+    /// 例如:SELECT count() AS total, math::sum(age), gender, country FROM person GROUP BY gender, country;
+    /// The simplest and most complex queries require handwritten SQL statements
+    /// Used to build queries that SelectWrapper currently cannot perform
+    /// example:SELECT count() AS total, math::sum(age), gender, country FROM person GROUP BY gender, country;
+    let mut select_wrapper = SelectWrapper::new();
+    select_wrapper.select("SELECT * FROM user;");
     /// 提交语句
     /// commit statement
-    // let create_res = db.commit(create_wrapper).await;
-    // dbg!(create_res.unwrap());
+    let create_res = db.commit(select_wrapper).await;
+    dbg!(create_res.unwrap());
     Ok(())
 }
-
-
-
 
