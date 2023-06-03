@@ -1,3 +1,4 @@
+use std::cell::RefCell;
 use surrealdb::engine::remote::ws::Client;
 use surrealdb::Surreal;
 use serde::{Deserialize, Serialize};
@@ -48,6 +49,182 @@ pub const HOUR: &'static str = "h";
 pub const INSERT: &'static str = "INSERT";
 pub const INTO: &'static str = "INTO";
 pub const VALUES: &'static str = "VALUES";
+pub const DELETE: &'static str = "DELETE";
+
+
+///核心设计!
+#[derive(Debug, Clone)]
+pub struct SQLRegion {
+    region_field: RegionField,
+    region_statement: String,
+    keyword: String,
+}
+
+impl RegionImpl for SQLRegion {
+    fn combine(&mut self, stmt: &str) -> &str {
+        self.region_statement = String::from(stmt);
+        self.region_statement.as_str()
+    }
+}
+
+
+impl SQLRegion {
+    pub fn new(region_field: RegionField, keyword: &str) -> Self {
+        SQLRegion {
+            region_field,
+            region_statement: String::new(),
+            keyword: String::from(keyword),
+        }
+    }
+    pub fn new_no_arg(keyword: &str) -> Self {
+        SQLRegion {
+            region_field: RegionField::Single(String::new()),
+            region_statement: String::new(),
+            keyword: String::from(keyword),
+        }
+    }
+    pub fn get_region_field(&self) -> &RegionField {
+        &self.region_field
+    }
+    pub fn get_region_field_mut(&mut self) -> &mut RegionField {
+        &mut self.region_field
+    }
+    pub fn get_keyword(&self) -> &str {
+        &self.keyword
+    }
+    pub fn get_keyword_mut(&mut self) -> &mut str {
+        &mut self.keyword
+    }
+    pub fn get_region_statement(&self) -> &str {
+        &self.region_statement
+    }
+    pub fn get_region_statement_mut(&mut self) -> &mut str {
+        &mut self.region_statement
+    }
+    pub fn set_keyword(&mut self, keyword: &str) {
+        self.keyword = String::from(keyword);
+    }
+    pub fn set_region_statement(&mut self, region_statement: &str) {
+        self.region_statement = String::from(region_statement);
+    }
+    pub fn set_region_field(&mut self, region_field: &RegionField) {
+        self.region_field = region_field.clone();
+    }
+    ///如果是Multi就是push，Single就是Set
+    pub fn push_set(&mut self, item: &SQLField) {
+        match &mut self.region_field {
+            RegionField::Multi(field_list) => {
+                field_list.push(item.clone())
+            }
+            RegionField::Single(field) => {
+                *field = String::from(item.get_field_value());
+            }
+        };
+    }
+    pub fn get_region_multi(&self) -> &Vec<SQLField> {
+        match self.get_region_field() {
+            RegionField::Multi(fields) => {
+                return fields;
+            }
+            RegionField::Single(_) => {
+                panic!("this fn is used for get region_field(RegionField::Multi)!")
+            }
+        }
+    }
+    pub fn set_region_multi(&mut self, value: Vec<SQLField>) {
+        match self.get_region_field_mut() {
+            RegionField::Multi(fields) => {
+                *fields = value;
+            }
+            RegionField::Single(_) => {
+                panic!("this fn is used for get region_field(RegionField::Multi)!")
+            }
+        }
+    }
+    pub fn region_multi_push(&mut self, value: SQLField) {
+        match self.get_region_field_mut() {
+            RegionField::Multi( fields) => {
+                fields.push(value);
+            }
+            RegionField::Single(_) => {
+                panic!("this fn is used for get region_field(RegionField::Multi)!")
+            }
+        }
+    }
+    pub fn get_region_multi_mut(&mut self) -> &mut Vec<SQLField> {
+        match self.get_region_field_mut() {
+            RegionField::Multi(ref mut fields) => {
+                return fields;
+            }
+            RegionField::Single(_) => {
+                panic!("this fn is used for get region_field(RegionField::Multi)!")
+            }
+        }
+    }
+    pub fn get_region_single(&self) -> &str {
+        match self.get_region_field() {
+            RegionField::Multi(_) => {
+                panic!("this fn is used for get region_field(RegionField::Single)!")
+            }
+            RegionField::Single(field) => {
+                field
+            }
+        }
+    }
+    pub fn set_region_single(&mut self, value: &str) {
+        match self.get_region_field_mut() {
+            RegionField::Multi(_) => {
+                panic!("this fn is used for get region_field(RegionField::Single)!");
+            }
+            RegionField::Single(field) => {
+                *field = String::from(value);
+            }
+        }
+    }
+}
+
+
+#[derive(Debug, Clone)]
+pub enum RegionField {
+    Multi(Vec<SQLField>),
+    Single(String),
+}
+
+
+#[derive(Debug, Clone)]
+pub struct SQLField {
+    keyword: String,
+    field_value: String,
+}
+
+impl SQLField {
+    pub fn new(keyword: &str, field_value: &str) -> SQLField {
+        SQLField {
+            keyword: String::from(keyword),
+            field_value: String::from(field_value),
+        }
+    }
+    pub fn get_field_value(&self) -> &str {
+        &self.field_value
+    }
+    pub fn get_keyword(&self) -> &str {
+        &self.keyword
+    }
+    pub fn set_keyword(&mut self, keyword: &str) {
+        self.keyword = String::from(keyword);
+    }
+    pub fn set_field_value(&mut self, value: &str) {
+        self.field_value = String::from(value);
+    }
+    ///匹配传入的keyword，相同则返回field_value
+    pub fn get(&self, keyword: &str) -> Option<&str> {
+        if !&self.get_keyword().eq(keyword) {
+            return None;
+        }
+        Some(&self.get_field_value())
+    }
+}
+
 
 
 ///SurrealCore是应用核心结构体，连接使用的是Surreal<Client>
@@ -233,175 +410,181 @@ pub trait RegionImpl {
     fn combine(&mut self, stmt: &str) -> &str;
 }
 
-///核心设计!
+
+///Where条件构建
 #[derive(Debug, Clone)]
-pub struct SQLRegion {
-    region_field: RegionField,
-    region_statement: String,
-    keyword: String,
-}
-
-impl RegionImpl for SQLRegion {
-    fn combine(&mut self, stmt: &str) -> &str {
-        self.region_statement = String::from(stmt);
-        self.region_statement.as_str()
-    }
-}
-
-
-impl SQLRegion {
-    pub fn new(region_field: RegionField, keyword: &str) -> Self {
-        SQLRegion {
-            region_field,
-            region_statement: String::new(),
-            keyword: String::from(keyword),
-        }
-    }
-    pub fn new_no_arg(keyword: &str) -> Self {
-        SQLRegion {
-            region_field: RegionField::Single(String::new()),
-            region_statement: String::new(),
-            keyword: String::from(keyword),
-        }
-    }
-    pub fn get_region_field(&self) -> &RegionField {
-        &self.region_field
-    }
-    pub fn get_region_field_mut(&mut self) -> &mut RegionField {
-        &mut self.region_field
-    }
-    pub fn get_keyword(&self) -> &str {
-        &self.keyword
-    }
-    pub fn get_keyword_mut(&mut self) -> &mut str {
-        &mut self.keyword
-    }
-    pub fn get_region_statement(&self) -> &str {
-        &self.region_statement
-    }
-    pub fn get_region_statement_mut(&mut self) -> &mut str {
-        &mut self.region_statement
-    }
-    pub fn set_keyword(&mut self, keyword: &str) {
-        self.keyword = String::from(keyword);
-    }
-    pub fn set_region_statement(&mut self, region_statement: &str) {
-        self.region_statement = String::from(region_statement);
-    }
-    pub fn set_region_field(&mut self, region_field: &RegionField) {
-        self.region_field = region_field.clone();
-    }
-    ///如果是Multi就是push，Single就是Set
-    pub fn push_set(&mut self, item: &SQLField) {
-        match &mut self.region_field {
-            RegionField::Multi(field_list) => {
-                field_list.push(item.clone())
-            }
-            RegionField::Single(field) => {
-                *field = String::from(item.get_field_value());
-            }
-        };
-    }
-    pub fn get_region_multi(&self) -> &Vec<SQLField> {
-        match self.get_region_field() {
-            RegionField::Multi(fields) => {
-                return fields;
-            }
-            RegionField::Single(_) => {
-                panic!("this fn is used for get region_field(RegionField::Multi)!")
-            }
-        }
-    }
-    pub fn set_region_multi(&mut self, value: Vec<SQLField>) {
-        match self.get_region_field_mut() {
-            RegionField::Multi(fields) => {
-                *fields = value;
-            }
-            RegionField::Single(_) => {
-                panic!("this fn is used for get region_field(RegionField::Multi)!")
-            }
-        }
-    }
-    pub fn region_multi_push(&mut self, value: SQLField) {
-        match self.get_region_field_mut() {
-            RegionField::Multi( fields) => {
-                fields.push(value);
-            }
-            RegionField::Single(_) => {
-                panic!("this fn is used for get region_field(RegionField::Multi)!")
-            }
-        }
-    }
-    pub fn get_region_multi_mut(&mut self) -> &mut Vec<SQLField> {
-        match self.get_region_field_mut() {
-            RegionField::Multi(ref mut fields) => {
-                return fields;
-            }
-            RegionField::Single(_) => {
-                panic!("this fn is used for get region_field(RegionField::Multi)!")
-            }
-        }
-    }
-    pub fn get_region_single(&self) -> &str {
-        match self.get_region_field() {
-            RegionField::Multi(_) => {
-                panic!("this fn is used for get region_field(RegionField::Single)!")
-            }
-            RegionField::Single(field) => {
-                field
-            }
-        }
-    }
-    pub fn set_region_single(&mut self, value: &str) {
-        match self.get_region_field_mut() {
-            RegionField::Multi(_) => {
-                panic!("this fn is used for get region_field(RegionField::Single)!");
-            }
-            RegionField::Single(field) => {
-                *field = String::from(value);
-            }
-        }
-    }
+pub struct Criteria {
+    ///比较符
+    judge: JudgeCriteria,
+    ///自己构建，对于如：WHERE count(->experience->organisation) > 3
+    ///则需要自己构建
+    define: String,
+    core: String,
+    comparator: String,
+    complex: RefCell<Vec<String>>,
 }
 
 
+impl Criteria {
+    pub fn new() -> Self {
+        Criteria {
+            judge: JudgeCriteria::NONE,
+            define: String::new(),
+            core: String::new(),
+            comparator: String::new(),
+            complex: RefCell::new(Vec::new()),
+        }
+    }
+    pub fn combine(&self) -> String {
+        let mut res = String::new();
+        if self.define.is_empty() {
+            let mut sign: &str = "";
+            match self.judge {
+                JudgeCriteria::Eq => {
+                    sign = EQ;
+                }
+                JudgeCriteria::Neq => {
+                    sign = NEQ;
+                }
+                JudgeCriteria::Lt => {
+                    sign = LT;
+                }
+                JudgeCriteria::Gt => {
+                    sign = GT;
+                }
+                JudgeCriteria::Lte => {
+                    sign = LTE;
+                }
+                JudgeCriteria::Gte => {
+                    sign = GTE;
+                }
+                JudgeCriteria::NONE => ()
+            }
+            res = format!("{}{}{}{}{}", self.core, COMMON_SEPARATOR, sign, COMMON_SEPARATOR, self.comparator);
+        } else {
+            res = String::from(&self.define);
+        }
+        res
+    }
+    /// 自定义写入条件
+    /// 由于有些条件通过Criteria当前提供的方法无法直接构建
+    /// 例如：count(->experience->organisation) > 3
+    /// 此时就需要调用者直接进行手写
+    pub fn define(&mut self, define_str: &str) {
+        self.define = String::from(define_str);
+    }
+    fn build_core(&mut self, core: &str) {
+        let res = self.complexBuild();
+        if res.is_empty() {
+            self.core = String::from(core);
+        } else {
+            self.core = res;
+        }
+    }
+    /// 相等条件
+    /// core = comparator
+    pub fn eq(&mut self, core: &str, comparator: &str) -> &mut Self {
+        self.build_core(core);
+        self.judge = JudgeCriteria::Eq;
+        self.comparator = String::from(comparator);
+        self
+    }
+    /// 大于条件
+    /// core > comparator
+    pub fn gt(&mut self, core: &str, comparator: &str) -> &mut Self {
+        self.build_core(core);
+        self.judge = JudgeCriteria::Gt;
+        self.comparator = String::from(comparator);
+        self
+    }
+    pub fn lt(&mut self, core: &str, comparator: &str) -> &mut Self {
+        self.build_core(core);
+        self.judge = JudgeCriteria::Lt;
+        self.comparator = String::from(comparator);
+        self
+    }
+    pub fn neq(&mut self, core: &str, comparator: &str) -> &mut Self {
+        self.build_core(core);
+        self.judge = JudgeCriteria::Neq;
+        self.comparator = String::from(comparator);
+        self
+    }
+    pub fn lte(&mut self, core: &str, comparator: &str) -> &mut Self {
+        self.build_core(core);
+        self.judge = JudgeCriteria::Lte;
+        self.comparator = String::from(comparator);
+        self
+    }
+    pub fn gte(&mut self, core: &str, comparator: &str) -> &mut Self {
+        self.build_core(core);
+        self.judge = JudgeCriteria::Gte;
+        self.comparator = String::from(comparator);
+        self
+    }
+    pub fn and(&self, left: &str, right: &str) -> String {
+        let res = format!("{}{}{}{}{}", left, COMMON_SEPARATOR, AND, COMMON_SEPARATOR, right);
+        self.complex.borrow_mut().push(res.clone());
+        res
+    }
+    pub fn or(&self, left: &str, right: &str) -> String {
+        let res = format!("{}{}{}{}{}", left, COMMON_SEPARATOR, OR, COMMON_SEPARATOR, right);
+        self.complex.borrow_mut().push(res.clone());
+        res
+    }
+    pub fn complexBuild(&mut self) -> String {
+        if !self.complex.borrow().is_empty() {
+            let mut counter: usize = 0;
+            for core_complex in &*self.complex.borrow() {
+                counter += 1;
+
+                if counter.eq(&self.complex.borrow().len()) {
+                    self.core = replace_str(&self.core, core_complex);
+                } else {
+                    let res = replace_str(&self.core, core_complex);
+                    self.core = format!("( {} )", res);
+                }
+            }
+        }
+        self.core.clone()
+    }
+}
+
+///=================================================<br>
+/// @params:
+/// <ol>
+///     <li>core:源目标</li>
+///     <li>replace:替换目标</li>
+/// </ol>
+/// @return:<br>
+/// @date:2023/5/28<br>
+/// @description:将Criteria的complexBuild方法中替换`()`<br>
+///=================================================
+fn replace_str(core: &str, replace: &str) -> String {
+    let value = core.replace("( ", "").replace(" )", "");
+    let res = replace.replace(&value, core);
+    res.clone()
+}
+
+///=================================================<br>
+/// @params:
+/// <ol>
+///     <li>Eq:等于</li>
+///     <li>Lt:小于</li>
+///     <li>Gt:大于</li>
+///     <li>Neq:不等于</li>
+///     <li>Lte:小于等于</li>
+///     <li>Gte:大于等于</li>
+/// </ol>
+/// @date:2023/5/28<br>
+/// @description:JudgeCriteria判断符枚举
+///=================================================
 #[derive(Debug, Clone)]
-pub enum RegionField {
-    Multi(Vec<SQLField>),
-    Single(String),
-}
-
-
-#[derive(Debug, Clone)]
-pub struct SQLField {
-    keyword: String,
-    field_value: String,
-}
-
-impl SQLField {
-    pub fn new(keyword: &str, field_value: &str) -> SQLField {
-        SQLField {
-            keyword: String::from(keyword),
-            field_value: String::from(field_value),
-        }
-    }
-    pub fn get_field_value(&self) -> &str {
-        &self.field_value
-    }
-    pub fn get_keyword(&self) -> &str {
-        &self.keyword
-    }
-    pub fn set_keyword(&mut self, keyword: &str) {
-        self.keyword = String::from(keyword);
-    }
-    pub fn set_field_value(&mut self, value: &str) {
-        self.field_value = String::from(value);
-    }
-    ///匹配传入的keyword，相同则返回field_value
-    pub fn get(&self, keyword: &str) -> Option<&str> {
-        if !&self.get_keyword().eq(keyword) {
-            return None;
-        }
-        Some(&self.get_field_value())
-    }
+pub enum JudgeCriteria {
+    Eq,
+    Lt,
+    Gt,
+    Neq,
+    Lte,
+    Gte,
+    NONE,
 }

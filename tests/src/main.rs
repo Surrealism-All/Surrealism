@@ -6,20 +6,7 @@
 ///  █▄▄▄▄▄█▀  ██▄▄▄███   ██        ██       ▀██▄▄▄▄█  ██▄▄▄███    ██▄▄▄   ▄▄▄██▄▄▄  █▄▄▄▄▄██  ██ ██ ██
 ///   ▀▀▀▀▀     ▀▀▀▀ ▀▀   ▀▀        ▀▀         ▀▀▀▀▀    ▀▀▀▀ ▀▀     ▀▀▀▀   ▀▀▀▀▀▀▀▀   ▀▀▀▀▀▀   ▀▀ ▀▀ ▀▀
 
-use surrealism::{InitServiceImpl, SurrealRes, Wrapper, InsertWrapper, UseWrapper};
-use serde::{Serialize, Deserialize};
-
-///构建结构体,需要使用surrealism提供的宏:ParseSQL
-/// build struct,Need to use the macro provided by surrealism: ParseSQL
-/// 请注意:ParseSQl宏和SQLParser trait要同时导入
-/// Please note that the ParseSQl macro and SQLParser trait need to be imported simultaneously
-#[derive(Debug, Serialize, Deserialize)]
-struct User {
-    pub userId: String,
-    pub name: String,
-    pub age: usize,
-}
-
+use surrealism::{InitServiceImpl, SurrealRes, Wrapper, DeleteWrapper, UseWrapper, Criteria, TimeUnit, TableId};
 
 #[tokio::main]
 async fn main() -> SurrealRes<()> {
@@ -36,22 +23,21 @@ async fn main() -> SurrealRes<()> {
     /// commit statement
     let res_use = db.use_commit(use_wrapper).await;
     dbg!(res_use);
-    ///准备数据
-    let data1 = User {
-        userId: "noob001".to_string(),
-        name: "Noob".to_string(),
-        age: 16,
-    };
-    ///构建InsertWrapper
-    /// 通过键值对形式构建传统语句
-    ///
-    let mut insert_wrapper = InsertWrapper::new();
-    insert_wrapper
-        .insert_into("user")
-        .insert_one(&data1);
+    /// 构建条件
+    let mut condition = Criteria::new();
+    condition.lt("age", "26");
+    ///构建DeleteWrapper
+    /// DELETE  user:10086 WHERE age  <  26 RETURN AFTER TIMEOUT 5s;
+    let mut delete_wrapper = DeleteWrapper::new();
+    delete_wrapper
+        .from("user:10086")
+        .where_condition(&condition)
+        .return_after()
+        .timeout(5, TimeUnit::SECOND);
+    dbg!(delete_wrapper.commit());
     /// 提交语句
     /// commit statement
-    let create_res = db.commit(insert_wrapper).await;
-    dbg!(create_res.unwrap());
+    // let create_res = db.commit(delete_wrapper).await;
+    // dbg!(create_res.unwrap());
     Ok(())
 }

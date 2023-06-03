@@ -1,5 +1,5 @@
 use std::cell::RefCell;
-use super::{Statements, SQLField, SQLRegion, RegionField, RegionImpl, FETCH, TIMEOUT, AND, OR, COMMON_SEPARATOR, END_SEPARATOR, NEXT_SEPARATOR, AS, SELECT, FROM, WHERE,  Wrapper, EQ, NEQ, LT, GT, LTE, GTE, ORDER_BY, GROUP_BY, SPLIT_AT, START_AT, LIMIT_BY, TimeUnit, MILLISECOND, SECOND, HOUR, MINUTE};
+use super::{Statements, Criteria, JudgeCriteria, SQLField, SQLRegion, RegionField, RegionImpl, FETCH, TIMEOUT, AND, OR, COMMON_SEPARATOR, END_SEPARATOR, NEXT_SEPARATOR, AS, SELECT, FROM, WHERE, Wrapper, EQ, NEQ, LT, GT, LTE, GTE, ORDER_BY, GROUP_BY, SPLIT_AT, START_AT, LIMIT_BY, TimeUnit, MILLISECOND, SECOND, HOUR, MINUTE};
 
 
 ///=================================================<br>
@@ -248,7 +248,7 @@ impl HandleRegion {
     }
     fn handle_str_push(&mut self, keyword: &str, stmt: &str, msg: &str) {
         if !stmt.is_empty() {
-            let push_stmt = format!("{}{}{}{}", keyword, COMMON_SEPARATOR, stmt,COMMON_SEPARATOR);
+            let push_stmt = format!("{}{}{}{}", keyword, COMMON_SEPARATOR, stmt, COMMON_SEPARATOR);
             self.handle_str.push_str(&push_stmt);
         } else {
             if !msg.is_empty() {
@@ -304,192 +304,6 @@ impl HandleRegion {
 }
 
 
-///Where条件构建
-#[derive(Debug, Clone)]
-pub struct Criteria {
-    ///比较符
-    judge: JudgeCriteria,
-    ///自己构建，对于如：WHERE count(->experience->organisation) > 3
-    ///则需要自己构建
-    define: String,
-    core: String,
-    comparator: String,
-    complex: RefCell<Vec<String>>,
-}
-
-// ///构建复杂的条件语句
-// /// 例如需要AND,OR的条件语句
-// pub struct CriteriaComplex {
-//     core: String,
-//     comparator: String,
-//
-// }
-
-impl Criteria {
-    pub fn new() -> Self {
-        Criteria {
-            judge: JudgeCriteria::NONE,
-            define: String::new(),
-            core: String::new(),
-            comparator: String::new(),
-            complex: RefCell::new(Vec::new()),
-        }
-    }
-    pub fn combine(&self) -> String {
-        let mut res = String::new();
-        if self.define.is_empty() {
-            let mut sign: &str = "";
-            match self.judge {
-                JudgeCriteria::Eq => {
-                    sign = EQ;
-                }
-                JudgeCriteria::Neq => {
-                    sign = NEQ;
-                }
-                JudgeCriteria::Lt => {
-                    sign = LT;
-                }
-                JudgeCriteria::Gt => {
-                    sign = GT;
-                }
-                JudgeCriteria::Lte => {
-                    sign = LTE;
-                }
-                JudgeCriteria::Gte => {
-                    sign = GTE;
-                }
-                JudgeCriteria::NONE => ()
-            }
-            res = format!("{}{}{}{}{}", self.core, COMMON_SEPARATOR, sign, COMMON_SEPARATOR, self.comparator);
-        } else {
-            res = String::from(&self.define);
-        }
-        res
-    }
-    /// 自定义写入条件
-    /// 由于有些条件通过Criteria当前提供的方法无法直接构建
-    /// 例如：count(->experience->organisation) > 3
-    /// 此时就需要调用者直接进行手写
-    pub fn define(&mut self, define_str: &str) {
-        self.define = String::from(define_str);
-    }
-    fn build_core(&mut self, core: &str) {
-        let res = self.complexBuild();
-        if res.is_empty() {
-            self.core = String::from(core);
-        } else {
-            self.core = res;
-        }
-    }
-    /// 相等条件
-    /// core = comparator
-    pub fn eq(&mut self, core: &str, comparator: &str) -> &mut Self {
-        self.build_core(core);
-        self.judge = JudgeCriteria::Eq;
-        self.comparator = String::from(comparator);
-        self
-    }
-    /// 大于条件
-    /// core > comparator
-    pub fn gt(&mut self, core: &str, comparator: &str) -> &mut Self {
-        self.build_core(core);
-        self.judge = JudgeCriteria::Gt;
-        self.comparator = String::from(comparator);
-        self
-    }
-    pub fn lt(&mut self, core: &str, comparator: &str) -> &mut Self {
-        self.build_core(core);
-        self.judge = JudgeCriteria::Lt;
-        self.comparator = String::from(comparator);
-        self
-    }
-    pub fn neq(&mut self, core: &str, comparator: &str) -> &mut Self {
-        self.build_core(core);
-        self.judge = JudgeCriteria::Neq;
-        self.comparator = String::from(comparator);
-        self
-    }
-    pub fn lte(&mut self, core: &str, comparator: &str) -> &mut Self {
-        self.build_core(core);
-        self.judge = JudgeCriteria::Lte;
-        self.comparator = String::from(comparator);
-        self
-    }
-    pub fn gte(&mut self, core: &str, comparator: &str) -> &mut Self {
-        self.build_core(core);
-        self.judge = JudgeCriteria::Gte;
-        self.comparator = String::from(comparator);
-        self
-    }
-    pub fn and(&self, left: &str, right: &str) -> String {
-        let res = format!("{}{}{}{}{}", left, COMMON_SEPARATOR, AND, COMMON_SEPARATOR, right);
-        self.complex.borrow_mut().push(res.clone());
-        res
-    }
-    pub fn or(&self, left: &str, right: &str) -> String {
-        let res = format!("{}{}{}{}{}", left, COMMON_SEPARATOR, OR, COMMON_SEPARATOR, right);
-        self.complex.borrow_mut().push(res.clone());
-        res
-    }
-    pub fn complexBuild(&mut self) -> String {
-        if !self.complex.borrow().is_empty() {
-            let mut counter: usize = 0;
-            for core_complex in &*self.complex.borrow() {
-                counter += 1;
-
-                if counter.eq(&self.complex.borrow().len()) {
-                    self.core = replace_str(&self.core, core_complex);
-                } else {
-                    let res = replace_str(&self.core, core_complex);
-                    self.core = format!("( {} )", res);
-                }
-            }
-        }
-        self.core.clone()
-    }
-}
-
-///=================================================<br>
-/// @params:
-/// <ol>
-///     <li>core:源目标</li>
-///     <li>replace:替换目标</li>
-/// </ol>
-/// @return:<br>
-/// @date:2023/5/28<br>
-/// @description:将Criteria的complexBuild方法中替换`()`<br>
-///=================================================
-fn replace_str(core: &str, replace: &str) -> String {
-    let value = core.replace("( ", "").replace(" )", "");
-    let res = replace.replace(&value, core);
-    res.clone()
-}
-
-///=================================================<br>
-/// @params:
-/// <ol>
-///     <li>Eq:等于</li>
-///     <li>Lt:小于</li>
-///     <li>Gt:大于</li>
-///     <li>Neq:不等于</li>
-///     <li>Lte:小于等于</li>
-///     <li>Gte:大于等于</li>
-/// </ol>
-/// @date:2023/5/28<br>
-/// @description:JudgeCriteria判断符枚举
-///=================================================
-#[derive(Debug, Clone)]
-pub enum JudgeCriteria {
-    Eq,
-    Lt,
-    Gt,
-    Neq,
-    Lte,
-    Gte,
-    NONE,
-}
-
-
 impl Wrapper for SelectWrapper {
     fn new() -> Self {
         SelectWrapper {
@@ -524,9 +338,7 @@ impl Wrapper for SelectWrapper {
             let mut available_copy = self.available.clone();
             let complete_stmt = available_copy.combine(&stmt_fn());
             self.available.set_region_statement(format!("{}{}", complete_stmt, END_SEPARATOR).as_str());
-            // if self.stmt.is_empty() {
-            //     self.stmt = format!("{}{}{}{}{}{}{}{}", self.field_region.combine(), COMMON_SEPARATOR, self.table_region.combine(), COMMON_SEPARATOR, self.where_region.combine(), COMMON_SEPARATOR, self.handle_region.combine(), END_SEPARATOR);
-            // }
+
         }
         self.available.get_region_statement()
     }
@@ -654,7 +466,7 @@ impl SelectWrapper {
             TimeUnit::MINUTE => res = String::from(MINUTE),
             TimeUnit::HOUR => res = String::from(HOUR)
         };
-        self.handle_region.timeout.set_region_single(format!("{}{}",time,&res).as_str());
+        self.handle_region.timeout.set_region_single(format!("{}{}", time, &res).as_str());
         self
     }
     ///构建limit子句
