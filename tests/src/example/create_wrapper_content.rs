@@ -1,11 +1,9 @@
-use surrealism::{InitServiceImpl, SurrealRes, UseWrapper, Wrapper, CreateWrapper, TableId, ParseSQL, SQLParser};
+use surrealism::{InitServiceImpl, SurrealRes, UseWrapper, Wrapper, CreateWrapper, TableId};
 use serde::{Serialize, Deserialize};
 
-///构建结构体,需要使用surrealism提供的宏:ParseSQL
-/// build struct,Need to use the macro provided by surrealism: ParseSQL
-/// 请注意:ParseSQl宏和SQLParser trait要同时导入
-/// Please note that the ParseSQl macro and SQLParser trait need to be imported simultaneously
-#[derive(Debug, Serialize, Deserialize, ParseSQL)]
+///构建结构体,需要使用serde提供的宏:Serialize, Deserialize
+/// build struct,Need to use the macro provided by serde::{Serialize, Deserialize}
+#[derive(Debug, Serialize, Deserialize)]
 struct User {
     pub userId: String,
     pub name: String,

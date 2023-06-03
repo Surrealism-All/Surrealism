@@ -45,6 +45,9 @@ pub const MILLISECOND: &'static str = "ms";
 pub const SECOND: &'static str = "s";
 pub const MINUTE: &'static str = "min";
 pub const HOUR: &'static str = "h";
+pub const INSERT: &'static str = "INSERT";
+pub const INTO: &'static str = "INTO";
+pub const VALUES: &'static str = "VALUES";
 
 
 ///SurrealCore是应用核心结构体，连接使用的是Surreal<Client>
@@ -327,7 +330,6 @@ impl SQLRegion {
             RegionField::Single(_) => {
                 panic!("this fn is used for get region_field(RegionField::Multi)!")
             }
-            _ => {}
         }
     }
     pub fn get_region_multi_mut(&mut self) -> &mut Vec<SQLField> {

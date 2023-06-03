@@ -1,11 +1,3 @@
-///    ▄▄▄▄                                                      ▄▄▄▄         ██
-///  ▄█▀▀▀▀█                                                     ▀▀██         ▀▀
-///  ██▄       ██    ██   ██▄████   ██▄████   ▄████▄    ▄█████▄    ██       ████     ▄▄█████▄  ████▄██▄
-///   ▀████▄   ██    ██   ██▀       ██▀      ██▄▄▄▄██   ▀ ▄▄▄██    ██         ██     ██▄▄▄▄ ▀  ██ ██ ██
-///       ▀██  ██    ██   ██        ██       ██▀▀▀▀▀▀  ▄██▀▀▀██    ██         ██      ▀▀▀▀██▄  ██ ██ ██
-///  █▄▄▄▄▄█▀  ██▄▄▄███   ██        ██       ▀██▄▄▄▄█  ██▄▄▄███    ██▄▄▄   ▄▄▄██▄▄▄  █▄▄▄▄▄██  ██ ██ ██
-///   ▀▀▀▀▀     ▀▀▀▀ ▀▀   ▀▀        ▀▀         ▀▀▀▀▀    ▀▀▀▀ ▀▀     ▀▀▀▀   ▀▀▀▀▀▀▀▀   ▀▀▀▀▀▀   ▀▀ ▀▀ ▀▀
-
 use surrealism::{InitServiceImpl, SurrealRes, Wrapper, InsertWrapper, UseWrapper};
 use serde::{Serialize, Deserialize};
 
@@ -42,13 +34,19 @@ async fn main() -> SurrealRes<()> {
         name: "Noob".to_string(),
         age: 16,
     };
+    let data2 = User {
+        userId: "noob002".to_string(),
+        name: "Noob".to_string(),
+        age: 26,
+    };
+    let mut data_list = vec![&data1, &data2];
     ///构建InsertWrapper
     /// 通过键值对形式构建传统语句
-    ///
+    ///INSERT INTO user  [ {userId:'noob001',name:'Noob',age:16} , {userId:'noob002',name:'Noob',age:26} ];
     let mut insert_wrapper = InsertWrapper::new();
     insert_wrapper
         .insert_into("user")
-        .insert_one(&data1);
+        .insert_many(&data_list);
     /// 提交语句
     /// commit statement
     let create_res = db.commit(insert_wrapper).await;

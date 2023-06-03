@@ -26,7 +26,6 @@ surrealism = {path="../../surrealism"}
 tokio = { version = "1.28.0", features = ["macros", "rt-multi-thread"] }
 surrealdb = "1.0.0-beta.9"
 serde = { version = "1.0.162", features = ["derive"] }
-
 ```
 
 ### add configuration
@@ -250,12 +249,12 @@ use surrealism::{Wrapper, CreateWrapper, TableId};
 
 #### content statement
 
-如果使用content语句来构建则需要从`surrealism`导入`Wrapper, CreateWrapper, TableId, ParseSQL, SQLParser`和`serde`中的`Serialize, Deserialize`
+如果使用content语句来构建则需要从`surrealism`导入`Wrapper, CreateWrapper, TableId`和`serde`中的`Serialize, Deserialize`
 
-If using the content statement to build, it needs to be imported：`Wrapper, CreateWrapper, TableId, ParseSQL, SQLParser`from `surrealism`and import`Serialize, Deserialize`from serde
+If using the content statement to build, it needs to be imported：`Wrapper, CreateWrapper, TableId` import`Serialize, Deserialize`from serde
 
 ```
-use surrealism::{Wrapper, CreateWrapper, TableId, ParseSQL, SQLParser};
+use surrealism::{Wrapper, CreateWrapper, TableId};
 use serde::{Serialize, Deserialize};
 ```
 
@@ -326,14 +325,12 @@ async fn main() -> SurrealRes<()> {
 #### main.rs
 
 ```rust
-use surrealism::{InitServiceImpl, SurrealRes, UseWrapper, Wrapper, CreateWrapper, TableId, ParseSQL, SQLParser};
+use surrealism::{InitServiceImpl, SurrealRes, UseWrapper, Wrapper, CreateWrapper, TableId};
 use serde::{Serialize, Deserialize};
 
-///构建结构体,需要使用surrealism提供的宏:ParseSQL
-/// build struct,Need to use the macro provided by surrealism: ParseSQL
-/// 请注意:ParseSQl宏和SQLParser trait要同时导入
-/// Please note that the ParseSQl macro and SQLParser trait need to be imported simultaneously
-#[derive(Debug, Serialize, Deserialize, ParseSQL)]
+///构建结构体,需要使用serde提供的宏:Serialize, Deserialize
+/// build struct,Need to use the macro provided by serde::{Serialize, Deserialize}
+#[derive(Debug, Serialize, Deserialize)]
 struct User {
     pub userId: String,
     pub name: String,
@@ -627,7 +624,7 @@ async fn main() -> SurrealRes<()> {
 
 #### res
 
-```
+```bash
 [src\main.rs:57] create_res.unwrap() = Response(
     {
         0: Ok(
@@ -688,5 +685,120 @@ import `use surrealism::{OrderCondition, Ordered,TimeUnit}`
         .limit_by(30)
         .fetch(&vec!["user.name"])
         .timeout(50, TimeUnit::SECOND);
+```
+
+## InsertWrapper
+
+> InsertWrapper的作用：帮助我们构造Create语句
+>
+> InsertWrapper：Help us construct the Insert statement
+
+### function
+
+| fun name    | params:type              | return             | des                                                          |
+| ----------- | ------------------------ | ------------------ | ------------------------------------------------------------ |
+| insert_into | table_name: &str         | &mut InsertWrapper | 设置插入的表名<br />Set the inserted table name              |
+| set         | key: &str<br /> value: T | &mut InsertWrapper | 插入单条记录单个字段<br />Insert a single record, a single field |
+| insert_one  | obj: &T                  | &mut InsertWrapper | 使用非传统方式插入单条<br />Inserting a single record using non-traditional methods |
+| insert_many | objs: `&Vec<T>`          | &mut InsertWrapper | 使用非传统方式插入多条<br />Inserting multiple records using non-traditional methods |
+| insert      | stmt: &str               | &mut InsertWrapper | 通用插入自己写插入语句<br />Universal Insert Write Insert Statement on Your Own |
+
+### Import
+
+如果你想使用`InsertWrapper`，你必须从`surrealism`导入`InsertWrapper`和`Wrapper`
+
+If you wanna use `InsertWrapper` , you must import `InsertWrapper` and `Wrapper` from `surrealism`
+
+```rust
+use surrealism::{Wrapper, InsertWrapper};
+```
+
+### Insert with traditional method (easy)
+
+通过传统形式插入一条记录
+
+Insert a record through traditional form
+
+#### main.rs
+
+```rust
+use surrealism::{InitServiceImpl, SurrealRes, Wrapper, InsertWrapper, UseWrapper};
+
+#[tokio::main]
+async fn main() -> SurrealRes<()> {
+    ///初始化连接
+    ///init connection
+    let db = InitServiceImpl::new().init().unwrap();
+    ///创建UseWrapper
+    /// new UseWrapper
+    let mut use_wrapper = UseWrapper::new();
+    /// 设置命名空间和数据库
+    /// Set namespace and database
+    use_wrapper.use_ns("test").use_db("test");
+    /// 提交语句
+    /// commit statement
+    let res_use = db.use_commit(use_wrapper).await;
+    dbg!(res_use);
+    /// 构建InsertWrapper
+    /// 通过键值对形式构建传统语句
+    /// Constructing Traditional Statements through Key Value Pairs
+    /// INSERT INTO user ( name , userId , age ) VALUES ( 'Kaye' , 'kaye001' , 56 );
+    let mut insert_wrapper = InsertWrapper::new();
+    insert_wrapper
+        .insert_into("user")
+        .set("name", "Kaye")
+        .set("userId", "kaye001")
+        .set("age", 56);
+    /// 提交语句
+    /// commit statement
+    let create_res = db.commit(insert_wrapper).await;
+    dbg!(create_res);
+    Ok(())
+}
+```
+
+#### res
+
+```bash
+[src\main.rs:39] create_res = Ok(
+    Response(
+        {
+            0: Ok(
+                [
+                    Object(
+                        Object(
+                            {
+                                "age": Number(
+                                    Int(
+                                        56,
+                                    ),
+                                ),
+                                "id": Thing(
+                                    Thing {
+                                        tb: "user",
+                                        id: String(
+                                            "reht5rqftwhljaon9cbb",
+                                        ),
+                                    },
+                                ),
+                                "name": Strand(
+                                    Strand(
+                                        "Kaye",
+                                    ),
+                                ),
+                                "userId": Strand(
+                                    Strand(
+                                        "kaye001",
+                                    ),
+                                ),
+                            },
+                        ),
+                    ),
+                ],
+            ),
+        },
+    ),
+)
+
 ```
 

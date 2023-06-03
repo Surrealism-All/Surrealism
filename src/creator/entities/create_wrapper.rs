@@ -1,6 +1,6 @@
-use super::{RegionImpl, Statements, SQLRegion, SQLField, RegionField, COMMON_SEPARATOR, SET, END_SEPARATOR, CREATE, EQUAL_SEPARATOR, NEXT_SEPARATOR, IS_SEPARATOR, RETURN, NONE, DIFF, AFTER, BEFORE, RAND, ULID, UUID, CONTENT, AvailData, Wrapper, TableId, IdFunction};
-use crate::{ParseSQL, SQLParser, handle_str, check_available_order};
-use serde::{Deserialize, Serialize};
+use super::{RegionImpl, Statements, SQLRegion, SQLField, RegionField, COMMON_SEPARATOR, SET, END_SEPARATOR, CREATE, EQUAL_SEPARATOR, NEXT_SEPARATOR, IS_SEPARATOR, RETURN, NONE, DIFF, AFTER, BEFORE, RAND, ULID, UUID, CONTENT, Wrapper, TableId, IdFunction};
+use crate::{handle_str};
+use serde::{Serialize};
 
 
 ///create语句包装器
@@ -193,14 +193,14 @@ impl CreateWrapper {
     }
     ///CONTENT方式构建字段
     /// CONTENT method for constructing fields
-    pub fn content<T: Serialize + SQLParser>(&mut self, content_obj: T) -> &mut Self {
+    pub fn content<T: Serialize>(&mut self, content_obj: T) -> &mut Self {
         match self.content_type {
             ContentType::SET => panic!("you cannot use set and content together!"),
             ContentType::CONTENT => panic!("you cannot use content twice!"),
             ContentType::NONE => {
                 self.content_type = ContentType::CONTENT;
                 self.content_region.set_keyword(CONTENT);
-                let content_value = content_obj.parse_sql();
+                let content_value = handle_str(serde_json::to_string(&content_obj).unwrap().as_str());
                 self.content_region.set_region_field(&RegionField::Single(content_value));
             }
         };
@@ -293,7 +293,7 @@ impl CreateWrapper {
                     }
                 }
                 content_str.push_str(&set_str);
-                 self.available.get_region_multi_mut()[1].set_keyword(SET);
+                self.available.get_region_multi_mut()[1].set_keyword(SET);
             }
             ContentType::CONTENT => {
                 content_str.push_str(tmp_content.get_region_single());
