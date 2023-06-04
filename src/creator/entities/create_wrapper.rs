@@ -1,4 +1,4 @@
-use super::{RegionImpl, Statements, SQLRegion, SQLField, RegionField, COMMON_SEPARATOR, SET, END_SEPARATOR, CREATE, EQUAL_SEPARATOR, NEXT_SEPARATOR, IS_SEPARATOR, RETURN, NONE, DIFF, AFTER, BEFORE, RAND, ULID, UUID, CONTENT, Wrapper, TableId, IdFunction};
+use super::{ContentType, RegionImpl, Statements, SQLRegion, SQLField, RegionField, COMMON_SEPARATOR, SET, END_SEPARATOR, CREATE, EQUAL_SEPARATOR, NEXT_SEPARATOR, IS_SEPARATOR, RETURN, NONE, DIFF, AFTER, BEFORE, RAND, ULID, UUID, CONTENT, Wrapper, TableId, IdFunction};
 use crate::{handle_str};
 use serde::{Serialize};
 
@@ -32,23 +32,6 @@ pub struct CreateWrapper {
     return_region: SQLRegion,
 }
 
-
-#[derive(Debug, Clone)]
-pub enum ContentType {
-    SET,
-    CONTENT,
-    NONE,
-}
-
-///Create语句返回类型
-#[derive(Debug, Clone)]
-pub enum ReturnType {
-    NONE,
-    BEFORE,
-    AFTER,
-    DIFF,
-    FIELD,
-}
 
 impl Wrapper for CreateWrapper {
     fn new() -> Self {
@@ -170,13 +153,15 @@ impl CreateWrapper {
     ///SET方式构建字段
     /// SET method for constructing fields
     pub fn set<T: Serialize>(&mut self, field_name: &'static str, value: T) -> &mut Self {
-        // let len = self.get_available().len();
         match self.content_type {
             ContentType::CONTENT => panic!("you cannot use set and content together!"),
             ContentType::SET => (),
             ContentType::NONE => {
                 self.content_type = ContentType::SET;
                 self.content_region.set_keyword(SET);
+            }
+            _ => {
+                panic!("ContentType::MERGE and ContentType::PATCH is not allowed to be used in Create statement!");
             }
         };
         match self.content_region.get_region_field_mut() {
@@ -202,6 +187,9 @@ impl CreateWrapper {
                 self.content_region.set_keyword(CONTENT);
                 let content_value = handle_str(serde_json::to_string(&content_obj).unwrap().as_str());
                 self.content_region.set_region_field(&RegionField::Single(content_value));
+            },
+            _ => {
+                panic!("ContentType::MERGE and ContentType::PATCH is not allowed to be used in Create statement!");
             }
         };
         self
@@ -301,6 +289,9 @@ impl CreateWrapper {
             }
             ContentType::NONE => {
                 panic!("CreateWrapper is used to building create statement , if you just wanna check the database please use SelectWrapper")
+            },
+            _ => {
+                panic!("ContentType::MERGE and ContentType::PATCH is not allowed to be used in Create statement!");
             }
         };
         self.content_region.set_region_statement(&content_str);

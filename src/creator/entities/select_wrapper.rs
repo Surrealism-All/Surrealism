@@ -1,5 +1,5 @@
 use std::cell::RefCell;
-use super::{Statements, Criteria, JudgeCriteria, SQLField, SQLRegion, RegionField, RegionImpl, FETCH, TIMEOUT, AND, OR, COMMON_SEPARATOR, END_SEPARATOR, NEXT_SEPARATOR, AS, SELECT, FROM, WHERE, Wrapper, EQ, NEQ, LT, GT, LTE, GTE, ORDER_BY, GROUP_BY, SPLIT_AT, START_AT, LIMIT_BY, TimeUnit, MILLISECOND, SECOND, HOUR, MINUTE};
+use super::{Statements, Criteria, JudgeCriteria, SQLField, SQLRegion, RegionField, RegionImpl, FETCH, TIMEOUT, AND, DAY, OR, COMMON_SEPARATOR, END_SEPARATOR, NEXT_SEPARATOR, AS, SELECT, FROM, WHERE, Wrapper, EQ, NEQ, LT, GT, LTE, GTE, ORDER_BY, GROUP_BY, SPLIT_AT, START_AT, LIMIT_BY, TimeUnit, MILLISECOND, SECOND, HOUR, MINUTE};
 
 
 ///=================================================<br>
@@ -338,7 +338,6 @@ impl Wrapper for SelectWrapper {
             let mut available_copy = self.available.clone();
             let complete_stmt = available_copy.combine(&stmt_fn());
             self.available.set_region_statement(format!("{}{}", complete_stmt, END_SEPARATOR).as_str());
-
         }
         self.available.get_region_statement()
     }
@@ -459,12 +458,13 @@ impl SelectWrapper {
     }
     ///构建延时Timeout子句
     pub fn timeout(&mut self, time: usize, unit: TimeUnit) -> &mut Self {
-        let mut res = String::new();
+        let mut res = "";
         match unit {
-            TimeUnit::MILLISECOND => res = String::from(MILLISECOND),
-            TimeUnit::SECOND => res = String::from(SECOND),
-            TimeUnit::MINUTE => res = String::from(MINUTE),
-            TimeUnit::HOUR => res = String::from(HOUR)
+            TimeUnit::MILLISECOND => res = MILLISECOND,
+            TimeUnit::SECOND => res = SECOND,
+            TimeUnit::MINUTE => res = MINUTE,
+            TimeUnit::HOUR => res = HOUR,
+            TimeUnit::DAY => res = DAY
         };
         self.handle_region.timeout.set_region_single(format!("{}{}", time, &res).as_str());
         self

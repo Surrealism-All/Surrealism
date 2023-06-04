@@ -5,6 +5,7 @@ mod create_wrapper;
 mod select_wrapper;
 mod insert_wrapper;
 mod delete_wrapper;
+mod update_wrapper;
 
 pub use connector::{SurrealRecord, SurrealDB};
 pub use sql::*;
@@ -13,3 +14,4 @@ pub use create_wrapper::CreateWrapper;
 pub use select_wrapper::{SelectWrapper, Field, OrderCondition, Ordered};
 pub use insert_wrapper::{InsertWrapper};
 pub use delete_wrapper::{DeleteWrapper};
+pub use update_wrapper::{UpdateWrapper};

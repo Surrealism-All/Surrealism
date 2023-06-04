@@ -44,13 +44,16 @@ pub const AND: &'static str = "AND";
 pub const OR: &'static str = "OR";
 pub const MILLISECOND: &'static str = "ms";
 pub const SECOND: &'static str = "s";
-pub const MINUTE: &'static str = "min";
+pub const MINUTE: &'static str = "m";
 pub const HOUR: &'static str = "h";
+pub const DAY: &'static str = "d";
 pub const INSERT: &'static str = "INSERT";
 pub const INTO: &'static str = "INTO";
 pub const VALUES: &'static str = "VALUES";
 pub const DELETE: &'static str = "DELETE";
-
+pub const UPDATE: &'static str = "UPDATE";
+pub const MERGE: &'static str = "MERGE";
+pub const PATCH: &'static str = "PATCH";
 
 ///核心设计!
 #[derive(Debug, Clone)]
@@ -143,7 +146,7 @@ impl SQLRegion {
     }
     pub fn region_multi_push(&mut self, value: SQLField) {
         match self.get_region_field_mut() {
-            RegionField::Multi( fields) => {
+            RegionField::Multi(fields) => {
                 fields.push(value);
             }
             RegionField::Single(_) => {
@@ -224,7 +227,6 @@ impl SQLField {
         Some(&self.get_field_value())
     }
 }
-
 
 
 ///SurrealCore是应用核心结构体，连接使用的是Surreal<Client>
@@ -397,12 +399,42 @@ pub enum IdRange<T> {
     Arr(Vec<T>),
 }
 
-
+///在SurrealDB数据库中，Timeout子句可以用于设置查询的超时时间。它接受一个时间间隔作为参数，并支持以下单位：
+///
+///     ms：毫秒
+///     s：秒
+///     m：分钟
+///     h：小时
+///     d：天
 pub enum TimeUnit {
     MILLISECOND,
     SECOND,
     MINUTE,
     HOUR,
+    DAY,
+}
+
+///CONTENT @value：将整个文档替换为新的文档，其中 @value 是要替换的新文档。
+/// MERGE @value：将新的文档合并到旧文档中，其中 @value 是要合并的文档。如果旧文档中存在相同的字段，则用新文档中相应字段的值来覆盖旧文档中的值。
+/// PATCH @value：用 JSON patch 的方式更新文档，其中 @value 是一个 JSON patch 对象，表示要对文档进行的增、删、改等操作。
+/// SET @field = @value ...：与基本的 SET 子句类似，可以同时更新多个字段，其中 @field 是要更新的字段名，@value 是要更新的值。
+#[derive(Debug, Clone)]
+pub enum ContentType {
+    SET,
+    CONTENT,
+    MERGE,
+    PATCH,
+    NONE,
+}
+
+///语句返回类型
+#[derive(Debug, Clone)]
+pub enum ReturnType {
+    NONE,
+    BEFORE,
+    AFTER,
+    DIFF,
+    FIELD,
 }
 
 pub trait RegionImpl {

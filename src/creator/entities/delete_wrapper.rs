@@ -1,6 +1,6 @@
 use serde::Serialize;
 use crate::creator::entities::RegionImpl;
-use super::{Statements, SQLField, SQLRegion, RegionField, Wrapper, Criteria, JudgeCriteria, TableId, IdFunction, IdRange, TimeUnit, HOUR, COMMON_SEPARATOR, END_SEPARATOR, MINUTE, SECOND, MILLISECOND, IS_SEPARATOR, DELETE, RETURN, WHERE, TIMEOUT, NONE, BEFORE, AFTER, DIFF};
+use super::{Statements, SQLField, SQLRegion, RegionField, Wrapper, Criteria, JudgeCriteria, TableId, IdFunction, IdRange, TimeUnit, HOUR, DAY, COMMON_SEPARATOR, END_SEPARATOR, MINUTE, SECOND, MILLISECOND, IS_SEPARATOR, DELETE, RETURN, WHERE, TIMEOUT, NONE, BEFORE, AFTER, DIFF};
 
 ///DELETE @targets
 /// 	[ WHERE @condition ]
@@ -136,7 +136,8 @@ impl DeleteWrapper {
             TimeUnit::MILLISECOND => res = MILLISECOND,
             TimeUnit::SECOND => res = SECOND,
             TimeUnit::MINUTE => res = MINUTE,
-            TimeUnit::HOUR => res = HOUR
+            TimeUnit::HOUR => res = HOUR,
+            TimeUnit::DAY => res = DAY,
         };
         self.timeout_region.set_field_value(format!("{}{}", time, &res).as_str());
         self
