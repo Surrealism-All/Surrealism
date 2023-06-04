@@ -56,6 +56,11 @@ pub const DELETE: &'static str = "DELETE";
 pub const UPDATE: &'static str = "UPDATE";
 pub const MERGE: &'static str = "MERGE";
 pub const PATCH: &'static str = "PATCH";
+pub const INFO: &'static str = "INFO FOR";
+pub const KV: &'static str = "KV";
+pub const SCOPE: &'static str = "SCOPE";
+pub const TABLE: &'static str = "TABLE";
+
 
 ///核心设计!
 #[derive(Debug, Clone)]
