@@ -1,6 +1,6 @@
 use serde::Serialize;
 use crate::handle_str;
-use super::{ContentType, Statements, SQLField, SQLRegion, RegionField, Wrapper, RegionImpl, Criteria, JudgeCriteria, TimeUnit, TableId, NEXT_SEPARATOR, MERGE, PATCH, SET, CONTENT, EQUAL_SEPARATOR, TIMEOUT, DAY, WHERE, RETURN, UPDATE, IS_SEPARATOR, COMMON_SEPARATOR, END_SEPARATOR, HOUR, MINUTE, SECOND, MILLISECOND, NONE, BEFORE, AFTER, DIFF};
+use super::{ContentType, Statements, SQLField, SQLRegion, RegionField, Wrapper, RegionImpl, Criteria, JudgeCriteria, TimeUnit, TableId, ADD, MINUS, NEXT_SEPARATOR, MERGE, PATCH, SET, CONTENT, EQUAL_SEPARATOR, TIMEOUT, DAY, WHERE, RETURN, UPDATE, IS_SEPARATOR, COMMON_SEPARATOR, END_SEPARATOR, HOUR, MINUTE, SECOND, MILLISECOND, NONE, BEFORE, AFTER, DIFF};
 
 /// UPDATE @targets
 /// 	[ CONTENT @value
@@ -135,8 +135,10 @@ impl UpdateWrapper {
         self.table_region.set_field_value(format!("{}{}{}", self.table_region.get_field_value(), IS_SEPARATOR, tmp_res).as_str());
         self
     }
-    ///SET方式构建字段
+    /// SET方式构建字段
     /// SET method for constructing fields
+    /// set方法只能构造 = , 也就是值替换
+    /// 如果要构建使用 += , -= 则使用set_with_sign或set_add||set_minus
     pub fn set<T: Serialize>(&mut self, field_name: &'static str, value: T) -> &mut Self {
         match self.content_type {
             ContentType::SET => (),
@@ -153,6 +155,31 @@ impl UpdateWrapper {
         let field = SQLField::new(SET, &field_value);
         self.content_region.push_set(&field);
         self
+    }
+    /// set方法只能构造 = , 也就是值替换
+    /// 如果要构建使用 += , -= 则使用set_with_sign
+    pub fn set_with_sign<T: Serialize>(&mut self, field_name: &'static str, value: T, sign: &str) -> &mut Self {
+        match self.content_type {
+            ContentType::SET => (),
+            ContentType::NONE => {
+                self.content_type = ContentType::SET;
+                self.content_region.set_keyword(SET);
+                self.content_region.set_region_field(&RegionField::Multi(Vec::new()));
+            }
+            _ => {
+                panic!("you cannot use others and content together!")
+            }
+        };
+        let field_value = format!("{}{}{}", field_name, sign, handle_str(serde_json::to_string(&value).unwrap().as_str()));
+        let field = SQLField::new(SET, &field_value);
+        self.content_region.push_set(&field);
+        self
+    }
+    pub fn set_add<T: Serialize>(&mut self, field_name: &'static str, value: T) -> &mut Self {
+        self.set_with_sign(field_name, value, ADD)
+    }
+    pub fn set_minus<T: Serialize>(&mut self, field_name: &'static str, value: T) -> &mut Self {
+        self.set_with_sign(field_name, value, MINUS)
     }
     ///CONTENT方式构建字段
     /// CONTENT method for constructing fields

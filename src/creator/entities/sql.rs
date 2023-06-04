@@ -15,6 +15,8 @@ pub const GT: &'static str = " > ";
 pub const LT: &'static str = " < ";
 pub const GTE: &'static str = " >= ";
 pub const LTE: &'static str = " <= ";
+pub const ADD: &'static str = " += ";
+pub const MINUS: &'static str = " -= ";
 pub const USE: &'static str = "USE";
 pub const NS: &'static str = "NS";
 pub const DB: &'static str = "DB";
@@ -247,6 +249,8 @@ impl SurrealCore {
 
 /// 语句枚举
 /// 考虑结合包装器,也许可以将包装器的keyword字段使用Statements枚举
+/// LET:不设计
+///
 #[derive(Debug, Clone)]
 pub enum Statements {
     USE,
@@ -529,24 +533,28 @@ impl Criteria {
         self.comparator = String::from(comparator);
         self
     }
+    /// core < comparator
     pub fn lt(&mut self, core: &str, comparator: &str) -> &mut Self {
         self.build_core(core);
         self.judge = JudgeCriteria::Lt;
         self.comparator = String::from(comparator);
         self
     }
+    /// core != comparator
     pub fn neq(&mut self, core: &str, comparator: &str) -> &mut Self {
         self.build_core(core);
         self.judge = JudgeCriteria::Neq;
         self.comparator = String::from(comparator);
         self
     }
+    /// core <= comparator
     pub fn lte(&mut self, core: &str, comparator: &str) -> &mut Self {
         self.build_core(core);
         self.judge = JudgeCriteria::Lte;
         self.comparator = String::from(comparator);
         self
     }
+    /// core >= comparator
     pub fn gte(&mut self, core: &str, comparator: &str) -> &mut Self {
         self.build_core(core);
         self.judge = JudgeCriteria::Gte;

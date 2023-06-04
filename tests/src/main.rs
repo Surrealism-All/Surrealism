@@ -44,11 +44,12 @@ async fn main() -> SurrealRes<()> {
     update_wrapper
         .from("user")
         .id(TableId::<String>::Str("1008".to_string()))
-        .content(&data)
+        .set_minus("name","bar")
         .return_after();
+    dbg!(update_wrapper.commit());
     /// 提交语句
     /// commit statement
-    let update_res = db.commit(update_wrapper).await;
-    dbg!(update_res.unwrap());
+    // let update_res = db.commit(update_wrapper).await;
+    // dbg!(update_res.unwrap());
     Ok(())
 }
