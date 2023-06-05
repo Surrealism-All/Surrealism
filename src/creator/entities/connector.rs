@@ -2,7 +2,7 @@ use std::cell::RefCell;
 use std::fmt::Debug;
 use surrealdb::sql::{Thing};
 use serde::{Deserialize, Serialize};
-use super::{SurrealCore, Statements, RegionField, NS, DB, Wrapper};
+use super::{SurrealCore, Statements, RegionField, NS, DB, Wrapper, Transaction};
 use crate::config::SurrealConfig;
 
 
@@ -61,6 +61,11 @@ impl SurrealDB {
                 panic!("{}", "非USE语句请使用commit方法")
             }
         }
+    }
+    /// 提交事务
+    pub async fn commit_transaction(&self, mut transaction: &Transaction) -> Result<surrealdb::Response, surrealdb::Error> {
+        let sql = transaction.get_stmt();
+        self.core.cn.query(sql).await
     }
 }
 

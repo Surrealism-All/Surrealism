@@ -10,14 +10,14 @@ The `INFO` command outputs information about the setup of the SurrealDB system. 
 
 ## function
 
-| fun name | params:type | return           | des              |
-| -------- | ----------- | ---------------- | ---------------- |
-| kv       |             | &mut InfoWrapper | 获取系统信息     |
-| ns       |             | &mut InfoWrapper | 获取命名空间信息 |
-| db       |             | &mut InfoWrapper | 获取数据库信息   |
-| scope    | value: &str | &mut InfoWrapper | 获取范围信息     |
-| table    | value: &str | &mut InfoWrapper | 获取表信息       |
-| next     |             | &mut InfoWrapper | 切换下一条语句   |
+| fun name | params:type | return           | des                                              |
+| -------- | ----------- | ---------------- | ------------------------------------------------ |
+| kv       |             | &mut InfoWrapper | 获取系统信息<br /> get sys info                  |
+| ns       |             | &mut InfoWrapper | 获取命名空间信息<br />get namespace info         |
+| db       |             | &mut InfoWrapper | 获取数据库信息<br />get database info            |
+| scope    | value: &str | &mut InfoWrapper | 获取范围信息<br />get scope info                 |
+| table    | value: &str | &mut InfoWrapper | 获取表信息<br />get table info                   |
+| next     |             | &mut InfoWrapper | 切换下一条语句<br />Switch to the next statement |
 
 ## Import
 

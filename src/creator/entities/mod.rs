@@ -19,3 +19,4 @@ pub use insert_wrapper::{InsertWrapper};
 pub use delete_wrapper::{DeleteWrapper};
 pub use update_wrapper::{UpdateWrapper};
 pub use info_wrapper::{InfoWrapper};
+pub use transaction::Transaction;

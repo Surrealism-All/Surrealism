@@ -2,8 +2,7 @@ use std::ops::Add;
 use surrealdb::{ Surreal};
 use surrealdb::engine::remote::ws::{Ws, Client};
 use surrealdb::opt::auth::{Root};
-use crate::config::{SurrealConfig};
-
+use crate::config::SurrealConfig;
 
 
 ///连接Surreal数据库
