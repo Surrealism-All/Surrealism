@@ -9,14 +9,14 @@ pub const IS_SEPARATOR: &'static str = ":";
 pub const END_SEPARATOR: &'static str = ";";
 pub const EQUAL_SEPARATOR: &'static str = " = ";
 pub const NEXT_SEPARATOR: &'static str = " , ";
-pub const EQ: &'static str = " = ";
-pub const NEQ: &'static str = " != ";
-pub const GT: &'static str = " > ";
-pub const LT: &'static str = " < ";
-pub const GTE: &'static str = " >= ";
-pub const LTE: &'static str = " <= ";
-pub const ADD: &'static str = " += ";
-pub const MINUS: &'static str = " -= ";
+pub const EQ: &'static str = "=";
+pub const NEQ: &'static str = "!=";
+pub const GT: &'static str = ">";
+pub const LT: &'static str = "<";
+pub const GTE: &'static str = ">=";
+pub const LTE: &'static str = "<=";
+pub const ADD: &'static str = "+=";
+pub const MINUS: &'static str = "-=";
 pub const USE: &'static str = "USE";
 pub const NS: &'static str = "NS";
 pub const DB: &'static str = "DB";
@@ -60,6 +60,11 @@ pub const INFO: &'static str = "INFO FOR";
 pub const KV: &'static str = "KV";
 pub const SCOPE: &'static str = "SCOPE";
 pub const TABLE: &'static str = "TABLE";
+pub const IF: &str = "IF";
+pub const THEN: &str = "THEN";
+pub const ELSE_IF: &str = "ELSE IF";
+pub const ELSE: &str = "ELSE";
+pub const END: &str = "END";
 
 
 ///核心设计!
