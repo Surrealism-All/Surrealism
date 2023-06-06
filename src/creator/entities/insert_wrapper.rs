@@ -4,7 +4,7 @@ use crate::creator::entities::RegionImpl;
 use crate::utils::handle_str;
 use super::{Statements, SQLRegion, SQLField, RegionField, Wrapper, INSERT, INTO, VALUES, CONTENT, COMMON_SEPARATOR, NEXT_SEPARATOR, END_SEPARATOR};
 
-///=================================================<br>
+///=================================================
 ///
 /// INSERT [ IGNORE ] INTO @what
 /// 	[ @value
@@ -13,12 +13,14 @@ use super::{Statements, SQLRegion, SQLField, RegionField, Wrapper, INSERT, INTO,
 /// 	]
 /// ;
 /// @params:
-/// <ol>
-///     <li>keyword:关键字</li>
-/// </ol>
-/// @date:2023/5/27<br>
-/// @description:Select语句包装器,生成select语句，实现查询数据操作<br>
-/// @example:<br>
+///  - keyword:关键字
+///
+/// @date:2023/5/27
+///
+/// @description:Select语句包装器,生成select语句，实现查询数据操作
+///
+/// @example:
+///
 ///=================================================
 #[derive(Debug, Clone)]
 pub struct InsertWrapper {

@@ -65,7 +65,7 @@ pub const THEN: &str = "THEN";
 pub const ELSE_IF: &str = "ELSE IF";
 pub const ELSE: &str = "ELSE";
 pub const END: &str = "END";
-
+pub const DEFINE: &str = "DEFINE";
 
 ///核心设计!
 #[derive(Debug, Clone)]
