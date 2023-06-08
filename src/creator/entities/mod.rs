@@ -25,3 +25,4 @@ pub use update_wrapper::{UpdateWrapper};
 pub use info_wrapper::{InfoWrapper};
 pub use transaction::Transaction;
 pub use if_else_wrapper::IfElseWrapper;
+pub use define_wrapper::{DefineWrapper,TokenType,DefineFunction};

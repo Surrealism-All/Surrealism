@@ -6,7 +6,7 @@
 ///  █▄▄▄▄▄█▀  ██▄▄▄███   ██        ██       ▀██▄▄▄▄█  ██▄▄▄███    ██▄▄▄   ▄▄▄██▄▄▄  █▄▄▄▄▄██  ██ ██ ██
 ///   ▀▀▀▀▀     ▀▀▀▀ ▀▀   ▀▀        ▀▀         ▀▀▀▀▀    ▀▀▀▀ ▀▀     ▀▀▀▀   ▀▀▀▀▀▀▀▀   ▀▀▀▀▀▀   ▀▀ ▀▀ ▀▀
 
-use surrealism::{InitServiceImpl, SurrealRes, Wrapper, UpdateWrapper, UseWrapper, IfElseWrapper, Criteria, CreateWrapper, TableId};
+use surrealism::{InitServiceImpl, SurrealRes, Wrapper, UseWrapper, DefineWrapper};
 
 #[tokio::main]
 async fn main() -> SurrealRes<()> {
@@ -21,39 +21,23 @@ async fn main() -> SurrealRes<()> {
     use_wrapper.use_ns("test").use_db("test");
     /// 提交语句
     /// commit statement
-    let res_use = db.use_commit(use_wrapper).await;
+    let res_use = db.use_commit(&mut use_wrapper).await;
     dbg!(res_use);
-    /// 准备数据
-    /// prepare data
-    let mut data = CreateWrapper::new();
-    data
-        .create("user")
-        .id(TableId::<String>::Str("101".to_string()))
-        .set("name", "Jack")
-        .set("age", 16)
-        .set("railcard", "none")
-        .return_after();
-    let data_res = db.commit(data).await;
-    dbg!(data_res.unwrap());
-    ///条件
-    let mut cri1 = Criteria::new();
-    cri1.lte("age", "10");
-    let mut cri2 = Criteria::new();
-    cri2.lte("age", "21");
-    ///IF—ELSE
-    let mut if_wrapper = IfElseWrapper::new();
-    if_wrapper
-        .if_condition_str(&cri1, "junior")
-        .else_if_condition_str(&cri2, "student")
-        .else_condition_str("senior");
-    ///构建Wrapper
-    let mut update_wrapper = UpdateWrapper::new();
-    update_wrapper
-        .from("user")
-        .set_condition("railcard", &mut if_wrapper)
-        .return_after();
-    /// 提交事务
-    let res = db.commit(update_wrapper).await;
+
+    ///DEFINE FUNCTION fn::greet($name: string) {
+    /// 	RETURN "Hello, " + $name + "!";
+    /// }
+    let mut define_wrapper = DefineWrapper::new();
+    let mut define_fn = define_wrapper.define_function();
+    define_fn
+        .add_name("greet")
+        .add_params("name", "string")
+        .add_content(r#"RETURN "Hello, " + $name + "!";"#);
+
+    /// commit
+    let res = db.commit(&mut define_fn).await;
     dbg!(res.unwrap());
+    let res2 = db.run_fn(&mut define_fn,&vec!["Tobie"]).await;
+    dbg!(res2.unwrap());
     Ok(())
 }
