@@ -1,41 +1,8 @@
 //! DEFINE语句可用于指定身份验证访问和行为、全局参数、表配置、表事件、模式定义和索引。
-//! DEFINE [
-//! 	NAMESPACE @name
-//! 	| DATABASE @name
-//! 	| LOGIN @name ON [ NAMESPACE | DATABASE ] [ PASSWORD @pass | PASSHASH @hash ]
-//! 	| TOKEN @name ON [ NAMESPACE | DATABASE | SCOPE @scope ] TYPE @type VALUE @value
-//! 	| SCOPE @name
-//! 		[ SESSION @duration ]
-//! 		[ SIGNUP @expression ]
-//! 		[ SIGNIN @expression ]
-//! 	| TABLE @name
-//! 		[ DROP ]
-//! 		[ SCHEMAFULL | SCHEMALESS ]
-//! 		[ AS SELECT @projections
-//! 			FROM @tables
-//! 			[ WHERE @condition ]
-//! 			[ GROUP [ BY ] @groups ]
-//! 		]
-//! 		[ PERMISSIONS [ NONE | FULL
-//! 			| FOR select @expression
-//! 			| FOR create @expression
-//! 			| FOR update @expression
-//! 			| FOR delete @expression
-//! 		] ]
-//! 	| EVENT @name ON [ TABLE ] @table WHEN @expression THEN @expression
-//! 	| FIELD @name ON [ TABLE ] @table
-//! 		[ TYPE @type ]
-//! 		[ VALUE @expression ]
-//! 		[ ASSERT @expression ]
-//! 		[ PERMISSIONS [ NONE | FULL
-//! 			| FOR select @expression
-//! 			| FOR create @expression
-//! 			| FOR update @expression
-//! 			| FOR delete @expression
-//! 		] ]
-//! 	| INDEX @name ON [ TABLE ] @table [ FIELDS | COLUMNS ] @fields [ UNIQUE ]
-//! ]
+//! 对于DEFINE语句的构成十分复杂，在后续版本中对照Surrealdb提供的源码需要进行重构
 
+use serde::Serialize;
+use surrealdb::sql::Geometry;
 use crate::creator::entities::Statements;
 use crate::handle_str;
 use super::{Wrapper, SQLField, SQLRegion, RegionField, TimeUnit, Criteria, COMMON_SEPARATOR, END_SEPARATOR, DEFINE, HOUR, DAY, MINUTE, SECOND, MILLISECOND};
@@ -56,8 +23,10 @@ const EVENT: &str = "EVENT";
 const WHEN: &str = "WHEN";
 const THEN: &str = "THEN";
 const TABLE: &str = "TABLE";
+const FIELD: &str = "FIELD";
 const FUNCTION: &str = "FUNCTION";
 const RETURN: &str = "RETURN";
+const ASSERT: &str = "ASSERT";
 const EDDSA: &str = "EDDSA";
 const ES256: &str = "ES256";
 const ES384: &str = "ES384";
@@ -71,6 +40,27 @@ const PS512: &str = "PS512";
 const RS256: &str = "RS256";
 const RS384: &str = "RS384";
 const RS512: &str = "RS512";
+const ANY: &str = "any";
+const ARRAY: &str = "array";
+const BOOL: &str = "bool";
+const DATETIME: &str = "datetime";
+const DECIMAL: &str = "decimal";
+const DURATION: &str = "duration";
+const FLOAT: &str = "float";
+const INT: &str = "int";
+const NUMBER: &str = "number";
+const OBJECT: &str = "object";
+const STRING: &str = "string";
+const RECORD: &str = "record";
+const GEO_FEATURE: &str = "feature";
+const GEO_POINT: &str = "point";
+const GEO_LINE: &str = "line";
+const GEO_POLYGON: &str = "polygon";
+const GEO_MULTIPOINT: &str = "multipoint";
+const GEO_MULTILINE: &str = "multiline";
+const GEO_MULTIPOLYGON: &str = "multipolygon";
+const GEO_COLLECTION: &str = "collection";
+
 
 #[derive(Debug, Clone)]
 pub struct DefineWrapper {
@@ -243,6 +233,9 @@ impl DefineWrapper {
     /// - 必须选择命名空间和数据库 才能使用DEFINE FUNCTION 声明。
     pub fn define_function(&mut self) -> DefineFunction {
         DefineFunction::new()
+    }
+    pub fn define_field(&mut self) -> DefineField {
+        DefineField::new()
     }
 }
 
@@ -501,16 +494,16 @@ pub struct DefineFunction {
 }
 
 impl DefineFunction {
-    pub fn add_name(&mut self, name: &str) -> &mut Self {
+    pub fn fn_name(&mut self, name: &str) -> &mut Self {
         self.fn_name = format!("{}::{}", "fn", name);
         self
     }
-    pub fn add_params(&mut self, param_name: &str, param_type: &str) -> &mut Self {
-        let param_str = format!("${}:{}", param_name, param_type);
+    pub fn fn_params(&mut self, param_name: &str, param_type: &FieldType) -> &mut Self {
+        let param_str = format!("${}:{}", param_name, FieldType::match_type(param_type));
         self.fn_params.push(param_str);
         self
     }
-    pub fn add_content(&mut self, content: &str) -> &mut Self {
+    pub fn fn_content(&mut self, content: &str) -> &mut Self {
         self.fn_content = String::from(handle_str(content));
         self
     }
@@ -560,11 +553,190 @@ impl Wrapper for DefineFunction {
     }
 }
 
+/// DEFINE FIELD @name ON [ TABLE ] @table
+/// 	[ TYPE @type ]
+/// 	[ VALUE @expression ]
+/// 	[ ASSERT @expression ]
+/// 	[ PERMISSIONS [ NONE | FULL
+/// 		| FOR select @expression
+/// 		| FOR create @expression
+/// 		| FOR update @expression
+/// 		| FOR delete @expression
+/// 	] ]
 #[derive(Debug, Clone)]
-struct DefineField {}
+pub struct DefineField {
+    keyword: Statements,
+    available: SQLRegion,
+    field_name: String,
+    table_name: String,
+    field_type: String,
+    assert: String,
+    default_value: String,
+    permission: String,
+    variable: String,
+}
+
+impl DefineField {
+    pub fn field(&mut self, field_name: &str) -> &mut Self {
+        self.field_name = String::from(field_name);
+        self
+    }
+    pub fn variable(&mut self, variable: &str) -> &mut Self {
+        self.variable = format!("${}", variable);
+        self
+    }
+    pub fn table(&mut self, table_name: &str) -> &mut Self {
+        self.table_name = String::from(table_name);
+        self
+    }
+    pub fn field_type(&mut self, field_type: &FieldType) -> &mut Self {
+        let field_str = FieldType::match_type(field_type);
+        self.field_type = field_str;
+        self
+    }
+    /// 由于Assert子句的构建十分复杂，调用者更应该自己写，而不该固定模板
+    /// 不过需要注意的是使用variable()方法声明变量名在Assert中也需要使用相同的
+    pub fn field_assert(&mut self, assert_stmt: &str) -> &mut Self {
+        self.assert = format!("{} {}",ASSERT,assert_stmt);
+        self
+    }
+    pub fn default_value<T: Serialize>(&mut self, default_value: T) -> &mut Self {
+        self.default_value = handle_str(serde_json::to_string(&default_value).unwrap().as_str());
+        self
+    }
+    pub fn permission(&mut self, permission: &str) -> &mut Self {
+        self.permission = String::from(permission);
+        self
+    }
+    pub fn get_field(&self) -> &str {
+        &self.field_name
+    }
+    pub fn get_default_value(&self) -> &str {
+        &self.default_value
+    }
+    pub fn get_table(&self) -> &str {
+        &self.table_name
+    }
+    pub fn get_field_type(&self) -> &str {
+        &self.field_type
+    }
+    pub fn get_assert(&self) -> &str {
+        &self.assert
+    }
+    pub fn get_permission(&self) -> &str {
+        &self.permission
+    }
+    pub fn get_variable(&self) -> &str {
+        &self.variable
+    }
+}
+
+impl Wrapper for DefineField {
+    fn new() -> Self {
+        DefineField {
+            keyword: Statements::DEFINE,
+            available: SQLRegion::new(RegionField::Single(String::new()), DEFINE),
+            field_name: "".to_string(),
+            table_name: "".to_string(),
+            field_type: String::new(),
+            assert: "".to_string(),
+            default_value: "".to_string(),
+            permission: "".to_string(),
+            variable: "".to_string(),
+        }
+    }
+
+    fn commit(&mut self) -> &str {
+        let mut stmt = format!("{} {} {} {} {} {} {} {}", DEFINE, FIELD, self.get_field(), ON, TABLE, self.get_table(), TYPE, self.get_field_type());
+        if !self.get_assert().is_empty() {
+            stmt.push_str(COMMON_SEPARATOR);
+            stmt.push_str(self.get_assert());
+        }
+        if !self.get_default_value().is_empty() {
+            stmt.push_str(COMMON_SEPARATOR);
+            stmt.push_str(format!("VALUE {} OR {}", self.get_variable(), self.get_default_value()).as_str());
+        }
+        stmt.push_str(END_SEPARATOR);
+        self.available.set_region_statement(&stmt);
+        self.available.get_region_statement()
+    }
+
+    fn get_keyword(&self) -> &Statements {
+        &self.keyword
+    }
+
+    fn get_available(&self) -> &SQLRegion {
+        &self.available
+    }
+}
+
+pub enum FieldType {
+    ///当您明确不想指定字段的数据类型时，请使用此选项。该字段将允许SurrealDB支持的任何数据类型。
+    Any,
+    Array,
+    Bool,
+    ///一种符合ISO 8601的数据类型，用于存储带有时间和时区的日期。
+    Datetime,
+    ///使用BigDecimal以任意精度存储任何真实的。
+    Decimal,
+    ///存储表示时间长度的值。可以从日期时间或其他持续时间中添加或减去。
+    Duration,
+    ///将值存储在64位浮点数中。
+    Float,
+    ///将值存储为64位整数。
+    Int,
+    ///存储数字而不指定类型。SurrealDB将检测数字的类型，并使用最小的字节数存储它。对于以字符串形式传入的数字，此字段将数字存储在BigDecimal中。
+    Number,
+    ///存储包含任何受支持类型的值的格式化对象，对对象深度或嵌套没有限制。
+    Object,
+    String,
+    ///存储对另一个记录的引用。该值必须是记录ID。
+    Record,
+    ///RFC 7946 兼容的数据类型，用于在GeoJson格式.
+    Geometry(Geometry),
+}
+
+impl FieldType {
+    fn match_type(field_type: &FieldType) -> String {
+        let mut real_type = "";
+        match field_type {
+            FieldType::Any => { real_type = ANY }
+            FieldType::Array => { real_type = ARRAY }
+            FieldType::Bool => { real_type = BOOL }
+            FieldType::Datetime => { real_type = DATETIME }
+            FieldType::Decimal => { real_type = DECIMAL }
+            FieldType::Duration => { real_type = DURATION }
+            FieldType::Float => { real_type = FLOAT }
+            FieldType::Int => { real_type = INT }
+            FieldType::Number => { real_type = NUMBER }
+            FieldType::Object => { real_type = OBJECT }
+            FieldType::String => { real_type = STRING }
+            FieldType::Record => { real_type = RECORD }
+            FieldType::Geometry(geo) => {
+                match geo {
+                    Geometry::Point(_) => { real_type = GEO_POINT }
+                    Geometry::Line(_) => { real_type = GEO_LINE }
+                    Geometry::Polygon(_) => { real_type = GEO_POLYGON }
+                    Geometry::MultiPoint(_) => { real_type = GEO_MULTIPOINT }
+                    Geometry::MultiLine(_) => { real_type = GEO_MULTILINE }
+                    Geometry::MultiPolygon(_) => { real_type = GEO_MULTIPOLYGON }
+                    Geometry::Collection(_) => { real_type = GEO_COLLECTION }
+                }
+            }
+        }
+        real_type.to_string()
+    }
+}
+
 
 #[derive(Debug, Clone)]
-struct DefineIndex {}
+pub struct DefineIndex {
+    keyword: Statements,
+    available: SQLRegion,
+    index_name: String,
+    table_name: String,
+
+}
 
 #[derive(Debug, Clone)]
-struct DefineParam {}
+pub struct DefineParam {}

@@ -1,4 +1,4 @@
-use surrealism::{InitServiceImpl, SurrealRes, Wrapper, UseWrapper, DefineWrapper};
+use surrealism::{InitServiceImpl, SurrealRes, Wrapper, UseWrapper, DefineWrapper, FieldType};
 
 #[tokio::main]
 async fn main() -> SurrealRes<()> {
@@ -22,14 +22,13 @@ async fn main() -> SurrealRes<()> {
     let mut define_wrapper = DefineWrapper::new();
     let mut define_fn = define_wrapper.define_function();
     define_fn
-        .add_name("greet")
-        .add_params("name", "string")
-        .add_content(r#"RETURN "Hello, " + $name + "!";"#);
-
+        .fn_name("greet")
+        .fn_params("name", &FieldType::String)
+        .fn_content(r#"RETURN "Hello, " + $name + "!";"#);
     /// commit
     let res = db.commit(&mut define_fn).await;
     dbg!(res.unwrap());
-    let res2 = db.run_fn(&mut define_fn,&vec!["Tobie"]).await;
+    let res2 = db.run_fn(&mut define_fn, &vec!["Tobie"]).await;
     dbg!(res2.unwrap());
     Ok(())
 }

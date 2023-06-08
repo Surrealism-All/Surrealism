@@ -6,7 +6,7 @@
 ///  █▄▄▄▄▄█▀  ██▄▄▄███   ██        ██       ▀██▄▄▄▄█  ██▄▄▄███    ██▄▄▄   ▄▄▄██▄▄▄  █▄▄▄▄▄██  ██ ██ ██
 ///   ▀▀▀▀▀     ▀▀▀▀ ▀▀   ▀▀        ▀▀         ▀▀▀▀▀    ▀▀▀▀ ▀▀     ▀▀▀▀   ▀▀▀▀▀▀▀▀   ▀▀▀▀▀▀   ▀▀ ▀▀ ▀▀
 
-use surrealism::{InitServiceImpl, SurrealRes, Wrapper, UseWrapper, DefineWrapper};
+use surrealism::{InitServiceImpl, SurrealRes, Wrapper, UseWrapper, DefineWrapper, FieldType};
 
 #[tokio::main]
 async fn main() -> SurrealRes<()> {
@@ -23,21 +23,18 @@ async fn main() -> SurrealRes<()> {
     /// commit statement
     let res_use = db.use_commit(&mut use_wrapper).await;
     dbg!(res_use);
-
-    ///DEFINE FUNCTION fn::greet($name: string) {
-    /// 	RETURN "Hello, " + $name + "!";
-    /// }
+    /// DEFINE FIELD countrycode ON TABLE user TYPE string ASSERT $value != NONE AND $value = /[A-Z]{3}/ VALUE $value OR 'GBR';
     let mut define_wrapper = DefineWrapper::new();
-    let mut define_fn = define_wrapper.define_function();
-    define_fn
-        .add_name("greet")
-        .add_params("name", "string")
-        .add_content(r#"RETURN "Hello, " + $name + "!";"#);
-
+    let mut define_field = define_wrapper.define_field();
+    define_field
+        .field("countrycode")
+        .table("user")
+        .field_type(&FieldType::String)
+        .variable("value")
+        .field_assert("$value != NONE AND $value = /[A-Z]{3}/")
+        .default_value("GBR");
     /// commit
-    let res = db.commit(&mut define_fn).await;
+    let res = db.commit(&mut define_field).await;
     dbg!(res.unwrap());
-    let res2 = db.run_fn(&mut define_fn,&vec!["Tobie"]).await;
-    dbg!(res2.unwrap());
     Ok(())
 }
