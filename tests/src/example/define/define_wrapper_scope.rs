@@ -13,7 +13,7 @@ async fn main() -> SurrealRes<()> {
     use_wrapper.use_ns("test").use_db("test");
     /// 提交语句
     /// commit statement
-    let res_use = db.use_commit(use_wrapper).await;
+    let res_use = db.use_commit(&mut use_wrapper).await;
     dbg!(res_use);
     ///Define Scope
     let sign_up = "CREATE user SET email = surrealism@outlook.com, pass = crypto::argon2::generate(surrealism)";
@@ -21,7 +21,7 @@ async fn main() -> SurrealRes<()> {
     let mut define_wrapper = DefineWrapper::new();
     let mut define_scope = define_wrapper.define_scope("account", 24, TimeUnit::HOUR, sign_up, sign_in);
     /// commit
-    let res = db.commit(define_scope).await;
+    let res = db.commit(&mut define_scope).await;
     dbg!(res.unwrap());
     Ok(())
 }

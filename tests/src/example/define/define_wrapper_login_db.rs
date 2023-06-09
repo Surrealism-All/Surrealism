@@ -13,13 +13,13 @@ async fn main() -> SurrealRes<()> {
     use_wrapper.use_ns("test").use_db("test");
     /// 提交语句
     /// commit statement
-    let res_use = db.use_commit(use_wrapper).await;
+    let res_use = db.use_commit(&mut use_wrapper).await;
     dbg!(res_use);
     /// DEFINE LOGIN username ON DATABASE PASSWORD '123456';
     let mut define_wrapper = DefineWrapper::new();
     let mut define_login_db = define_wrapper.define_login_database("username", "123456");
     /// commit
-    let res = db.commit(define_login_db).await;
+    let res = db.commit(&mut define_login_db).await;
     dbg!(res.unwrap());
     Ok(())
 }

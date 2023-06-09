@@ -67,7 +67,7 @@ async fn main() -> SurrealRes<()> {
     use_wrapper.use_ns("test").use_db("test");
     /// 提交语句
     /// commit statement
-    let res_use = db.use_commit(use_wrapper).await;
+    let res_use = db.use_commit(&mut use_wrapper).await;
     dbg!(res_use);
     /// 构建DefineWrapper
     /// build DefineWrapper
@@ -77,7 +77,7 @@ async fn main() -> SurrealRes<()> {
     let mut define_ns = define_wrapper.define_namespace("test");
     /// 提交
     /// commit
-    let res = db.commit(define_ns).await;
+    let res = db.commit(&mut define_ns).await;
     dbg!(res.unwrap());
     Ok(())
 }
@@ -124,7 +124,7 @@ async fn main() -> SurrealRes<()> {
     use_wrapper.use_ns("test").use_db("test");
     /// 提交语句
     /// commit statement
-    let res_use = db.use_commit(use_wrapper).await;
+    let res_use = db.use_commit(&mut use_wrapper).await;
     dbg!(res_use);
     /// 通过define_database()转为DefineDatabase
     /// use define_database() to DefineDatabase
@@ -133,7 +133,7 @@ async fn main() -> SurrealRes<()> {
     let mut define_db = define_wrapper.define_database("test");
     /// 提交事务
     /// commit
-    let res = db.commit(define_db).await;
+    let res = db.commit(&mut define_db).await;
     dbg!(res.unwrap());
     Ok(())
 }
@@ -190,13 +190,13 @@ async fn main() -> SurrealRes<()> {
     use_wrapper.use_ns("test").use_db("test");
     /// 提交语句
     /// commit statement
-    let res_use = db.use_commit(use_wrapper).await;
+    let res_use = db.use_commit(&mut use_wrapper).await;
     dbg!(res_use);
     /// DEFINE LOGIN username ON NAMESPACE PASSWORD '123456';
     let mut define_wrapper = DefineWrapper::new();
     let mut define_login_ns = define_wrapper.define_login_namespace("username", "123456");
     /// commit
-    let res = db.commit(define_login_ns).await;
+    let res = db.commit(&mut define_login_ns).await;
     dbg!(res.unwrap());
     Ok(())
 }
@@ -220,13 +220,13 @@ async fn main() -> SurrealRes<()> {
     use_wrapper.use_ns("test").use_db("test");
     /// 提交语句
     /// commit statement
-    let res_use = db.use_commit(use_wrapper).await;
+    let res_use = db.use_commit(&mut use_wrapper).await;
     dbg!(res_use);
     /// DEFINE LOGIN username ON DATABASE PASSWORD '123456';
     let mut define_wrapper = DefineWrapper::new();
     let mut define_login_db = define_wrapper.define_login_database("username", "123456");
     /// commit
-    let res = db.commit(define_login_db).await;
+    let res = db.commit(&mut define_login_db).await;
     dbg!(res.unwrap());
     Ok(())
 }
@@ -252,14 +252,14 @@ async fn main() -> SurrealRes<()> {
     use_wrapper.use_ns("test").use_db("test");
     /// 提交语句
     /// commit statement
-    let res_use = db.use_commit(use_wrapper).await;
+    let res_use = db.use_commit(&mut use_wrapper).await;
     dbg!(res_use);
     let token_value = "sNSYneezcr8kqphfOC6NwwraUHJCVAt0XjsRSNmssBaBRh3WyMa9TRfq8ST7fsU2H2kGiOpU4GbAF1bCiXmM1b3JGgleBzz7rsrz6VvYEM4q3CLkcO8CMBIlhwhzWmy8";
     /// DEFINE TOKEN token_name ON NAMESPACE TYPE HS512 VALUE 'sNSYneezcr8kqphfOC6NwwraUHJCVAt0XjsRSNmssBaBRh3WyMa9TRfq8ST7fsU2H2kGiOpU4GbAF1bCiXmM1b3JGgleBzz7rsrz6VvYEM4q3CLkcO8CMBIlhwhzWmy8';
     let mut define_wrapper = DefineWrapper::new();
     let mut define_token_ns = define_wrapper.define_token_namespace("token_name", TokenType::HS512, token_value);
     /// commit
-    let res = db.commit(define_token_ns).await;
+    let res = db.commit(&mut define_token_ns).await;
     dbg!(res.unwrap());
     Ok(())
 }
@@ -283,14 +283,14 @@ async fn main() -> SurrealRes<()> {
     use_wrapper.use_ns("test").use_db("test");
     /// 提交语句
     /// commit statement
-    let res_use = db.use_commit(use_wrapper).await;
+    let res_use = db.use_commit(&mut use_wrapper).await;
     dbg!(res_use);
     let token_value = "sNSYneezcr8kqphfOC6NwwraUHJCVAt0XjsRSNmssBaBRh3WyMa9TRfq8ST7fsU2H2kGiOpU4GbAF1bCiXmM1b3JGgleBzz7rsrz6VvYEM4q3CLkcO8CMBIlhwhzWmy8";
     /// DEFINE TOKEN token_name ON DATABASE TYPE HS512 VALUE 'sNSYneezcr8kqphfOC6NwwraUHJCVAt0XjsRSNmssBaBRh3WyMa9TRfq8ST7fsU2H2kGiOpU4GbAF1bCiXmM1b3JGgleBzz7rsrz6VvYEM4q3CLkcO8CMBIlhwhzWmy8';
     let mut define_wrapper = DefineWrapper::new();
     let mut define_token_ns = define_wrapper.define_token_database("token_name", TokenType::HS512, token_value);
     /// commit
-    let res = db.commit(define_token_ns).await;
+    let res = db.commit(&mut define_token_ns).await;
     dbg!(res.unwrap());
     Ok(())
 }
@@ -314,14 +314,14 @@ async fn main() -> SurrealRes<()> {
     use_wrapper.use_ns("test").use_db("test");
     /// 提交语句
     /// commit statement
-    let res_use = db.use_commit(use_wrapper).await;
+    let res_use = db.use_commit(&mut use_wrapper).await;
     dbg!(res_use);
     let token_value = "sNSYneezcr8kqphfOC6NwwraUHJCVAt0XjsRSNmssBaBRh3WyMa9TRfq8ST7fsU2H2kGiOpU4GbAF1bCiXmM1b3JGgleBzz7rsrz6VvYEM4q3CLkcO8CMBIlhwhzWmy8";
     /// DEFINE TOKEN token_name ON SCOPE account TYPE HS512 VALUE 'sNSYneezcr8kqphfOC6NwwraUHJCVAt0XjsRSNmssBaBRh3WyMa9TRfq8ST7fsU2H2kGiOpU4GbAF1bCiXmM1b3JGgleBzz7rsrz6VvYEM4q3CLkcO8CMBIlhwhzWmy8';
     let mut define_wrapper = DefineWrapper::new();
     let mut define_token_scope = define_wrapper.define_token_scope("token_name", TokenType::HS512, "account", token_value);
     /// commit
-    let res = db.commit(define_token_scope).await;
+    let res = db.commit(&mut define_token_scope).await;
     dbg!(res.unwrap());
     Ok(())
 }
@@ -358,14 +358,14 @@ async fn main() -> SurrealRes<()> {
     use_wrapper.use_ns("test").use_db("test");
     /// 提交语句
     /// commit statement
-    let res_use = db.use_commit(use_wrapper).await;
+    let res_use = db.use_commit(&mut use_wrapper).await;
     dbg!(res_use);
     /// 采用相对固定的语句构建Scope
     /// Using relatively fixed statements to build a Scope
     let mut define_wrapper = DefineWrapper::new();
     let mut define_scope = define_wrapper.define_scope_bind("account", 24, TimeUnit::HOUR, "surrealism@outlook.com", "surrealism");
     /// commit
-    let res = db.commit(define_scope).await;
+    let res = db.commit(&mut define_scope).await;
     dbg!(res.unwrap());
     Ok(())
 }
@@ -389,7 +389,7 @@ async fn main() -> SurrealRes<()> {
     use_wrapper.use_ns("test").use_db("test");
     /// 提交语句
     /// commit statement
-    let res_use = db.use_commit(use_wrapper).await;
+    let res_use = db.use_commit(&mut use_wrapper).await;
     dbg!(res_use);
     ///Define Scope
     let sign_up = "CREATE user SET email = surrealism@outlook.com, pass = crypto::argon2::generate(surrealism)";
@@ -397,7 +397,7 @@ async fn main() -> SurrealRes<()> {
     let mut define_wrapper = DefineWrapper::new();
     let mut define_scope = define_wrapper.define_scope("account", 24, TimeUnit::HOUR, sign_up, sign_in);
     /// commit
-    let res = db.commit(define_scope).await;
+    let res = db.commit(&mut define_scope).await;
     dbg!(res.unwrap());
     Ok(())
 }
@@ -428,7 +428,7 @@ async fn main() -> SurrealRes<()> {
     use_wrapper.use_ns("test").use_db("test");
     /// 提交语句
     /// commit statement
-    let res_use = db.use_commit(use_wrapper).await;
+    let res_use = db.use_commit(&mut use_wrapper).await;
     dbg!(res_use);
     /// Define Event
     /// DEFINE EVENT my_event ON TABLE my_table WHEN surrealism >= 90 THEN ( UPDATE my_table SET status = 'pass' WHERE id = 1 );
@@ -438,7 +438,7 @@ async fn main() -> SurrealRes<()> {
     let mut define_wrapper = DefineWrapper::new();
     let mut define_event = define_wrapper.define_event("my_event", "my_table", &cri, then_stmt);
     /// commit
-    let res = db.commit(define_event).await;
+    let res = db.commit(&mut define_event).await;
     dbg!(res.unwrap());
     Ok(())
 }

@@ -27,6 +27,9 @@ const FIELD: &str = "FIELD";
 const FUNCTION: &str = "FUNCTION";
 const RETURN: &str = "RETURN";
 const ASSERT: &str = "ASSERT";
+const INDEX: &str = "INDEX";
+const COLUMNS: &str = "COLUMNS";
+const UNIQUE: &str = "UNIQUE";
 const EDDSA: &str = "EDDSA";
 const ES256: &str = "ES256";
 const ES384: &str = "ES384";
@@ -234,8 +237,17 @@ impl DefineWrapper {
     pub fn define_function(&mut self) -> DefineFunction {
         DefineFunction::new()
     }
+    /// 该DEFINE FIELD 语句允许您实例化表中的命名字段，使您能够设置 字段的数据类型、设置默认值、应用断言以保护数据一致性以及设置权限 指定可以在字段上执行什么操作。
+    /// - 必须作为根用户、命名空间用户或数据库用户进行身份验证，才能使用DEFINE FIELD 声明。
+    /// - 必须选择命名空间和数据库 才能使用DEFINE FIELD 声明。
     pub fn define_field(&mut self) -> DefineField {
         DefineField::new()
+    }
+    /// 就像在其他数据库中一样，SurrealDB使用索引来帮助优化查询性能。索引可以包括 表中的一个或多个字段，并且可以强制唯一性约束。如果您不希望索引具有 唯一性约束，则为索引选择的字段应具有高度的基数， 这意味着在索引表记录中的数据之间存在大量的多样性。
+    /// - 必须作为根用户、命名空间用户或数据库用户进行身份验证，才能使用DEFINE INDEX 声明。
+    /// - 必须选择命名空间和数据库 才能使用DEFINE INDEX 声明。
+    pub fn define_index(&mut self) -> DefineIndex {
+        DefineIndex::new()
     }
 }
 
@@ -597,7 +609,7 @@ impl DefineField {
     /// 由于Assert子句的构建十分复杂，调用者更应该自己写，而不该固定模板
     /// 不过需要注意的是使用variable()方法声明变量名在Assert中也需要使用相同的
     pub fn field_assert(&mut self, assert_stmt: &str) -> &mut Self {
-        self.assert = format!("{} {}",ASSERT,assert_stmt);
+        self.assert = format!("{} {}", ASSERT, assert_stmt);
         self
     }
     pub fn default_value<T: Serialize>(&mut self, default_value: T) -> &mut Self {
@@ -735,7 +747,65 @@ pub struct DefineIndex {
     available: SQLRegion,
     index_name: String,
     table_name: String,
+    field_name: String,
+}
 
+impl DefineIndex {
+    pub fn get_index_name(&self) -> &str {
+        &self.index_name
+    }
+    pub fn index(&mut self, index_name: &str) -> &mut Self {
+        self.index_name = String::from(index_name);
+        self
+    }
+    pub fn get_table_name(&self) -> &str {
+        &self.table_name
+    }
+    pub fn table(&mut self, table_name: &str) -> &mut Self {
+        self.table_name = String::from(table_name);
+        self
+    }
+    pub fn get_field_name(&self) -> &str {
+        &self.field_name
+    }
+    pub fn field(&mut self, field_name: &str) -> &mut Self {
+        self.field_name = String::from(field_name);
+        self
+    }
+    pub fn define(&mut self, stmt: &str) {
+        self.available.set_region_single(stmt)
+    }
+}
+
+impl Wrapper for DefineIndex {
+    fn new() -> Self {
+        DefineIndex {
+            keyword: Statements::DEFINE,
+            available: SQLRegion::new(RegionField::Single(String::new()), DEFINE),
+            index_name: "".to_string(),
+            table_name: "".to_string(),
+            field_name: "".to_string(),
+        }
+    }
+
+    fn commit(&mut self) -> &str {
+        let tmp = String::from(self.available.get_region_single());
+        if tmp.is_empty() {
+            let mut stmt = format!("{} {} {} {} {} {} {} {} {}{}", DEFINE, INDEX, self.get_index_name(), ON, TABLE, self.get_table_name(), COLUMNS, self.get_field_name(), UNIQUE, END_SEPARATOR);
+            self.available.set_region_statement(&stmt);
+        } else {
+            self.available.set_region_statement(&tmp);
+        }
+        self.available.get_region_statement()
+    }
+
+    fn get_keyword(&self) -> &Statements {
+        &self.keyword
+    }
+
+    fn get_available(&self) -> &SQLRegion {
+        &self.available
+    }
 }
 
 #[derive(Debug, Clone)]

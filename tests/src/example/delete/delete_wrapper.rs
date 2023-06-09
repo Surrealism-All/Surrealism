@@ -13,7 +13,7 @@ async fn main() -> SurrealRes<()> {
     use_wrapper.use_ns("test").use_db("test");
     /// 提交语句
     /// commit statement
-    let res_use = db.use_commit(use_wrapper).await;
+    let res_use = db.use_commit(&mut use_wrapper).await;
     dbg!(res_use);
     /// 构建条件
     let mut condition = Criteria::new();
@@ -27,7 +27,7 @@ async fn main() -> SurrealRes<()> {
         .return_after();
     /// 提交语句
     /// commit statement
-    let create_res = db.commit(delete_wrapper).await;
+    let create_res = db.commit(&mut delete_wrapper).await;
     dbg!(create_res.unwrap());
     Ok(())
 }

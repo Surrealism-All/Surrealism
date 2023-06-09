@@ -14,7 +14,7 @@ async fn main() -> SurrealRes<()> {
     use_wrapper.use_ns("test").use_db("test");
     /// 提交语句
     /// commit statement
-    let res_use = db.use_commit(use_wrapper).await;
+    let res_use = db.use_commit(&mut use_wrapper).await;
     dbg!(res_use);
     /// 最简单的查询也是最复杂的查询,需要自己手写SQL语句
     /// 用于构建一些SelectWrapper目前做不到的查询
@@ -26,7 +26,7 @@ async fn main() -> SurrealRes<()> {
     select_wrapper.select("SELECT * FROM user;");
     /// 提交语句
     /// commit statement
-    let create_res = db.commit(select_wrapper).await;
+    let create_res = db.commit(&mut select_wrapper).await;
     dbg!(create_res.unwrap());
     Ok(())
 }

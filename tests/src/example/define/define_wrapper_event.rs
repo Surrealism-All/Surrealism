@@ -13,7 +13,7 @@ async fn main() -> SurrealRes<()> {
     use_wrapper.use_ns("test").use_db("test");
     /// 提交语句
     /// commit statement
-    let res_use = db.use_commit(use_wrapper).await;
+    let res_use = db.use_commit(&mut use_wrapper).await;
     dbg!(res_use);
     /// Define Event
     /// DEFINE EVENT my_event ON TABLE my_table WHEN surrealism >= 90 THEN ( UPDATE my_table SET status = 'pass' WHERE id = 1 );
@@ -23,7 +23,7 @@ async fn main() -> SurrealRes<()> {
     let mut define_wrapper = DefineWrapper::new();
     let mut define_event = define_wrapper.define_event("my_event", "my_table", &cri, then_stmt);
     /// commit
-    let res = db.commit(define_event).await;
+    let res = db.commit(&mut define_event).await;
     dbg!(res.unwrap());
     Ok(())
 }

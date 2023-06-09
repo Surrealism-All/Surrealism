@@ -26,7 +26,7 @@ async fn main() -> SurrealRes<()> {
     use_wrapper.use_ns("test").use_db("test");
     /// 提交语句
     /// commit statement
-    let res_use = db.use_commit(use_wrapper).await;
+    let res_use = db.use_commit(&mut use_wrapper).await;
     dbg!(res_use);
     ///准备数据
     let data1 = User {
@@ -49,7 +49,7 @@ async fn main() -> SurrealRes<()> {
         .insert_many(&data_list);
     /// 提交语句
     /// commit statement
-    let create_res = db.commit(insert_wrapper).await;
+    let create_res = db.commit(&mut insert_wrapper).await;
     dbg!(create_res.unwrap());
     Ok(())
 }

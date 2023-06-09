@@ -11,7 +11,7 @@ async fn main() -> SurrealRes<()> {
     info.kv();
     /// 提交语句
     /// commit statement
-    let res = db.commit(info).await;
+    let res = db.commit(&mut info).await;
     dbg!(res.unwrap());
     Ok(())
 }

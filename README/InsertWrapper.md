@@ -52,7 +52,7 @@ async fn main() -> SurrealRes<()> {
     use_wrapper.use_ns("test").use_db("test");
     /// 提交语句
     /// commit statement
-    let res_use = db.use_commit(use_wrapper).await;
+    let res_use = db.use_commit(&mut use_wrapper).await;
     dbg!(res_use);
     /// 构建InsertWrapper
     /// 通过键值对形式构建传统语句
@@ -66,7 +66,7 @@ async fn main() -> SurrealRes<()> {
         .set("age", 56);
     /// 提交语句
     /// commit statement
-    let create_res = db.commit(insert_wrapper).await;
+    let create_res = db.commit(&mut insert_wrapper).await;
     dbg!(create_res);
     Ok(())
 }

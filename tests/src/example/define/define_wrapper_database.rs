@@ -13,7 +13,7 @@ async fn main() -> SurrealRes<()> {
     use_wrapper.use_ns("test").use_db("test");
     /// 提交语句
     /// commit statement
-    let res_use = db.use_commit(use_wrapper).await;
+    let res_use = db.use_commit(&mut use_wrapper).await;
     dbg!(res_use);
     /// 通过define_database()转为DefineDatabase
     /// use define_database() to DefineDatabase
@@ -22,7 +22,7 @@ async fn main() -> SurrealRes<()> {
     let mut define_db = define_wrapper.define_database("test");
     /// 提交事务
     /// commit
-    let res = db.commit(define_db).await;
+    let res = db.commit(&mut define_db).await;
     dbg!(res.unwrap());
     Ok(())
 }

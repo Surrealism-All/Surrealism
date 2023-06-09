@@ -6,7 +6,7 @@
 ///  █▄▄▄▄▄█▀  ██▄▄▄███   ██        ██       ▀██▄▄▄▄█  ██▄▄▄███    ██▄▄▄   ▄▄▄██▄▄▄  █▄▄▄▄▄██  ██ ██ ██
 ///   ▀▀▀▀▀     ▀▀▀▀ ▀▀   ▀▀        ▀▀         ▀▀▀▀▀    ▀▀▀▀ ▀▀     ▀▀▀▀   ▀▀▀▀▀▀▀▀   ▀▀▀▀▀▀   ▀▀ ▀▀ ▀▀
 
-use surrealism::{DefaultInitServiceImpl, SurrealRes, UseWrapper, Wrapper};
+use surrealism::{DefaultInitServiceImpl, SurrealRes, Wrapper, UseWrapper, DefineWrapper};
 
 #[tokio::main]
 async fn main() -> SurrealRes<()> {
@@ -23,5 +23,18 @@ async fn main() -> SurrealRes<()> {
     /// commit statement
     let res_use = db.use_commit(&mut use_wrapper).await;
     dbg!(res_use);
+    /// 通过define_database()转为DefineDatabase
+    /// use define_database() to DefineDatabase
+    /// DEFINE DATABASE test;
+    let mut define_wrapper = DefineWrapper::new();
+    let mut define_index = define_wrapper.define_index();
+    define_index
+        .index("userEmailIndex")
+        .table("user")
+        .field("email");
+    /// 提交事务
+    /// commit
+    let res = db.commit(&mut define_index).await;
+    dbg!(res.unwrap());
     Ok(())
 }

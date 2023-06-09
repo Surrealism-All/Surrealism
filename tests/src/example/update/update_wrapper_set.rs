@@ -13,7 +13,7 @@ async fn main() -> SurrealRes<()> {
     use_wrapper.use_ns("test").use_db("test");
     /// 提交语句
     /// commit statement
-    let res_use = db.use_commit(use_wrapper).await;
+    let res_use = db.use_commit(&mut use_wrapper).await;
     dbg!(res_use);
     /// 准备数据
     /// prepare data
@@ -23,7 +23,7 @@ async fn main() -> SurrealRes<()> {
         .set("name", "Kanye")
         .set("age", 36)
         .return_none();
-    let create_res = db.commit(create_wrapper).await;
+    let create_res = db.commit(&mut create_wrapper).await;
     dbg!(create_res);
     /// 构建UpdateWrapper
     /// UPDATE user:1008 SET age = 6 RETURN AFTER;
@@ -35,7 +35,7 @@ async fn main() -> SurrealRes<()> {
         .return_after();
     /// 提交语句
     /// commit statement
-    let update_res = db.commit(update_wrapper).await;
+    let update_res = db.commit(&mut update_wrapper).await;
     dbg!(update_res.unwrap());
     Ok(())
 }
