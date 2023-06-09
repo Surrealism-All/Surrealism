@@ -21,6 +21,12 @@ pub struct SurrealDB {
 }
 
 impl SurrealDB {
+    pub fn new(core: SurrealCore, config: SurrealConfig) ->Self{
+        SurrealDB{
+            core,
+            config
+        }
+    }
     /// 提交SurrealQL语句
     pub async fn commit(&self, wrapper: &mut impl Wrapper) -> Result<surrealdb::Response, surrealdb::Error> {
         let sql = wrapper.commit();
