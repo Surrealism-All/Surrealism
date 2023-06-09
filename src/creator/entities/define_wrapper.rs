@@ -1,8 +1,19 @@
 //! DEFINE语句可用于指定身份验证访问和行为、全局参数、表配置、表事件、模式定义和索引。
 //! 对于DEFINE语句的构成十分复杂，在后续版本中对照Surrealdb提供的源码需要进行重构
+//!
+//! 重构项：
+//! - Define Table
+//! - Define Function
+//! - Define Param
+//! - Define ...
+//! ```txt
+//! @author:syf20020816@outlook.com
+//! @version:0.0.1
+//! @date:20230609
+//! ```
 
 use serde::Serialize;
-use surrealdb::sql::Geometry;
+use surrealdb::sql::{Geometry, Param};
 use crate::creator::entities::Statements;
 use crate::handle_str;
 use super::{Wrapper, SQLField, SQLRegion, RegionField, TimeUnit, Criteria, COMMON_SEPARATOR, END_SEPARATOR, DEFINE, HOUR, DAY, MINUTE, SECOND, MILLISECOND};
@@ -30,6 +41,7 @@ const ASSERT: &str = "ASSERT";
 const INDEX: &str = "INDEX";
 const COLUMNS: &str = "COLUMNS";
 const UNIQUE: &str = "UNIQUE";
+const PARAM: &str = "PARAM";
 const EDDSA: &str = "EDDSA";
 const ES256: &str = "ES256";
 const ES384: &str = "ES384";
@@ -248,6 +260,12 @@ impl DefineWrapper {
     /// - 必须选择命名空间和数据库 才能使用DEFINE INDEX 声明。
     pub fn define_index(&mut self) -> DefineIndex {
         DefineIndex::new()
+    }
+    /// 该DEFINE PARAM 语句允许您定义可用于每个客户端的全局（数据库范围）参数。
+    /// - 必须作为根用户、命名空间用户或数据库用户进行身份验证，才能使用DEFINE PARAM 声明。
+    /// - 必须选择命名空间和数据库 才能使用DEFINE PARAM 声明。
+    pub fn define_param(&mut self) -> DefineParam {
+        DefineParam::new()
     }
 }
 
@@ -809,4 +827,60 @@ impl Wrapper for DefineIndex {
 }
 
 #[derive(Debug, Clone)]
-pub struct DefineParam {}
+pub struct DefineParam {
+    keyword: Statements,
+    available: SQLRegion,
+    param_name: String,
+    value: String,
+}
+
+impl DefineParam {
+    pub fn get_param(&self) -> &str {
+        &self.param_name
+    }
+    pub fn param(&mut self, param: &str) -> &mut Self {
+        self.param_name = format!("${}", param);
+        self
+    }
+    pub fn get_value(&self) -> &str {
+        &self.value
+    }
+    pub fn value<T: Serialize>(&mut self, value: T) -> &mut Self {
+        self.value = handle_str(serde_json::to_string(&value).unwrap().as_str());
+        self
+    }
+    pub fn define(&mut self, stmt: &str) {
+        self.available.set_region_single(stmt)
+    }
+}
+
+
+impl Wrapper for DefineParam {
+    fn new() -> Self {
+        DefineParam {
+            keyword: Statements::DEFINE,
+            available: SQLRegion::new(RegionField::Single(String::new()), DEFINE),
+            param_name: "".to_string(),
+            value: "".to_string(),
+        }
+    }
+
+    fn commit(&mut self) -> &str {
+        let tmp = String::from(self.available.get_region_single());
+        if tmp.is_empty() {
+            let mut stmt = format!("{} {} {} {} {}{}", DEFINE, PARAM, self.get_param(), VALUE, self.get_value(), END_SEPARATOR);
+            self.available.set_region_statement(&stmt);
+        } else {
+            self.available.set_region_statement(&tmp);
+        }
+        self.available.get_region_statement()
+    }
+
+    fn get_keyword(&self) -> &Statements {
+        &self.keyword
+    }
+
+    fn get_available(&self) -> &SQLRegion {
+        &self.available
+    }
+}

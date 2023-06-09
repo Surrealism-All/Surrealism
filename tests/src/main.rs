@@ -6,7 +6,7 @@
 ///  █▄▄▄▄▄█▀  ██▄▄▄███   ██        ██       ▀██▄▄▄▄█  ██▄▄▄███    ██▄▄▄   ▄▄▄██▄▄▄  █▄▄▄▄▄██  ██ ██ ██
 ///   ▀▀▀▀▀     ▀▀▀▀ ▀▀   ▀▀        ▀▀         ▀▀▀▀▀    ▀▀▀▀ ▀▀     ▀▀▀▀   ▀▀▀▀▀▀▀▀   ▀▀▀▀▀▀   ▀▀ ▀▀ ▀▀
 
-use surrealism::{DefaultInitServiceImpl, SurrealRes, Wrapper, UseWrapper, DefineWrapper};
+use surrealism::{DefaultInitServiceImpl, SurrealRes, Wrapper, UseWrapper, DefineWrapper, parse_response};
 
 #[tokio::main]
 async fn main() -> SurrealRes<()> {
@@ -27,14 +27,17 @@ async fn main() -> SurrealRes<()> {
     /// use define_database() to DefineDatabase
     /// DEFINE DATABASE test;
     let mut define_wrapper = DefineWrapper::new();
-    let mut define_index = define_wrapper.define_index();
-    define_index
-        .index("userEmailIndex")
-        .table("user")
-        .field("email");
+    let mut define_param = define_wrapper.define_param();
+    define_param
+        .param("endpointBase")
+        .value("surrealism");
     /// 提交事务
     /// commit
-    let res = db.commit(&mut define_index).await;
+    let res = db.commit(&mut define_param).await;
     dbg!(res.unwrap());
+    let mut param_res = db.return_param("$endpointBase").await?;
+    /// 将返回的参数解析为Rust可用类型
+    let response_parse: String = parse_response(param_res);
+    dbg!(&response_parse);
     Ok(())
 }

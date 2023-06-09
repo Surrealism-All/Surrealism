@@ -7,7 +7,6 @@ use crate::config::SurrealConfig;
 use crate::handle_str;
 
 
-///
 #[derive(Debug, Deserialize, Serialize)]
 pub struct SurrealRecord {
     #[allow(dead_code)]
@@ -21,10 +20,10 @@ pub struct SurrealDB {
 }
 
 impl SurrealDB {
-    pub fn new(core: SurrealCore, config: SurrealConfig) ->Self{
-        SurrealDB{
+    pub fn new(core: SurrealCore, config: SurrealConfig) -> Self {
+        SurrealDB {
             core,
-            config
+            config,
         }
     }
     /// 提交SurrealQL语句
@@ -90,6 +89,12 @@ impl SurrealDB {
         let return_stmt = format!("{} {}({})", RETURN, func.get_name(), params_str);
 
         self.core.cn.query(&return_stmt).await
+    }
+    /// 返回某个Param，前提是SurrealDB中有，你需要使用Define Param语句先进行定义
+    /// 具体怎么返回取决于传入的语句
+    pub async fn return_param(&self, return_stmt: &str) -> Result<surrealdb::Response, surrealdb::Error> {
+        let stmt = format!("RETURN {};", return_stmt);
+        self.core.cn.query(&stmt).await
     }
 }
 
