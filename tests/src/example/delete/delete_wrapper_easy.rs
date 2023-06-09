@@ -1,10 +1,10 @@
-use surrealism::{InitServiceImpl, SurrealRes, Wrapper, DeleteWrapper, UseWrapper};
+use surrealism::{DefaultInitServiceImpl, SurrealRes, Wrapper, DeleteWrapper, UseWrapper};
 
 #[tokio::main]
 async fn main() -> SurrealRes<()> {
     ///初始化连接
     ///init connection
-    let db = InitServiceImpl::new().init().unwrap();
+    let db = DefaultInitServiceImpl::new().init().unwrap();
     ///创建UseWrapper
     /// new UseWrapper
     let mut use_wrapper = UseWrapper::new();

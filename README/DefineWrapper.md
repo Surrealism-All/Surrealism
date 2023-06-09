@@ -52,13 +52,13 @@ surreal start --user root --pass surrealism --bind 127.0.0.1:10086
 ### main.rs
 
 ```rust
-use surrealism::{InitServiceImpl, SurrealRes, Wrapper, UseWrapper, DefineWrapper};
+use surrealism::{DefaultInitServiceImpl, SurrealRes, Wrapper, UseWrapper, DefineWrapper};
 
 #[tokio::main]
 async fn main() -> SurrealRes<()> {
     ///初始化连接
     ///init connection
-    let db = InitServiceImpl::new().init().unwrap();
+    let db = DefaultInitServiceImpl::new().init().unwrap();
     ///创建UseWrapper
     /// new UseWrapper
     let mut use_wrapper = UseWrapper::new();
@@ -109,13 +109,13 @@ async fn main() -> SurrealRes<()> {
 ### main.rs
 
 ```rust
-use surrealism::{InitServiceImpl, SurrealRes, Wrapper, UseWrapper, DefineWrapper};
+use surrealism::{DefaultInitServiceImpl, SurrealRes, Wrapper, UseWrapper, DefineWrapper};
 
 #[tokio::main]
 async fn main() -> SurrealRes<()> {
     ///初始化连接
     ///init connection
-    let db = InitServiceImpl::new().init().unwrap();
+    let db = DefaultInitServiceImpl::new().init().unwrap();
     ///创建UseWrapper
     /// new UseWrapper
     let mut use_wrapper = UseWrapper::new();
@@ -175,13 +175,13 @@ Use the `DEFINE LOGIN` statement to create user accounts on SurrealDB.
 ### Define login namespace
 
 ```rust
-use surrealism::{InitServiceImpl, SurrealRes, Wrapper, UseWrapper, DefineWrapper};
+use surrealism::{DefaultInitServiceImpl, SurrealRes, Wrapper, UseWrapper, DefineWrapper};
 
 #[tokio::main]
 async fn main() -> SurrealRes<()> {
     ///初始化连接
     ///init connection
-    let db = InitServiceImpl::new().init().unwrap();
+    let db = DefaultInitServiceImpl::new().init().unwrap();
     ///创建UseWrapper
     /// new UseWrapper
     let mut use_wrapper = UseWrapper::new();
@@ -205,13 +205,13 @@ async fn main() -> SurrealRes<()> {
 ### Define login database
 
 ```rust
-use surrealism::{InitServiceImpl, SurrealRes, Wrapper, UseWrapper, DefineWrapper};
+use surrealism::{DefaultInitServiceImpl, SurrealRes, Wrapper, UseWrapper, DefineWrapper};
 
 #[tokio::main]
 async fn main() -> SurrealRes<()> {
     ///初始化连接
     ///init connection
-    let db = InitServiceImpl::new().init().unwrap();
+    let db = DefaultInitServiceImpl::new().init().unwrap();
     ///创建UseWrapper
     /// new UseWrapper
     let mut use_wrapper = UseWrapper::new();
@@ -237,13 +237,13 @@ async fn main() -> SurrealRes<()> {
 ### Define token namespace
 
 ```rust
-use surrealism::{InitServiceImpl, SurrealRes, Wrapper, UseWrapper, DefineWrapper, TokenType};
+use surrealism::{DefaultInitServiceImpl, SurrealRes, Wrapper, UseWrapper, DefineWrapper, TokenType};
 
 #[tokio::main]
 async fn main() -> SurrealRes<()> {
     ///初始化连接
     ///init connection
-    let db = InitServiceImpl::new().init().unwrap();
+    let db = DefaultInitServiceImpl::new().init().unwrap();
     ///创建UseWrapper
     /// new UseWrapper
     let mut use_wrapper = UseWrapper::new();
@@ -268,13 +268,13 @@ async fn main() -> SurrealRes<()> {
 ### Define token database
 
 ```rust
-use surrealism::{InitServiceImpl, SurrealRes, Wrapper, UseWrapper, DefineWrapper, TokenType};
+use surrealism::{DefaultInitServiceImpl, SurrealRes, Wrapper, UseWrapper, DefineWrapper, TokenType};
 
 #[tokio::main]
 async fn main() -> SurrealRes<()> {
     ///初始化连接
     ///init connection
-    let db = InitServiceImpl::new().init().unwrap();
+    let db = DefaultInitServiceImpl::new().init().unwrap();
     ///创建UseWrapper
     /// new UseWrapper
     let mut use_wrapper = UseWrapper::new();
@@ -299,13 +299,13 @@ async fn main() -> SurrealRes<()> {
 ### Define token scope
 
 ```rust
-use surrealism::{InitServiceImpl, SurrealRes, Wrapper, UseWrapper, DefineWrapper, TokenType};
+use surrealism::{DefaultInitServiceImpl, SurrealRes, Wrapper, UseWrapper, DefineWrapper, TokenType};
 
 #[tokio::main]
 async fn main() -> SurrealRes<()> {
     ///初始化连接
     ///init connection
-    let db = InitServiceImpl::new().init().unwrap();
+    let db = DefaultInitServiceImpl::new().init().unwrap();
     ///创建UseWrapper
     /// new UseWrapper
     let mut use_wrapper = UseWrapper::new();
@@ -343,13 +343,13 @@ async fn main() -> SurrealRes<()> {
 ### Scope bind
 
 ```rust
-use surrealism::{InitServiceImpl, SurrealRes, Wrapper, UseWrapper, DefineWrapper, TokenType, TimeUnit};
+use surrealism::{DefaultInitServiceImpl, SurrealRes, Wrapper, UseWrapper, DefineWrapper, TokenType, TimeUnit};
 
 #[tokio::main]
 async fn main() -> SurrealRes<()> {
     ///初始化连接
     ///init connection
-    let db = InitServiceImpl::new().init().unwrap();
+    let db = DefaultInitServiceImpl::new().init().unwrap();
     ///创建UseWrapper
     /// new UseWrapper
     let mut use_wrapper = UseWrapper::new();
@@ -374,13 +374,13 @@ async fn main() -> SurrealRes<()> {
 ### Scope
 
 ```rust
-use surrealism::{InitServiceImpl, SurrealRes, Wrapper, UseWrapper, DefineWrapper, TokenType, TimeUnit};
+use surrealism::{DefaultInitServiceImpl, SurrealRes, Wrapper, UseWrapper, DefineWrapper, TokenType, TimeUnit};
 
 #[tokio::main]
 async fn main() -> SurrealRes<()> {
     ///初始化连接
     ///init connection
-    let db = InitServiceImpl::new().init().unwrap();
+    let db = DefaultInitServiceImpl::new().init().unwrap();
     ///创建UseWrapper
     /// new UseWrapper
     let mut use_wrapper = UseWrapper::new();
@@ -413,13 +413,13 @@ async fn main() -> SurrealRes<()> {
 - `THEN @expression`：该属性表示事件触发后执行的操作（Action），可以指定一个或多个操作，包括修改数据、添加数据、删除数据等。例如，`THEN @expression` 属性可以定义为 `UPDATE my_table SET status = 'pass' WHERE id = 1`，表示当事件被触发时，将更新名为 `my_table` 的数据表中 id 为 1 的数据，将其状态设置为 'pass'。
 
 ```rust
-use surrealism::{InitServiceImpl, SurrealRes, Wrapper, UseWrapper, DefineWrapper, Criteria};
+use surrealism::{DefaultInitServiceImpl, SurrealRes, Wrapper, UseWrapper, DefineWrapper, Criteria};
 
 #[tokio::main]
 async fn main() -> SurrealRes<()> {
     ///初始化连接
     ///init connection
-    let db = InitServiceImpl::new().init().unwrap();
+    let db = DefaultInitServiceImpl::new().init().unwrap();
     ///创建UseWrapper
     /// new UseWrapper
     let mut use_wrapper = UseWrapper::new();
@@ -449,13 +449,13 @@ async fn main() -> SurrealRes<()> {
 ### main.rs
 
 ```rust
-use surrealism::{InitServiceImpl, SurrealRes, Wrapper, UseWrapper, DefineWrapper, FieldType};
+use surrealism::{DefaultInitServiceImpl, SurrealRes, Wrapper, UseWrapper, DefineWrapper, FieldType};
 
 #[tokio::main]
 async fn main() -> SurrealRes<()> {
     ///初始化连接
     ///init connection
-    let db = InitServiceImpl::new().init().unwrap();
+    let db = DefaultInitServiceImpl::new().init().unwrap();
     ///创建UseWrapper
     /// new UseWrapper
     let mut use_wrapper = UseWrapper::new();
@@ -507,13 +507,13 @@ async fn main() -> SurrealRes<()> {
 ## Define field
 
 ```rust
-use surrealism::{InitServiceImpl, SurrealRes, Wrapper, UseWrapper, DefineWrapper, FieldType};
+use surrealism::{DefaultInitServiceImpl, SurrealRes, Wrapper, UseWrapper, DefineWrapper, FieldType};
 
 #[tokio::main]
 async fn main() -> SurrealRes<()> {
     ///初始化连接
     ///init connection
-    let db = InitServiceImpl::new().init().unwrap();
+    let db = DefaultInitServiceImpl::new().init().unwrap();
     ///创建UseWrapper
     /// new UseWrapper
     let mut use_wrapper = UseWrapper::new();

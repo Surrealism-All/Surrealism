@@ -67,6 +67,9 @@ pub const ELSE: &str = "ELSE";
 pub const END: &str = "END";
 pub const DEFINE: &str = "DEFINE";
 
+///Surreal返回值
+pub type SurrealRes<T> =  surrealdb::Result<T>;
+
 ///核心设计!
 #[derive(Debug, Clone)]
 pub struct SQLRegion {

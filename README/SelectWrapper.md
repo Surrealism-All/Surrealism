@@ -40,13 +40,13 @@ use surrealism::{Wrapper, SelectWrapper};
 ### main.rs
 
 ```rust
-use surrealism::{InitServiceImpl, SurrealRes, UseWrapper, Wrapper, SelectWrapper};
+use surrealism::{DefaultInitServiceImpl, SurrealRes, UseWrapper, Wrapper, SelectWrapper};
 
 #[tokio::main]
 async fn main() -> SurrealRes<()> {
     ///初始化连接
     ///init connection
-    let db = InitServiceImpl::new().init().unwrap();
+    let db = DefaultInitServiceImpl::new().init().unwrap();
     ///创建UseWrapper
     /// new UseWrapper
     let mut use_wrapper = UseWrapper::new();
@@ -169,14 +169,14 @@ async fn main() -> SurrealRes<()> {
 ### main.rs
 
 ```rust
-use surrealism::{InitServiceImpl, SurrealRes, UseWrapper, Wrapper, SelectWrapper, Field, Criteria};
+use surrealism::{DefaultInitServiceImpl, SurrealRes, UseWrapper, Wrapper, SelectWrapper, Field, Criteria};
 
 
 #[tokio::main]
 async fn main() -> SurrealRes<()> {
     ///初始化连接
     ///init connection
-    let db = InitServiceImpl::new().init().unwrap();
+    let db = DefaultInitServiceImpl::new().init().unwrap();
     ///创建UseWrapper
     /// new UseWrapper
     let mut use_wrapper = UseWrapper::new();

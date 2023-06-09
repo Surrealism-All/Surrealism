@@ -32,13 +32,13 @@ use surrealism::{InfoWrapper, Wrapper};
 ## main.rs
 
 ```rust
-use surrealism::{InitServiceImpl, SurrealRes, Wrapper, InfoWrapper};
+use surrealism::{DefaultInitServiceImpl, SurrealRes, Wrapper, InfoWrapper};
 
 #[tokio::main]
 async fn main() -> SurrealRes<()> {
     ///初始化连接
     ///init connection
-    let db = InitServiceImpl::new().init().unwrap();
+    let db = DefaultInitServiceImpl::new().init().unwrap();
     /// 构建InfoWrapper
     /// build InfoWrapper
     let mut info = InfoWrapper::new();
@@ -187,13 +187,13 @@ info.next()
 ### main.rs
 
 ```rust
-use surrealism::{InitServiceImpl, SurrealRes, Wrapper, InfoWrapper,UseWrapper};
+use surrealism::{DefaultInitServiceImpl, SurrealRes, Wrapper, InfoWrapper,UseWrapper};
 
 #[tokio::main]
 async fn main() -> SurrealRes<()> {
     ///初始化连接
     ///init connection
-    let db = InitServiceImpl::new().init().unwrap();
+    let db = DefaultInitServiceImpl::new().init().unwrap();
     ///创建UseWrapper
     /// new UseWrapper
     let mut use_wrapper = UseWrapper::new();

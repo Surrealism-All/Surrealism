@@ -54,13 +54,13 @@ use serde::{Serialize, Deserialize};
 ### main.rs
 
 ```rust
-use surrealism::{InitServiceImpl, SurrealRes, UseWrapper, Wrapper, CreateWrapper, TableId};
+use surrealism::{DefaultInitServiceImpl, SurrealRes, UseWrapper, Wrapper, CreateWrapper, TableId};
 
 #[tokio::main]
 async fn main() -> SurrealRes<()> {
     ///初始化连接
     ///init connection
-    let db = InitServiceImpl::new().init().unwrap();
+    let db = DefaultInitServiceImpl::new().init().unwrap();
     ///创建UseWrapper
     /// new UseWrapper
     let mut use_wrapper = UseWrapper::new();
@@ -112,7 +112,7 @@ async fn main() -> SurrealRes<()> {
 ### main.rs
 
 ```rust
-use surrealism::{InitServiceImpl, SurrealRes, UseWrapper, Wrapper, CreateWrapper, TableId};
+use surrealism::{DefaultInitServiceImpl, SurrealRes, UseWrapper, Wrapper, CreateWrapper, TableId};
 use serde::{Serialize, Deserialize};
 
 ///构建结构体,需要使用serde提供的宏:Serialize, Deserialize
@@ -128,7 +128,7 @@ struct User {
 async fn main() -> SurrealRes<()> {
     ///初始化连接
     ///init connection
-    let db = InitServiceImpl::new().init().unwrap();
+    let db = DefaultInitServiceImpl::new().init().unwrap();
     ///创建UseWrapper
     /// new UseWrapper
     let mut use_wrapper = UseWrapper::new();

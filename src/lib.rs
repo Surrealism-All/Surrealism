@@ -1,6 +1,6 @@
 mod config;
 mod creator;
-pub mod utils;
+mod utils;
 mod sql;
 
 pub use config::DefaultInitServiceImpl;
