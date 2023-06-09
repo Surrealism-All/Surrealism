@@ -6,7 +6,7 @@
 ///  █▄▄▄▄▄█▀  ██▄▄▄███   ██        ██       ▀██▄▄▄▄█  ██▄▄▄███    ██▄▄▄   ▄▄▄██▄▄▄  █▄▄▄▄▄██  ██ ██ ██
 ///   ▀▀▀▀▀     ▀▀▀▀ ▀▀   ▀▀        ▀▀         ▀▀▀▀▀    ▀▀▀▀ ▀▀     ▀▀▀▀   ▀▀▀▀▀▀▀▀   ▀▀▀▀▀▀   ▀▀ ▀▀ ▀▀
 
-use surrealism::{DefaultInitServiceImpl, SurrealRes, Wrapper, UseWrapper, DefineWrapper, parse_response};
+use surrealism::{DefaultInitServiceImpl, SurrealRes, Wrapper, UseWrapper, DefineWrapper, parse_response, Schema};
 
 #[tokio::main]
 async fn main() -> SurrealRes<()> {
@@ -23,21 +23,17 @@ async fn main() -> SurrealRes<()> {
     /// commit statement
     let res_use = db.use_commit(&mut use_wrapper).await;
     dbg!(res_use);
-    /// 通过define_database()转为DefineDatabase
-    /// use define_database() to DefineDatabase
-    /// DEFINE DATABASE test;
+    ///DEFINE TABLE user DROP SCHEMALESS AS SELECT count() AS total,time::month(recorded_at) AS month,math::mean(temperature) AS average_temp FROM reading GROUP BY city;
     let mut define_wrapper = DefineWrapper::new();
-    let mut define_param = define_wrapper.define_param();
-    define_param
-        .param("endpointBase")
-        .value("surrealism");
+    let mut define_table = define_wrapper.define_table();
+    define_table
+        .table("user")
+        .drop()
+        .schema(Schema::Less)
+        .as_select("SELECT count() AS total,time::month(recorded_at) AS month,math::mean(temperature) AS average_temp FROM reading GROUP BY city");
     /// 提交事务
     /// commit
-    let res = db.commit(&mut define_param).await;
+    let res = db.commit(&mut define_table).await;
     dbg!(res.unwrap());
-    let mut param_res = db.return_param("$endpointBase").await?;
-    /// 将返回的参数解析为Rust可用类型
-    let response_parse: String = parse_response(param_res);
-    dbg!(&response_parse);
     Ok(())
 }

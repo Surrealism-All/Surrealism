@@ -75,6 +75,10 @@ const GEO_MULTIPOINT: &str = "multipoint";
 const GEO_MULTILINE: &str = "multiline";
 const GEO_MULTIPOLYGON: &str = "multipolygon";
 const GEO_COLLECTION: &str = "collection";
+const SCHEMA_FULL: &str = "SCHEMAFULL";
+const SCHEMA_LESS: &str = "SCHEMALESS";
+const PERMISSION: &str = "PERMISSION FOR";
+const AS: &str = "AS";
 
 
 #[derive(Debug, Clone)]
@@ -266,6 +270,12 @@ impl DefineWrapper {
     /// - 必须选择命名空间和数据库 才能使用DEFINE PARAM 声明。
     pub fn define_param(&mut self) -> DefineParam {
         DefineParam::new()
+    }
+    /// 该DEFINE TABLE 语句允许您按名称声明表，从而可以应用严格的 控件添加到表的架构中，方法是将SCHEMAFULL，创建外部表视图，并设置权限 指定可以在字段上执行什么操作。
+    /// - 必须作为根用户、命名空间用户或数据库用户进行身份验证，才能使用DEFINE TABLE 声明。
+    /// - 必须选择命名空间和数据库 才能使用DEFINE TABLE 声明。
+    pub fn define_table(&mut self) -> DefineTable {
+        DefineTable::new()
     }
 }
 
@@ -460,8 +470,140 @@ impl Wrapper for DefineScope {
     }
 }
 
+/// Define Table
+/// - @name：要定义的表的名称
+/// - DROP：可选参数，表示如果存在同名的表，则删除现有的表。
+/// - SCHEMAFULL 或 SCHEMALESS：可选参数，指定表的类型。SCHEMAFULL 表示表有严格的结构，每个字段都具有确定的数据类型和长度；SCHEMALESS 表示表是半结构化的，数据可以包含不同的数据类型和长度。
+/// - AS SELECT @projections FROM @tables [WHERE @condition] [GROUP [BY] @groups]：可选参数，表示这个表的内容是从一个查询语句中获取的。@projections 指定了要查询的字段列表，@tables 指定了要查询的表或视图，@condition 指定了查询条件，@groups 指定了分组参数。
+/// - PERMISSIONS: 可选参数，用于定义访问表的权限。
+/// [ NONE | FULL | FOR select @expression | FOR create @expression | FOR update @expression | FOR delete @expression ]: 可选参数。
+/// 当指定了 PERMISSIONS 参数时，可以使用该参数指定具体的权限类型，包括 "NONE"（没有权限）、"FULL"（完全权限）、"FOR SELECT @expression"（查询权限）、"FOR CREATE @expression"（创建权限）、"FOR UPDATE @expression"（更新权限）和 "FOR DELETE @expression"（删除权限）。
+///
+/// 需要注意的是，以上参数有些是可选的，有些是必选的。例如，@name 参数是必选的，而 DROP 和 SCHEMAFULL/SCHEMALESS 是可选的。在实际使用中，你可以根据具体情况按照语法规则来组合和定义表结构。
 #[derive(Debug, Clone)]
-pub struct DefineTable {}
+pub struct DefineTable {
+    keyword: Statements,
+    available: SQLRegion,
+    table_name: String,
+    drop: bool,
+    schema: Schema,
+    as_select: String,
+    permission: String,
+}
+
+#[derive(Debug, Clone)]
+pub enum Schema {
+    Full,
+    Less,
+    None,
+}
+
+impl Schema {
+    fn match_type(schema: Schema) -> String {
+        let mut res = "";
+        match schema {
+            Schema::Full => { res = SCHEMA_FULL }
+            Schema::Less => { res = SCHEMA_LESS }
+            Schema::None => { res = "NONE" }
+        }
+        res.to_string()
+    }
+}
+
+
+impl DefineTable {
+    pub fn get_table_name(&self) -> &str {
+        &self.table_name
+    }
+    pub fn table(&mut self, table: &str) -> &mut Self {
+        self.table_name = String::from(table);
+        self
+    }
+    pub fn get_drop(&self) -> &bool {
+        &self.drop
+    }
+    pub fn drop(&mut self) -> &mut Self {
+        self.drop = true;
+        self
+    }
+    pub fn get_schema(&self) -> &Schema {
+        &self.schema
+    }
+    pub fn schema(&mut self, schema: Schema) -> &mut Self {
+        self.schema = schema;
+        self
+    }
+    pub fn get_as_select(&self) -> &str {
+        &self.as_select
+    }
+    pub fn as_select(&mut self, as_select: &str) -> &mut Self {
+        self.as_select = format!("{} {}", AS, as_select);
+        self
+    }
+    pub fn get_permission(&self) -> &str {
+        &self.permission
+    }
+    pub fn permission(&mut self, permission: &str) -> &mut Self {
+        self.permission = format!("{} {}", PERMISSION, permission);
+        self
+    }
+    pub fn define(&mut self, stmt: &str) {
+        self.available.set_region_single(stmt)
+    }
+}
+
+
+impl Wrapper for DefineTable {
+    fn new() -> Self {
+        DefineTable {
+            keyword: Statements::DEFINE,
+            available: SQLRegion::new(RegionField::Single(String::new()), DEFINE),
+            table_name: "".to_string(),
+            drop: false,
+            schema: Schema::Less,
+            as_select: "".to_string(),
+            permission: "".to_string(),
+        }
+    }
+
+    fn commit(&mut self) -> &str {
+        let tmp = String::from(self.available.get_region_single());
+        if tmp.is_empty() {
+            let mut stmt = format!("{} {} {}", DEFINE, TABLE, self.get_table_name());
+            if *self.get_drop() {
+                stmt.push_str(COMMON_SEPARATOR);
+                stmt.push_str("DROP")
+            }
+            if let schema = &Schema::match_type(self.get_schema().clone()) {
+                if !schema.eq("NONE") {
+                    stmt.push_str(COMMON_SEPARATOR);
+                    stmt.push_str(schema);
+                }
+            }
+            if !self.get_as_select().is_empty() {
+                stmt.push_str(COMMON_SEPARATOR);
+                stmt.push_str(self.get_as_select());
+            }
+            if !self.get_permission().is_empty() {
+                stmt.push_str(COMMON_SEPARATOR);
+                stmt.push_str(self.get_permission());
+            }
+            stmt.push_str(END_SEPARATOR);
+            self.available.set_region_statement(&stmt);
+        } else {
+            self.available.set_region_statement(&tmp);
+        }
+        self.available.get_region_statement()
+    }
+
+    fn get_keyword(&self) -> &Statements {
+        &self.keyword
+    }
+
+    fn get_available(&self) -> &SQLRegion {
+        &self.available
+    }
+}
 
 ///DEFINE EVENT @name ON [ TABLE ] @table WHEN @expression THEN @expression
 #[derive(Debug, Clone)]
@@ -560,7 +702,7 @@ impl Wrapper for DefineFunction {
     }
 
     fn commit(&mut self) -> &str {
-        let tmp = self.available.clone();
+        // let tmp = self.available.clone();
         let mut param_str = String::new();
         let params = self.get_params();
         for i in 0..params.len() {

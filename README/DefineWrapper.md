@@ -543,7 +543,128 @@ async fn main() -> SurrealRes<()> {
 
 ## Define index
 
+```rust
+use surrealism::{DefaultInitServiceImpl, SurrealRes, Wrapper, UseWrapper, DefineWrapper};
+
+#[tokio::main]
+async fn main() -> SurrealRes<()> {
+    ///初始化连接
+    ///init connection
+    let db = DefaultInitServiceImpl::new().init().unwrap();
+    ///创建UseWrapper
+    /// new UseWrapper
+    let mut use_wrapper = UseWrapper::new();
+    /// 设置命名空间和数据库
+    /// Set namespace and database
+    use_wrapper.use_ns("test").use_db("test");
+    /// 提交语句
+    /// commit statement
+    let res_use = db.use_commit(&mut use_wrapper).await;
+    dbg!(res_use);
+    /// DEFINE INDEX userEmailIndex ON TABLE user COLUMNS email UNIQUE;
+    let mut define_wrapper = DefineWrapper::new();
+    let mut define_index = define_wrapper.define_index();
+    define_index
+        .index("userEmailIndex")
+        .table("user")
+        .field("email");
+    /// 提交事务
+    /// commit
+    let res = db.commit(&mut define_index).await;
+    dbg!(res.unwrap());
+    Ok(())
+}
 ```
 
+## Define param
+
+该`DEFINE PARAM` 语句允许您定义可用于每个客户端的全局（数据库范围）参数。 
+
+- 必须作为根用户、命名空间用户或数据库用户进行身份验证，才能使用`DEFINE PARAM` 声明。
+- [必须选择命名空间和数据库](https://surrealdb.com/docs/surrealql/statements/use) 才能使用`DEFINE PARAM` 声明。
+
+```rust
+use surrealism::{DefaultInitServiceImpl, SurrealRes, Wrapper, UseWrapper, DefineWrapper, parse_response};
+
+#[tokio::main]
+async fn main() -> SurrealRes<()> {
+    ///初始化连接
+    ///init connection
+    let db = DefaultInitServiceImpl::new().init().unwrap();
+    ///创建UseWrapper
+    /// new UseWrapper
+    let mut use_wrapper = UseWrapper::new();
+    /// 设置命名空间和数据库
+    /// Set namespace and database
+    use_wrapper.use_ns("test").use_db("test");
+    /// 提交语句
+    /// commit statement
+    let res_use = db.use_commit(&mut use_wrapper).await;
+    dbg!(res_use);
+    /// DEFINE PARAM $endpointBase VALUE "surrealism";
+    let mut define_wrapper = DefineWrapper::new();
+    let mut define_param = define_wrapper.define_param();
+    define_param
+        .param("endpointBase")
+        .value("surrealism");
+    /// 提交事务
+    /// commit
+    let res = db.commit(&mut define_param).await;
+    dbg!(res.unwrap());
+    let mut param_res = db.return_param("$endpointBase").await?;
+    /// 将返回的参数解析为Rust可用类型
+    /// Resolve the returned parameters to Rust available types
+    let response_parse: String = parse_response(param_res);
+    dbg!(&response_parse);
+    Ok(())
+}
+```
+
+## Define Table
+
+
+ - @name：要定义的表的名称
+ - DROP：可选参数，表示如果存在同名的表，则删除现有的表。
+ - SCHEMAFULL 或 SCHEMALESS：可选参数，指定表的类型。SCHEMAFULL 表示表有严格的结构，每个字段都具有确定的数据类型和长度；SCHEMALESS 表示表是半结构化的，数据可以包含不同的数据类型和长度。
+ - AS SELECT @projections FROM @tables [WHERE @condition] [GROUP [BY] @groups]：可选参数，表示这个表的内容是从一个查询语句中获取的。@projections 指定了要查询的字段列表，@tables 指定了要查询的表或视图，@condition 指定了查询条件，@groups 指定了分组参数。
+ - PERMISSIONS: 可选参数，用于定义访问表的权限。
+`[ NONE | FULL | FOR select @expression | FOR create @expression | FOR update @expression | FOR delete @expression ]`: 可选参数。
+ 当指定了 PERMISSIONS 参数时，可以使用该参数指定具体的权限类型，包括 "NONE"（没有权限）、"FULL"（完全权限）、"FOR SELECT @expression"（查询权限）、"FOR CREATE @expression"（创建权限）、"FOR UPDATE @expression"（更新权限）和 "FOR DELETE @expression"（删除权限）。
+
+需要注意的是，以上参数有些是可选的，有些是必选的。例如，@name 参数是必选的，而 DROP 和 SCHEMAFULL/SCHEMALESS 是可选的。在实际使用中，你可以根据具体情况按照语法规则来组合和定义表结构。
+
+
+```rust
+use surrealism::{DefaultInitServiceImpl, SurrealRes, Wrapper, UseWrapper, DefineWrapper, parse_response, Schema};
+
+#[tokio::main]
+async fn main() -> SurrealRes<()> {
+    ///初始化连接
+    ///init connection
+    let db = DefaultInitServiceImpl::new().init().unwrap();
+    ///创建UseWrapper
+    /// new UseWrapper
+    let mut use_wrapper = UseWrapper::new();
+    /// 设置命名空间和数据库
+    /// Set namespace and database
+    use_wrapper.use_ns("test").use_db("test");
+    /// 提交语句
+    /// commit statement
+    let res_use = db.use_commit(&mut use_wrapper).await;
+    dbg!(res_use);
+    ///DEFINE TABLE user DROP SCHEMALESS AS SELECT count() AS total,time::month(recorded_at) AS month,math::mean(temperature) AS average_temp FROM reading GROUP BY city;
+    let mut define_wrapper = DefineWrapper::new();
+    let mut define_table = define_wrapper.define_table();
+    define_table
+        .table("user")
+        .drop()
+        .schema(Schema::Less)
+        .as_select("SELECT count() AS total,time::month(recorded_at) AS month,math::mean(temperature) AS average_temp FROM reading GROUP BY city");
+    /// 提交事务
+    /// commit
+    let res = db.commit(&mut define_table).await;
+    dbg!(res.unwrap());
+    Ok(())
+}
 ```
 

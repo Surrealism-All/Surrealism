@@ -15,9 +15,7 @@ async fn main() -> SurrealRes<()> {
     /// commit statement
     let res_use = db.use_commit(&mut use_wrapper).await;
     dbg!(res_use);
-    /// 通过define_database()转为DefineDatabase
-    /// use define_database() to DefineDatabase
-    /// DEFINE DATABASE test;
+    /// DEFINE PARAM $endpointBase VALUE "surrealism";
     let mut define_wrapper = DefineWrapper::new();
     let mut define_param = define_wrapper.define_param();
     define_param
@@ -29,6 +27,7 @@ async fn main() -> SurrealRes<()> {
     dbg!(res.unwrap());
     let mut param_res = db.return_param("$endpointBase").await?;
     /// 将返回的参数解析为Rust可用类型
+    /// Resolve the returned parameters to Rust available types
     let response_parse: String = parse_response(param_res);
     dbg!(&response_parse);
     Ok(())
