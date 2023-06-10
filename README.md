@@ -28,8 +28,8 @@ Surrealism relies on Surrealdb's official Rust standard library:surrealdb,The pu
 
 ```toml
 [dependencies]
-surrealism = ""
-
+surrealism = "0.1.0"
+tokio = { version = "1.28.0", features = ["macros", "rt-multi-thread"] }
 ```
 
 ### add configuration
