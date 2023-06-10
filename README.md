@@ -1,3 +1,5 @@
+<img src="./README/imgs/logo.svg"><img src="./README/imgs/license.svg">
+
 # Surrealism
 
 - author：syf20020816@outlook.com
@@ -7,6 +9,10 @@
 - version：0.0.1
 - des-tag：test
 - email：syf20020816@outlook.com
+
+## LICEMSE
+
+MIT
 
 ## Surrealism Introduction
 
