@@ -1,6 +1,6 @@
 use serde::Serialize;
 use crate::handle_str;
-use super::{EQ, IfElseWrapper, ContentType, Statements, SQLField, SQLRegion, RegionField, Wrapper, RegionImpl, Criteria, JudgeCriteria, TimeUnit, TableId, ADD, MINUS, NEXT_SEPARATOR, MERGE, PATCH, SET, CONTENT, EQUAL_SEPARATOR, TIMEOUT, DAY, WHERE, RETURN, UPDATE, IS_SEPARATOR, COMMON_SEPARATOR, END_SEPARATOR, HOUR, MINUTE, SECOND, MILLISECOND, NONE, BEFORE, AFTER, DIFF};
+use super::{EQ, IfElseWrapper, ContentType, Statements, SQLField, SQLRegion, RegionField, Wrapper, RegionImpl, Criteria,  TimeUnit, TableId, ADD, MINUS, NEXT_SEPARATOR, MERGE, PATCH, SET, CONTENT, EQUAL_SEPARATOR, TIMEOUT, DAY, WHERE, RETURN, UPDATE, IS_SEPARATOR, COMMON_SEPARATOR, END_SEPARATOR, HOUR, MINUTE, SECOND, MILLISECOND, NONE, BEFORE, AFTER, DIFF};
 
 /// UPDATE @targets
 /// 	[ CONTENT @value

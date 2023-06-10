@@ -1,3 +1,9 @@
+//! CREATE STMT
+//! ```txt
+//! @author:syf20020816@outlook.com
+//! @version:0.0.1
+//! @date:20230601
+//! ```
 use super::{ContentType, RegionImpl, Statements, SQLRegion, SQLField, RegionField, COMMON_SEPARATOR, SET, END_SEPARATOR, CREATE, EQUAL_SEPARATOR, NEXT_SEPARATOR, IS_SEPARATOR, RETURN, NONE, DIFF, AFTER, BEFORE, RAND, ULID, UUID, CONTENT, Wrapper, TableId, IdFunction};
 use crate::{handle_str};
 use serde::{Serialize};
@@ -6,7 +12,8 @@ use serde::{Serialize};
 ///create语句包装器
 /// 生成create语句，实现添加数据操作
 /// example:
-/// use surrealism::{CreateWrapper,TableId,IdFunction}
+/// ```rust
+/// use surrealism::{CreateWrapper, TableId, IdFunction, Wrapper};
 /// let mut create_table = CreateWrapper::new();
 ///
 ///     create_table.create("user")
@@ -16,7 +23,7 @@ use serde::{Serialize};
 ///         .return_field("name");
 ///
 /// let res = db.commit(create_table).await?;
-///
+///```
 #[derive(Debug, Clone)]
 pub struct CreateWrapper {
     ///关键词

@@ -1,4 +1,4 @@
-use super::{Statements, SQLField, SQLRegion, RegionField, Wrapper, RegionImpl, INFO, END_SEPARATOR, COMMON_SEPARATOR, TABLE, SCOPE, KV, NS, DB};
+use super::{Statements, SQLField, SQLRegion, RegionField, Wrapper,  INFO, END_SEPARATOR, COMMON_SEPARATOR, TABLE, SCOPE, KV, NS, DB};
 
 ///=================================================
 /// INFO FOR [

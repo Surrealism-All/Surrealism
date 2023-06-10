@@ -44,5 +44,6 @@ https://surrealdb.com/docs
 | 12    | DefineWrapper illustration | https://github.com/syf20020816/Surrealism/wiki/DefineWrapper-illustration |
 | 13    | InfoWrapper illustration   | https://github.com/syf20020816/Surrealism/wiki/InfoWrapper-illustration |
 | 14    | RemoveWrapper illustration | https://github.com/syf20020816/Surrealism/wiki/RemoveWrapper-illustration |
-| 15    | Transaction illustration   | https://github.com/syf20020816/Surrealism/wiki/Transaction-illustration |
+| 15    | RelateWrapper illustration | https://github.com/syf20020816/Surrealism/wiki/RelateWrapper-illustration |
+| 16    | Transaction illustration   | https://github.com/syf20020816/Surrealism/wiki/Transaction-illustration |
 

@@ -3,7 +3,6 @@
 //! 2. CANCEL [ TRANSACTION ]; 取消
 //! 3. COMMIT [ TRANSACTION ]; 提交
 
-use crate::creator::entities::{SQLRegion, Statements};
 use super::{Wrapper};
 
 const BEGIN: &str = "BEGIN TRANSACTION;";
@@ -30,6 +29,7 @@ impl Transaction {
     /// 添加一条语句
     /// ```rust
     /// use surrealism::{Transaction, SelectWrapper, Wrapper};
+    ///
     /// let mut wrapper1 = SelectWrapper::new();
     /// wrapper1.select("SELECT * FROM user;");
     /// let mut transaction = Transaction::new();

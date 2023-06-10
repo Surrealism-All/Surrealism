@@ -26,3 +26,5 @@ pub use info_wrapper::{InfoWrapper};
 pub use transaction::Transaction;
 pub use if_else_wrapper::IfElseWrapper;
 pub use define_wrapper::{DefineWrapper, TokenType, DefineFunction, FieldType, Schema};
+pub use remove_wrapper::RemoveWrapper;
+pub use relate_wrapper::RelateWrapper;

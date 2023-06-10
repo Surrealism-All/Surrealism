@@ -70,11 +70,11 @@ impl DefaultInitServiceImpl {
         let mut config_service = DefaultConfigServiceImpl::new();
         config_service.convert_config_data();
         //banner
-        &self.init_banner();
+        let _ = &self.init_banner();
         //获取配置信息
         let config = config_service.get_config_data();
         //logger
-        &self.init_log(config);
+        let _ = &self.init_log(config);
         info!("{}","Configuration Initialization over(配置初始化完成)");
         //connection
         info!("{}","Connection Initialization start(初始化连接检测开始)");

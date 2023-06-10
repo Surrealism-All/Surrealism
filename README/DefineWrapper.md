@@ -21,6 +21,12 @@ The DEFINE statement can be used to specify authentication access and  behaviour
 | define_token_scope     | 1. token_name: &str<br />2. token_type: TokenType<br />3. scope_name: &str<br />4. value: &str | DefineToken     | DEFINE TOKEN ... ON SCOPE                                    |
 | define_scope           | 1. scope_name: &str<br />2. session: usize<br />3. unit: TimeUnit<br />4. sign_up: &str<br />5. sign_in: &str | DefineScope     | DEFINE SCOPE @name SESSION @duration SIGNUP @expression SIGNIN @expression |
 | define_scope_bind      | 1. scope_name: &str<br />2. session: usize<br />3. unit: TimeUnit<br />4. email: &str<br />5. password: &str | DefineScope     | DEFINE SCOPE @name SESSION @duration SIGNUP @expression SIGNIN @expression |
+| define_event           | 1.event_name: &str<br />2. table_name: &str<br />3. when: &Criteria<br />4. then: &str | DefineEvent     | DEFINE EVENT @name ON [ TABLE ] @table WHEN @expression THEN @expression |
+| define_function        |                                                              | DefineFunction  | DEFINE FUNCTION fn::@name( 	[ @argument: @type ... ] ) { 	[ @query ... ] 	[ RETURN @returned ] } |
+| define_field           |                                                              | DefineField     | DEFINE FIELD ...                                             |
+| define_index           |                                                              | DefineIndex     | DEFINE INDEX @name ON [ TABLE ] @table [ FIELDS \| COLUMNS ] @fields [ UNIQUE ] |
+| define_param           |                                                              | DefineParam     | DEFINE PARAM $@name VALUE @value;                            |
+| define_table           |                                                              | DefineTable     | DEFINE TABLE @name ...                                       |
 
 ## Import
 

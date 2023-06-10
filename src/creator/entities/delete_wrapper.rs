@@ -1,6 +1,6 @@
 use serde::Serialize;
 use crate::creator::entities::RegionImpl;
-use super::{Statements, SQLField, SQLRegion, RegionField, Wrapper, Criteria, JudgeCriteria, TableId, IdFunction, IdRange, TimeUnit, HOUR, DAY, COMMON_SEPARATOR, END_SEPARATOR, MINUTE, SECOND, MILLISECOND, IS_SEPARATOR, DELETE, RETURN, WHERE, TIMEOUT, NONE, BEFORE, AFTER, DIFF};
+use super::{Statements, SQLField, SQLRegion, RegionField, Wrapper, Criteria,  TableId, TimeUnit, HOUR, DAY, COMMON_SEPARATOR, END_SEPARATOR, MINUTE, SECOND, MILLISECOND, IS_SEPARATOR, DELETE, RETURN, WHERE, TIMEOUT, NONE, BEFORE, AFTER, DIFF};
 
 ///DELETE @targets
 /// 	[ WHERE @condition ]

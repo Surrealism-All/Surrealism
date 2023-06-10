@@ -6,7 +6,7 @@
 ///  █▄▄▄▄▄█▀  ██▄▄▄███   ██        ██       ▀██▄▄▄▄█  ██▄▄▄███    ██▄▄▄   ▄▄▄██▄▄▄  █▄▄▄▄▄██  ██ ██ ██
 ///   ▀▀▀▀▀     ▀▀▀▀ ▀▀   ▀▀        ▀▀         ▀▀▀▀▀    ▀▀▀▀ ▀▀     ▀▀▀▀   ▀▀▀▀▀▀▀▀   ▀▀▀▀▀▀   ▀▀ ▀▀ ▀▀
 
-use surrealism::{DefaultInitServiceImpl, SurrealRes, Wrapper, UseWrapper, DefineWrapper, parse_response, Schema};
+use surrealism::{DefaultInitServiceImpl, SurrealRes, UseWrapper, Wrapper};
 
 #[tokio::main]
 async fn main() -> SurrealRes<()> {
@@ -23,17 +23,5 @@ async fn main() -> SurrealRes<()> {
     /// commit statement
     let res_use = db.use_commit(&mut use_wrapper).await;
     dbg!(res_use);
-    ///DEFINE TABLE user DROP SCHEMALESS AS SELECT count() AS total,time::month(recorded_at) AS month,math::mean(temperature) AS average_temp FROM reading GROUP BY city;
-    let mut define_wrapper = DefineWrapper::new();
-    let mut define_table = define_wrapper.define_table();
-    define_table
-        .table("user")
-        .drop()
-        .schema(Schema::Less)
-        .as_select("SELECT count() AS total,time::month(recorded_at) AS month,math::mean(temperature) AS average_temp FROM reading GROUP BY city");
-    /// 提交事务
-    /// commit
-    let res = db.commit(&mut define_table).await;
-    dbg!(res.unwrap());
     Ok(())
 }

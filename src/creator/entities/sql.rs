@@ -66,9 +66,22 @@ pub const ELSE_IF: &str = "ELSE IF";
 pub const ELSE: &str = "ELSE";
 pub const END: &str = "END";
 pub const DEFINE: &str = "DEFINE";
+pub const REMOVE: &str = "REMOVE";
+pub const NAMESPACE: &str = "NAMESPACE";
+pub const DATABASE: &str = "DATABASE";
+pub const FIELD: &str = "FIELD";
+pub const FUNCTION: &str = "FUNCTION";
+pub const LOGIN: &str = "LOGIN";
+pub const ON: &str = "ON";
+pub const INDEX: &str = "INDEX";
+pub const PARAM: &str = "PARAM";
+pub const TOKEN: &str = "TOKEN";
+pub const EVENT: &str = "EVENT";
+pub const RELATE: &str = "RELATE";
+pub const PARALLEL:&str = "PARALLEL";
 
 ///Surreal返回值
-pub type SurrealRes<T> =  surrealdb::Result<T>;
+pub type SurrealRes<T> = surrealdb::Result<T>;
 
 ///核心设计!
 #[derive(Debug, Clone)]
@@ -293,13 +306,15 @@ impl SurrealOperator {
 }
 
 
-///所有包装器都需要实现这个顶级包装器trait
-/// new:创建一个新包装器
-/// and:语句连接,当语句进入一个新区域时,使用and(),例如: USE NS xxx DB xxx; => UseWrapper::new().use_ns("xxx")`.and()下个方法进入新区域`.use_db("xxx")
-/// build:当所有构建结束后使用build进行完整的构建,否则导致语句不完整
-/// commit:语句提交
-/// get_keyword:获取keyword
-/// get_available:获取可用参数Map
+/// 所有包装器都需要实现这个顶级包装器trait
+///
+/// All wrappers need to implement this top-level wrapper trait
+/// - new:创建一个新包装器
+/// - （弃用）and:语句连接,当语句进入一个新区域时,使用and(),例如: USE NS xxx DB xxx; => UseWrapper::new().use_ns("xxx")`.and()下个方法进入新区域`.use_db("xxx")
+/// - （弃用）build:当所有构建结束后使用build进行完整的构建,否则导致语句不完整
+/// - commit:语句提交
+/// - get_keyword:获取keyword
+/// - get_available:获取可用参数Map
 pub trait Wrapper {
     fn new() -> Self;
     fn commit(&mut self) -> &str;
@@ -584,7 +599,10 @@ impl Criteria {
         self.complex.borrow_mut().push(res.clone());
         res
     }
-    pub fn complexBuild(&mut self) -> String {
+    /// 当构建Where子句时其中用到And，Or关键字时
+    /// 我们很可能用到多个And，Or，该方法帮助我们更好的进行梳理优先级
+    /// We are likely to use multiple And, Or methods, which can help us better organize priorities
+    fn complexBuild(&mut self) -> String {
         if !self.complex.borrow().is_empty() {
             let mut counter: usize = 0;
             for core_complex in &*self.complex.borrow() {
@@ -602,15 +620,19 @@ impl Criteria {
     }
 }
 
-///=================================================<br>
+///=================================================
+///
 /// @params:
 /// <ol>
 ///     <li>core:源目标</li>
 ///     <li>replace:替换目标</li>
 /// </ol>
-/// @return:<br>
-/// @date:2023/5/28<br>
-/// @description:将Criteria的complexBuild方法中替换`()`<br>
+/// @return:
+///
+/// @date:2023/5/28
+///
+/// @description:将Criteria的complexBuild方法中替换`()`
+///
 ///=================================================
 fn replace_str(core: &str, replace: &str) -> String {
     let value = core.replace("( ", "").replace(" )", "");

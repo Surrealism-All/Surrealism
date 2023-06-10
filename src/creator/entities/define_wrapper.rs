@@ -13,35 +13,24 @@
 //! ```
 
 use serde::Serialize;
-use surrealdb::sql::{Geometry, Param};
+use surrealdb::sql::{Geometry};
 use crate::creator::entities::Statements;
 use crate::handle_str;
-use super::{Wrapper, SQLField, SQLRegion, RegionField, TimeUnit, Criteria, COMMON_SEPARATOR, END_SEPARATOR, DEFINE, HOUR, DAY, MINUTE, SECOND, MILLISECOND};
+use super::{Wrapper, SQLField, SQLRegion, RegionField, TimeUnit, Criteria, COMMON_SEPARATOR, END_SEPARATOR, DEFINE, HOUR, DAY, MINUTE, SECOND, EVENT, MILLISECOND, NAMESPACE, DATABASE, SCOPE, INDEX, PARAM, FUNCTION, LOGIN, TOKEN, TABLE, ON, FIELD};
 
-const NAMESPACE: &str = "NAMESPACE";
-const DATABASE: &str = "DATABASE";
-const SCOPE: &str = "SCOPE";
-const LOGIN: &str = "LOGIN";
-const ON: &str = "ON";
+
 const PASSWORD: &str = "PASSWORD";
 const PASSHASH: &str = "PASSHASH";
-const TOKEN: &str = "TOKEN";
 const TYPE: &str = "TYPE";
 const VALUE: &str = "VALUE";
 const SIGNUP: &str = "SIGNUP";
 const SIGNIN: &str = "SIGNIN";
-const EVENT: &str = "EVENT";
 const WHEN: &str = "WHEN";
 const THEN: &str = "THEN";
-const TABLE: &str = "TABLE";
-const FIELD: &str = "FIELD";
-const FUNCTION: &str = "FUNCTION";
 const RETURN: &str = "RETURN";
 const ASSERT: &str = "ASSERT";
-const INDEX: &str = "INDEX";
 const COLUMNS: &str = "COLUMNS";
 const UNIQUE: &str = "UNIQUE";
-const PARAM: &str = "PARAM";
 const EDDSA: &str = "EDDSA";
 const ES256: &str = "ES256";
 const ES384: &str = "ES384";

@@ -57,7 +57,7 @@ pub fn handle_str(origin_str: &str) -> String {
 }
 
 ///将一段字符串中"包含是字符串处理为用'包含
-pub fn handle_str2(origin_str: &str) -> String {
+fn handle_str2(origin_str: &str) -> String {
     let re = Regex::new(r#"""#).unwrap();
     re.replace_all(origin_str, "'").to_string()
 }

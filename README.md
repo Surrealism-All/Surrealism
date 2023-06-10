@@ -10,7 +10,7 @@
 
 ## Surrealism Introduction
 
-<img src="https://github.com/syf20020816/Surrealism/blob/main/README/imgs/clone.png" />
+<img src="https://github.com/syf20020816/Surrealism/blob/main/README/imgs/logo.png" />
 
 Surrealism依托于Surrealdb提供的Rust官方标准库:surrealdb,目的是构建一种更加统一，简单的方式对Surrealdb数据库进行各类操作
 

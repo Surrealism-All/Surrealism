@@ -69,7 +69,7 @@ impl SurrealDB {
         }
     }
     /// 提交事务
-    pub async fn commit_transaction(&self, mut transaction: &Transaction) -> Result<surrealdb::Response, surrealdb::Error> {
+    pub async fn commit_transaction(&self, transaction: &Transaction) -> Result<surrealdb::Response, surrealdb::Error> {
         let sql = transaction.get_stmt();
         self.core.cn.query(sql).await
     }
