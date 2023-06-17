@@ -3,7 +3,7 @@ use log::{LevelFilter::{Info, Warn, Debug, Error, Trace}};
 use simple_logger::SimpleLogger;
 use surrealdb::{Surreal};
 use surrealdb::engine::remote::ws::{Ws, Client};
-use surrealdb::opt::auth::{Root};
+use surrealdb::opt::auth::{Root, Database, Namespace};
 
 
 ///配置结构体
@@ -20,11 +20,21 @@ pub struct SurrealConfig {
     pub surreal: SurrealType,
     pub username: String,
     pub password: String,
+    pub auth: Auth,
     pub url: String,
     pub port: String,
     pub mode: ModeType,
     pub path: String,
     pub logLevel: String,
+    pub ns: String,
+    pub db: String,
+}
+
+#[derive(Debug, Serialize, Deserialize, PartialEq, Clone)]
+pub enum Auth {
+    Root,
+    NS,
+    DB,
 }
 
 impl SurrealConfig {
@@ -38,6 +48,9 @@ impl SurrealConfig {
             mode: ModeType::Memory,
             path: "".to_string(),
             logLevel: "info".to_string(),
+            ns: "".to_string(),
+            auth: Auth::Root,
+            db: "".to_string(),
         }
     }
     pub fn set_surreal(&mut self, surreal: SurrealType) {
@@ -82,6 +95,10 @@ impl SurrealConfig {
     pub fn get_path(&self) -> &str {
         &self.path
     }
+    pub fn get_ns(&self) -> &str { &self.ns }
+    pub fn set_ns(&mut self, ns: &str) { self.ns = String::from(ns) }
+    pub fn get_db(&self) -> &str { &self.db }
+    pub fn set_db(&mut self, db: &str) { self.db = String::from(db) }
     pub fn set_logLevel(&mut self, logLevel: &str) {
         self.logLevel = String::from(logLevel);
     }
@@ -114,11 +131,31 @@ impl SurrealConfig {
         let uri = format!("{}:{}", self.get_url(), self.get_port());
         //进行网络连接
         let db: Surreal<Client> = Surreal::new::<Ws>(uri.as_str()).await?;
-        //设定用户名密码
-        db.signin(Root {
-            username: self.get_username(),
-            password: self.get_password(),
-        }).await?;
+        //设定用户名密码尝试连接
+        match self.auth {
+            Auth::Root => {
+                db.signin(Root {
+                    username: self.get_username(),
+                    password: self.get_password(),
+                }).await?;
+            }
+            Auth::NS => {
+                db.signin(Namespace {
+                    namespace: self.get_ns(),
+                    username: self.get_username(),
+                    password: self.get_password(),
+                }).await?;
+            }
+            Auth::DB => {
+                db.signin(Database {
+                    namespace: self.get_ns(),
+                    database: self.get_db(),
+                    username: self.get_username(),
+                    password: self.get_password(),
+                }).await?;
+            }
+        }
+
         Ok(db)
     }
 }
@@ -130,11 +167,14 @@ impl Default for SurrealConfig {
             surreal: SurrealType::Single,
             username: String::default(),
             password: String::default(),
+            auth: Auth::Root,
             url: String::default(),
             port: String::default(),
             mode: ModeType::Memory,
             path: String::default(),
             logLevel: String::default(),
+            ns: "".to_string(),
+            db: "".to_string(),
         }
     }
 }

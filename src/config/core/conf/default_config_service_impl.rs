@@ -91,7 +91,7 @@ impl ConfigService for DefaultConfigServiceImpl {
                             self.set_config_data(parser.merge(Toml::file(real_file_path).nested()).extract::<SurrealConfig>().unwrap());
                         } else {
                             //json解析
-                            self.set_config_data(parser.merge(Json::file(real_file_path)).extract::<SurrealConfig>().unwrap());
+                            self.set_config_data(parser.merge(Json::file(real_file_path)).extract::<SurrealConfig>().unwrap_or_else(|_|{panic!("config parse error : please check the Surrealism Config(Surrealism.toml||Surrealism.json)")}));
                         }
                     }
                     Err(e) => { panic!("{}", e) }

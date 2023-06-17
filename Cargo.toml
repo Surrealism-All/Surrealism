@@ -1,10 +1,13 @@
 [package]
 name = "surrealism"
-version = "0.1.0"
+version = "0.1.1"
 edition = "2021"
-description = "Rust's extension of SurrelaDB's official library aims to facilitate and unify various operations"
+description = "Rust's extension of SurrealDB's official library aims to facilitate and unify various operations"
 authors = ["syf20020816@outlook.com"]
 license = "MIT"
+repository = "https://github.com/syf20020816/Surrealism"
+documentation = "https://github.com/syf20020816/Surrealism/wiki"
+keywords = ["surrealism", "surrealdb"]
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 

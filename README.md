@@ -1,12 +1,12 @@
-<img src="./README/imgs/logo.svg"><img src="./README/imgs/license.svg">
+<img src="./README/imgs/logo.svg"> <img src="./README/imgs/license.svg">
 
 # Surrealism
 
 - author：syf20020816@outlook.com
 - docName：Surrealism README
 - createDate：20230506
-- updateDate：20230609
-- version：0.0.1
+- updateDate：20230617
+- version：0.1.1
 - des-tag：test
 - email：syf20020816@outlook.com
 
@@ -28,15 +28,18 @@ Surrealism relies on Surrealdb's official Rust standard library:surrealdb,The pu
 
 ```toml
 [dependencies]
-surrealism = "0.1.0"
+surrealism = "0.1.1"
 tokio = { version = "1.28.0", features = ["macros", "rt-multi-thread"] }
 ```
 
 ### add configuration
 配置：
 - surreal:单机本地连接Single还是分布式连接Multi
+- auth:连接鉴权方式(Root,NS,DB)
 - username:用户名
 - password:密码
+- ns:命名空间名称
+- db:数据库名称  
 - url:连接地址
 - port:连接端口
 - mode:连接模式（Memory:表示内存,File:表示存到文件中）
@@ -55,8 +58,11 @@ tokio = { version = "1.28.0", features = ["macros", "rt-multi-thread"] }
 configuration：
 
 - surreal:Single machine local connection or distributed connection Multi
+- auth:connection authentication method(Root,NS,DB)
 - username:your username
 - password:your password
+- ns:namespace
+- db:database
 - url:connection url
 - port:connection port
 - mode:connection mode（Memory:Instructions for storing in memory,File:Instructions stored in files）
@@ -71,12 +77,19 @@ The configuration file address can be set to：
 - ./configs/Surrealism.toml
 - ./templates/Surrealism.toml
 
+> ❗note：当前SurrealDB仍处于开发阶段，对应连接鉴权方式：NS和DB并为支持，所以使用Surrealism进行配置时请以Root方式进行鉴权连接，不要设置ns和db！
+>
+> ❗note：Currently, SurrealDB is still in the development stage, and the corresponding connection authentication methods are supported: NS and DB. Therefore, when using Surrealsm for configuration, please use Root mode for authentication connections and do not set ns and db!
+
 #### Surrealism.json(JSON)
 ```json
 {
   "surreal": "Single",
+  "auth": "Root",
   "username": "root",
   "password": "syf20020816",
+  "ns": "",
+  "db": "",
   "url": "127.0.0.1",
   "port": "10086",
   "mode": "Memory",
@@ -88,8 +101,11 @@ The configuration file address can be set to：
 ```toml
 [default]
 surreal = "Single"
+auth = "Root"
 username = "root"
 password = "syf20020816"
+ns = ""
+db = ""
 url = "127.0.0.1"
 port = "10086"
 mode = "Memory"
@@ -165,3 +181,6 @@ We can add banner.txt to the root directory to add our own logo
 
 ```
 
+## Update Des
+
+- 0.1.1：更新配置，增加基于Namespace和Database的支持，但是基于当前SurrealDB无法支持，所以并不能使用🥲（Update the configuration and add support based on Namespace and Database, but it cannot be used due to the current SurrealDB support 🥲）
