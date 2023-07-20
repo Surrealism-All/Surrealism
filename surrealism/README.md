@@ -1,4 +1,4 @@
-<img src="https://github.com/syf20020816/Surrealism/tree/main/README/imgs/logo.svg"> <img src="https://github.com/syf20020816/Surrealism/tree/main/README/imgs/license.svg">
+<img src="./README/imgs/logo.svg"> <img src="./README/imgs/license.svg">
 
 # Surrealism
 
