@@ -1,5 +1,9 @@
 mod core;
 mod error;
+mod util;
+
+pub use crate::core::SurrealismConfig;
+pub use crate::error::{ConfigDirNotFoundError,ErrorLevel};
 
 
 

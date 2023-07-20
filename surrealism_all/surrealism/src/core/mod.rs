@@ -3,3 +3,7 @@ mod builder;
 mod orm;
 mod config;
 mod sql;
+mod constant;
+
+pub use config::SurrealismConfig;
+pub use constant::*;

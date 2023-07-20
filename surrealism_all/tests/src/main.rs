@@ -1,3 +1,5 @@
+use surrealism::SurrealismConfig;
+
 fn main() {
-    println!("Hello, world!");
+    println!("{:?}", SurrealismConfig::default());
 }
