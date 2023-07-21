@@ -5,5 +5,5 @@ mod config;
 mod sql;
 mod constant;
 
-pub use config::SurrealismConfig;
+pub use config::{SurrealismConfig,DefaultInitService,InitService};
 pub use constant::*;

@@ -11,6 +11,7 @@ use std::path::PathBuf;
 use std::env::current_dir;
 use serde_json;
 use serde::{Deserialize, Serialize};
+use super::{LogLevel, SurrealLogger};
 
 /// Surrealism configuration
 /// surreal:单机本地连接Single还是分布式连接Multi
@@ -31,7 +32,7 @@ pub struct SurrealismConfig {
     port: u16,
     mode: Option<SurrealMode>,
     path: Option<PathBuf>,
-    log: Option<SurrealLog>,
+    log: Option<SurrealLogger>,
     ns: Option<String>,
     db: Option<String>,
 }
@@ -62,7 +63,7 @@ impl Default for SurrealismConfig {
             port: 9999,
             mode: Some(SurrealMode::Default),
             path: None,
-            log: Some(SurrealLog::default()),
+            log: Some(SurrealLogger::default()),
             ns: None,
             db: None,
         }
@@ -87,35 +88,7 @@ enum SurrealMode {
     Default,
 }
 
-/// log struct for configuration
-/// - level : log level (Error,Warn,Debug,Info,Trace)
-/// - print : true/false (open log or not)
-/// - path : the path for logging
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
-struct SurrealLog {
-    level: LogLevel,
-    print: bool,
-    path: PathBuf,
-}
 
-impl Default for SurrealLog {
-    fn default() -> Self {
-        SurrealLog {
-            level: LogLevel::Warn,
-            print: false,
-            path: current_dir().unwrap(),
-        }
-    }
-}
-
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
-enum LogLevel {
-    Error,
-    Warn,
-    Debug,
-    Info,
-    Trace,
-}
 
 #[derive(Debug, Serialize, Deserialize, PartialEq, Clone)]
 enum Auth {

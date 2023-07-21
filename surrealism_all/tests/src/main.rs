@@ -1,5 +1,7 @@
-use surrealism::SurrealismConfig;
+use surrealism::{DefaultInitService, InitService};
 
 fn main() {
-    println!("{:?}", SurrealismConfig::default());
+    let mut service = DefaultInitService::new();
+    service.init();
+    // println!("{:?}", service);
 }

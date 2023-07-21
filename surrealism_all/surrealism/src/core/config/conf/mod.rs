@@ -1,6 +1,9 @@
 mod default;
 
+
 use crate::ConfigDirNotFoundError;
+
+pub use default::DefaultConfigurationService;
 
 /// Super Configuration Service
 ///

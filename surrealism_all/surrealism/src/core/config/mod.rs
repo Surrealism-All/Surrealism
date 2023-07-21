@@ -10,9 +10,12 @@
 mod init;
 mod conf;
 mod configuration;
+mod logger;
 
 pub use configuration::SurrealismConfig;
-
+pub use conf::DefaultConfigurationService;
+pub use init::{DefaultInitService, InitService};
+pub use logger::{LogLevel, SurrealLogger};
 
 
 
