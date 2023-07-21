@@ -8,10 +8,9 @@
 //! ```
 
 use std::path::PathBuf;
-use std::env::current_dir;
 use serde_json;
 use serde::{Deserialize, Serialize};
-use super::{LogLevel, SurrealLogger};
+use super::{SurrealLogger};
 
 /// Surrealism configuration
 /// surreal:单机本地连接Single还是分布式连接Multi
@@ -45,6 +44,21 @@ impl SurrealismConfig {
     pub fn from(s: &str) -> SurrealismConfig {
         let obj: SurrealismConfig = serde_json::from_str(s).unwrap();
         obj
+    }
+    pub fn from_self(&mut self, data: SurrealismConfig) -> Self {
+        Self {
+            surreal: data.surreal,
+            username: data.username,
+            password: data.password,
+            auth: data.auth,
+            url: data.url,
+            port: data.port,
+            mode: data.mode,
+            path: data.path,
+            log: data.log,
+            ns: data.ns,
+            db: data.db,
+        }
     }
     /// get ref SurrealismConfig
     pub fn get_config(&self) -> &SurrealismConfig {
@@ -87,7 +101,6 @@ enum SurrealMode {
     File,
     Default,
 }
-
 
 
 #[derive(Debug, Serialize, Deserialize, PartialEq, Clone)]

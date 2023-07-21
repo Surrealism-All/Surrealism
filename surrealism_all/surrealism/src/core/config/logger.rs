@@ -7,7 +7,6 @@
 //! ```
 
 use std::path::PathBuf;
-use simple_logger::SimpleLogger;
 use serde::{Serialize, Deserialize};
 
 /// log struct for configuration

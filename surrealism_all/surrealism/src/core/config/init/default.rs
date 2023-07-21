@@ -5,14 +5,15 @@
 //! @version:0.0.1
 //! @description:
 //! ```
+
 use std::error::Error;
-use crate::ConfigDirNotFoundError;
+use std::process::exit;
 use crate::core::config::conf::ConfigurationService;
 use crate::core::config::{DefaultConfigurationService, SurrealLogger, LogLevel};
 use super::InitService;
 use log::{warn, error, info};
 use log::LevelFilter::{Warn, Debug, Info, Trace};
-use crate::{INIT_LOGGER};
+use crate::{INIT_LOGGER, INIT_CONFIG, ConfigError, err_panic};
 use simple_logger::SimpleLogger;
 
 pub struct DefaultInitService {
@@ -28,16 +29,22 @@ impl InitService for DefaultInitService {
         }
     }
 
+    fn init_config(&mut self) -> Result<(), ConfigError> {
+        self.config_service.init()
+    }
+
     fn init(&mut self) -> () {
         //init logger
         let _ = self.init_log().init().unwrap();
         info!("{}",INIT_LOGGER);
-        match self.config_service.define_config_dir("static") {
-            Ok(_) => {}
-            Err(err) => {
-                error!("{}",err.description());
+        //init configuration
+        match self.init_config() {
+            Ok(_) => info!("{}",INIT_CONFIG),
+            Err(e) => {
+                err_panic!(e.description(),(ConfigError::ERROR_TYPE_ID as i32));
             }
         }
+
     }
 
     fn init_log(&self) -> SimpleLogger {
