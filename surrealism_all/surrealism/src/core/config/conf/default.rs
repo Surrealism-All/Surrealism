@@ -1,4 +1,25 @@
-//! Default implementation for ConfigurationService
+//! # Default implementation for ConfigurationService
+//!
+//! # impl DefineConfiguration
+//!
+//! be like:
+//! ``` code
+//!  fn define_config_dir(&mut self, path: &str) -> Result<(), ConfigNotFoundError> {
+//!          let target_dir = PathBuf::from(path);
+//!          if target_dir.try_exists().unwrap() {
+//!              self.tmp_dirs.push(target_dir);
+//!              Ok(())
+//!          } else {
+//!              Err(ConfigNotFoundError::new(line!(), file!(), ErrorLevel::Error)
+//!                  .set_msg(format!("Could not find the path : {}", path).as_str())
+//!                  .set_recommend(format!("You must make dir : {}", path).as_str())
+//!                  .print_description()
+//!                  .deref_mut()
+//!              )
+//!          }
+//!      }
+//! ```
+//!
 //! ```txt
 //! @author:syf20020816@Outlook.com
 //! @date:2023/7/20
@@ -12,16 +33,23 @@ use std::path::PathBuf;
 use figment::providers::Format;
 use super::ConfigurationService;
 use crate::{ConfigNotFoundError, SurrealismConfig, ErrorLevel, ConfigParseError, ConfigError};
+use crate::core::config::SurrealLogger;
 use crate::core::constant::{CONFIG_PATH_COMMON, CONFIG_PATH_LEVEL1, CONFIG_PATH_LEVEL2, CONFIG_NAME, CONFIG_FILE_TYPE_TOML, CONFIG_FILE_TYPE_JSON};
 
 /// - path : final target configuration path
 /// - data : configuration
 /// - tmp_dirs : Process directory for obtaining configuration
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct DefaultConfigurationService {
     path: PathBuf,
     data: Option<SurrealismConfig>,
     tmp_dirs: Vec<PathBuf>,
+}
+
+impl DefaultConfigurationService {
+    pub fn get_surrealism_config(&self) -> Option<SurrealismConfig> {
+        self.data.clone()
+    }
 }
 
 impl ConfigurationService for DefaultConfigurationService {
@@ -44,21 +72,6 @@ impl ConfigurationService for DefaultConfigurationService {
             if config_dir.try_exists().unwrap() {
                 self.tmp_dirs.push(config_dir)
             }
-        }
-    }
-
-    fn define_config_dir(&mut self, path: &str) -> Result<(), ConfigNotFoundError> {
-        let target_dir = PathBuf::from(path);
-        if target_dir.try_exists().unwrap() {
-            self.tmp_dirs.push(target_dir);
-            Ok(())
-        } else {
-            Err(ConfigNotFoundError::new(line!(), file!(), ErrorLevel::Error)
-                .set_msg(format!("Could not find the path : {}", path).as_str())
-                .set_recommend(format!("You must make dir : {}", path).as_str())
-                .print_description()
-                .deref_mut()
-            )
         }
     }
 
@@ -134,7 +147,6 @@ impl ConfigurationService for DefaultConfigurationService {
             data = data.from_self(parser.merge(Json::file(&self.path).nested()).extract::<SurrealismConfig>().unwrap());
         }
         self.data.replace(data);
-        dbg!(&self.data);
         Ok(())
     }
 
@@ -148,6 +160,20 @@ impl ConfigurationService for DefaultConfigurationService {
             Err(e) => {
                 Err(ConfigError::from_not_found(e))
             }
+        }
+    }
+
+    fn get_logger(self) -> Result<SurrealLogger, ConfigNotFoundError> {
+        match self.data {
+            None => {
+                Err(ConfigNotFoundError::new(line!(), file!(), ErrorLevel::Error)
+                    .set_msg("Could not find the config file : `Surrealism.toml` or `Surrealism.json`")
+                    .set_recommend("You must make config file : `Surrealism.toml` or `Surrealism.json` under the config dir : `/ ` , `/templates/` , `/configs/`")
+                    .print_description()
+                    .deref_mut()
+                )
+            }
+            Some(config_data) => Ok(config_data.get_logger())
         }
     }
 }

@@ -14,7 +14,7 @@ use std::fmt::{Debug, Display, Formatter};
 use super::{ErrorLevel, ErrorType};
 
 /// 顶层Config Error
-#[derive(Debug, Clone)]
+#[derive(Debug)]
 pub struct ConfigError {
     line: u32,
     file: String,
@@ -91,6 +91,7 @@ impl ConfigNotFoundError {
         self.print_msg = format!("ConfigNotFoundError : \nError : {}\nCheck Line : {} line {}\nHow To Solve : {}", &self.msg, &self.file, &self.line, &self.recommend);
         self
     }
+    /// deref mut : mut ConfigNotFoundError -> ConfigNotFoundError
     pub fn deref_mut(&mut self) -> ConfigNotFoundError {
         ConfigNotFoundError {
             line: self.line,

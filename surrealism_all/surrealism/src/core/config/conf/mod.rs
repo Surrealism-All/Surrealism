@@ -4,6 +4,7 @@ mod default;
 use crate::{ConfigNotFoundError, ConfigParseError, ConfigError};
 
 pub use default::DefaultConfigurationService;
+use crate::core::config::SurrealLogger;
 
 /// Super Configuration Service
 ///
@@ -13,8 +14,6 @@ pub trait ConfigurationService {
     fn new() -> Self;
     /// search configuration dir
     fn get_config_dir(&mut self) -> ();
-    /// define a path to get the configuration
-    fn define_config_dir(&mut self, path: &str) -> Result<(), ConfigNotFoundError>;
     /// get configuration file
     /// after get_config_dir()
     fn get_config_file(&mut self) -> Result<(), ConfigNotFoundError>;
@@ -27,4 +26,10 @@ pub trait ConfigurationService {
     /// 2. get_config_file()
     /// 3. get_config_data()
     fn init(&mut self) -> Result<(), ConfigError>;
+    fn get_logger(self) -> Result<SurrealLogger, ConfigNotFoundError>;
+}
+
+pub trait DefineConfiguration{
+    /// define a path to get the configuration
+    fn define_config_dir(&mut self, path: &str) -> Result<(), ConfigNotFoundError>;
 }

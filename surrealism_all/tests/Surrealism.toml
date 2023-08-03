@@ -1,0 +1,10 @@
+[default]
+surreal = "Single"
+auth = "Root"
+username = "root"
+password = "syf20020816"
+url = "127.0.0.1"
+port = 10086
+mode = "Memory"
+path = "E:/Rust/surreal"
+log = { level = "Info", print = true, path = "E:/surrealism/log" }

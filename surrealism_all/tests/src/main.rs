@@ -1,7 +1,8 @@
-use surrealism::{DefaultInitService, InitService};
+use surrealism::{DefaultInitService, InitService,SurrealismConnector,SurrealismRes};
 
-fn main() {
-    let mut service = DefaultInitService::new();
-    service.init();
-    // println!("{:?}", service);
+
+#[tokio::main]
+async fn main()->Result<(),&'static str>{
+    let mut service = DefaultInitService::new().init();
+    Ok(())
 }

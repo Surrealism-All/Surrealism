@@ -1,4 +1,12 @@
+//! # DefaultInitService
+//! 默认的初始化服务实现
 //!
+//! 所有初始化服务都需要实现InitService trait
+//!
+//! ```rust
+//! use surrealism::{DefaultInitService,InitService};
+//! let mut service = DefaultInitService::new().init();
+//! ```
 //! ```txt
 //! @author:syf20020816@Outlook.com
 //! @date:2023/7/20
@@ -11,11 +19,13 @@ use std::process::exit;
 use crate::core::config::conf::ConfigurationService;
 use crate::core::config::{DefaultConfigurationService, SurrealLogger, LogLevel};
 use super::InitService;
-use log::{warn, error, info};
+use log::{error, info};
 use log::LevelFilter::{Warn, Debug, Info, Trace};
-use crate::{INIT_LOGGER, INIT_CONFIG, ConfigError, err_panic};
+use crate::{INIT_LOGGER, INIT_CONFIG, ConfigError, err_panic, ConfigNotFoundError};
 use simple_logger::SimpleLogger;
+use crate::core::{BANNER, SurrealismConnector};
 
+#[derive(Debug)]
 pub struct DefaultInitService {
     config_service: DefaultConfigurationService,
     log_service: SurrealLogger,
@@ -29,22 +39,53 @@ impl InitService for DefaultInitService {
         }
     }
 
-    fn init_config(&mut self) -> Result<(), ConfigError> {
+    fn init_banner(&self) -> () {
+        println!("{}", BANNER);
+        info!("{}", "Welcome to use Surrealism!");
+    }
+
+    fn init_log_service(&mut self) -> () {
+        let config_service = self.config_service.clone();
+        match config_service.get_logger() {
+            Ok(logger) => {
+                self.log_service = SurrealLogger::from(logger);
+            }
+            Err(e) => {
+                err_panic!(e.description(),ConfigNotFoundError::ERROR_TYPE_ID as i32);
+            }
+        }
+        // self.log_service.from()
+        info!("{}",INIT_LOGGER);
+    }
+
+    fn init_config_service(&mut self) -> Result<(), ConfigError> {
         self.config_service.init()
     }
 
-    fn init(&mut self) -> () {
-        //init logger
+    fn init(&mut self) -> SurrealismConnector {
         let _ = self.init_log().init().unwrap();
-        info!("{}",INIT_LOGGER);
+        self.init_banner();
         //init configuration
-        match self.init_config() {
+        match self.init_config_service() {
             Ok(_) => info!("{}",INIT_CONFIG),
             Err(e) => {
-                err_panic!(e.description(),(ConfigError::ERROR_TYPE_ID as i32));
+                err_panic!(e.description(),ConfigError::ERROR_TYPE_ID as i32);
             }
         }
-
+        //init logger
+        let _ = self.init_log_service();
+        //init connection
+        let config_data = self.config_service.get_surrealism_config().unwrap();
+        let surrealism_connector = SurrealismConnector::from_config(&config_data);
+        match surrealism_connector {
+            Ok(res) => {
+                let version = res.version();
+                info!("Please focus following print to check!\n{:#?}",version);
+                info!("Init Service : `Connection Service` Successfully!");
+                res
+            }
+            Err(e) => panic!("{:?}", e)
+        }
     }
 
     fn init_log(&self) -> SimpleLogger {

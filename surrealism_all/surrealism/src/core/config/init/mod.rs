@@ -1,19 +1,23 @@
 mod default;
 
 pub use default::DefaultInitService;
-use crate::{ConfigError};
+use crate::{ConfigError, SurrealismConnector};
 use simple_logger::SimpleLogger;
 
 pub trait InitService {
     fn new() -> Self;
+    fn init_banner(&self)->();
+    /// Init log service
+    fn init_log_service(&mut self)->();
     /// Init config service
-    fn init_config(&mut self) -> Result<(), ConfigError>;
+    fn init_config_service(&mut self) -> Result<(), ConfigError>;
     /// Init all services including:
-    /// - init configuration
-    /// - init banner
     /// - init log
+    /// - init banner
+    /// - init config service
+    /// - init log service
     /// - init connection
-    fn init(&mut self) -> ();
+    fn init(&mut self) -> SurrealismConnector;
     /// init logger
     fn init_log(&self) -> SimpleLogger;
 }

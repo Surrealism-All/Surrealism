@@ -9,7 +9,7 @@
 
 mod config;
 
-use std::process::exit;
+
 pub use config::{ConfigNotFoundError, ConfigParseError, ConfigError};
 
 use serde::{Serialize, Deserialize};

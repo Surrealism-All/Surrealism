@@ -31,14 +31,20 @@ impl SurrealLogger {
     pub fn get_level(&self) -> &LogLevel {
         &self.level
     }
-    ///
-    pub fn init(&self) -> () {}
+    ///from SurrealLogger -> SurrealLogger
+    pub fn from(logger: SurrealLogger) -> SurrealLogger {
+        SurrealLogger {
+            level: logger.level,
+            print: logger.print,
+            path: logger.path,
+        }
+    }
 }
 
 impl Default for SurrealLogger {
     fn default() -> Self {
         SurrealLogger {
-            level: LogLevel::Warn,
+            level: LogLevel::Info,
             print: true,
             path: PathBuf::new(),
         }

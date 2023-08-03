@@ -1805,6 +1805,7 @@ name = "surrealism"
 version = "0.2.0"
 dependencies = [
  "figment",
+ "futures",
  "log",
  "serde",
  "serde_json",
