@@ -1,5 +1,3 @@
-mod lib;
-
 use surrealism::{SurrealismRes, IDNumber, SurrealID};
 use serde::{Deserialize, Serialize};
 

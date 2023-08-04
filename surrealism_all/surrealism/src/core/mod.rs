@@ -9,3 +9,5 @@ mod connector;
 pub use config::{SurrealismConfig, DefaultInitService, InitService};
 pub use constant::*;
 pub use connector::*;
+pub use row::RowSql;
+pub use db::*;

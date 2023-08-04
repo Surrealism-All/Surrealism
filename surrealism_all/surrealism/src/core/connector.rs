@@ -10,19 +10,39 @@
 //! ```
 
 use surrealdb::engine::remote::ws::{Client, Ws};
-use surrealdb::{Error, Surreal};
+use surrealdb::{Error, Response, Surreal};
 use surrealdb::opt::auth::Root;
 use futures::executor::block_on;
-use surrealdb::method::Version;
+use surrealdb::method::{UseNs, UseNsDb, Version};
 use crate::SurrealismConfig;
+use async_trait::async_trait;
 
-pub trait Connector {
-    fn new(url: &str, port: u16) -> Self;
-    fn try_connect(&self, username: &str, password: &str) -> Result<(), surrealdb::Error>;
+#[async_trait]
+pub trait UseNSDB {
+    async fn use_commit(&self, ns: &str, db: &str) -> Result<(), Error>;
+}
+
+#[async_trait]
+pub trait SurrealismCommit {
+    async fn commit_sql(&self, sql: &str) -> Result<surrealdb::Response, surrealdb::Error>;
 }
 
 pub struct SurrealismConnector {
     client: Surreal<Client>,
+}
+
+#[async_trait]
+impl UseNSDB for SurrealismConnector {
+    async fn use_commit(&self, ns: &str, db: &str) -> Result<(), Error> {
+        self.client.use_ns(ns).use_db(db).await
+    }
+}
+
+#[async_trait]
+impl SurrealismCommit for SurrealismConnector {
+    async fn commit_sql(&self, sql: &str) -> Result<Response, Error> {
+        self.client.query(sql).await
+    }
 }
 
 impl SurrealismConnector {
