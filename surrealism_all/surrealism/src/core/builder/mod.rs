@@ -11,13 +11,15 @@ mod insert;
 mod delete;
 mod create;
 
+use serde::Serialize;
 use self::create::CreateWrapper;
+use crate::{Table};
 
 pub struct SQLBuilder {}
 
 impl SQLBuilder {
-    fn create() -> CreateWrapper {
-        CreateWrapper::new()
+    fn create(table: &str) -> CreateWrapper {
+        CreateWrapper::new(table)
     }
     // fn select() -> SelectWrapper {}
     // fn update() -> UpdateWrapper {}
@@ -25,10 +27,22 @@ impl SQLBuilder {
     // fn delete() -> DeleteWrapper {}
 }
 
-pub trait BaseFunc{
-    fn new()->Self;
+pub trait BaseFunc {
+    /// 创建一个Table指定name和id
+    fn new(table: &str) -> Self;
+    /// 通过使用Table工具创建一个Wrapper
+    /// 这样会指定好Table的name和id
+    fn from<T: Serialize>(table: &Table<T>) -> Self;
+    /// 直接创建一个Wrapper
+    fn new_no_args() -> Self;
+    /// 指定table name
+    fn table(&mut self, table_name: &str,table_id:&str) -> &mut Self;
+
 }
-pub trait ReturnFunc{}
-pub trait TimeoutFunc{}
+
+pub trait ReturnFunc {}
+
+pub trait TimeoutFunc {}
+
 ///PARALLEL
-pub trait ParallelFunc{}
+pub trait ParallelFunc {}

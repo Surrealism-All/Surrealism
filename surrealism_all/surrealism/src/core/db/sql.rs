@@ -1,24 +1,41 @@
-//!
+//! Core SQL Tools
 //! ```txt
 //! @author:syf20020816@Outlook.com
 //! @date:2023/8/4
 //! @version:0.0.1
 //! @description:
 //! ```
-use super::{AFTER, BEFORE, NONE, DIFF};
+use super::{AFTER, BEFORE, NONE, DIFF, UUID, ULID, RAND};
 use serde::{Serialize, Deserialize};
 
+/// # build Table with ID
+/// If you don't want to specify the type, you can create it directly using `new_into()`
+/// > `Table::<String>::new_into("temperature", "['London', 'New York']").build();`
+/// ## example
+/// ```code
+///     let table1 = Table::new("test", SurrealID::<String>::Str("surrealdb".to_string())).build();
+///     let table2 = Table::new_no_arg().table("temperature").id(SurrealID::<IDNumber>::Number(IDNumber::Int(17493))).build();
+///     let table3 = Table::<String>::new_into("temperature", "['London', 'New York']").build();
+///     let table4 = Table::new("user", SurrealID::<String>::RAND).build();
+/// ```
 #[derive(Debug, Serialize, Deserialize)]
-pub struct Table<T:Serialize> {
+pub struct Table<T: Serialize> {
     name: String,
     id: SurrealID<T>,
 }
 
-impl<T:Serialize> Table<T> {
+impl<T: Serialize> Table<T> {
     pub fn new(table_name: &str, table_id: SurrealID<T>) -> Table<T> {
         Table {
             name: String::from(table_name),
             id: table_id,
+        }
+    }
+    /// build a table param with name and id freely
+    pub fn new_into(table_name: &str, table_id: &str) -> Table<String> {
+        Table {
+            name: String::from(table_name),
+            id: SurrealID::Str(String::from(table_id)),
         }
     }
     pub fn new_no_arg() -> Table<T> {
@@ -27,15 +44,19 @@ impl<T:Serialize> Table<T> {
             id: SurrealID::Default,
         }
     }
+    /// build table name
     pub fn table(&mut self, table_name: &str) -> &mut Self {
         self.name = String::from(table_name);
         self
     }
+    /// build table special id
     pub fn id(&mut self, table_id: SurrealID<T>) -> &mut Self {
         self.id = table_id;
         self
     }
-    pub fn build(&mut self) -> String {
+    /// after appoint table name and id , this function will return a complete String like:
+    /// > user:1006
+    pub fn build(&self) -> String {
         let mut table_stmt = String::new();
         match self.id {
             SurrealID::Default => table_stmt = format!("{}", &self.name),
@@ -45,16 +66,32 @@ impl<T:Serialize> Table<T> {
     }
 }
 
+/// # ID的枚举类型
+/// 通过SurrealID快速生成一个含有类型的ID
+/// ## example
+/// ``` code
+///     let n1 = IDNumber::Int(56).to_str();
+///     let sn1 = SurrealID::<String>::Default.to_str();
+///     let sn2 = SurrealID::<String>::Str("Joe".to_string()).to_str();
+///     let sn3 = SurrealID::<User>::Array(vec![User { name: "Joe", age: 16 }, User { name: "Mark", age: 25 }]);
+///     let sn4 = SurrealID::<f32>::Number(IDNumber::Float(23.56546_f32)).to_str();
+///     let sn5 = SurrealID::<User>::Object(User { name: "Mary", age: 23 });
+///     let sn6 =  SurrealID::<String>::UUID;
+/// ```
 #[derive(Debug, Serialize, Deserialize)]
-pub enum SurrealID<T:Serialize> {
+pub enum SurrealID<T: Serialize> {
     Default,
     Number(IDNumber),
     Str(String),
     Object(T),
     Array(Vec<T>),
+    UUID,
+    ULID,
+    RAND,
 }
 
 impl<T: Serialize> SurrealID<T> {
+    /// Convert SurrealID to String
     pub fn to_str(&self) -> String {
         match self {
             SurrealID::Default => String::new(),
@@ -63,11 +100,15 @@ impl<T: Serialize> SurrealID<T> {
             }
             SurrealID::Str(s) => String::from(s),
             SurrealID::Object(obj) => serde_json::to_string(obj).unwrap(),
-            SurrealID::Array(arr) => serde_json::to_string(arr).unwrap()
+            SurrealID::Array(arr) => serde_json::to_string(arr).unwrap(),
+            SurrealID::ULID => ULID.to_string(),
+            SurrealID::UUID => UUID.to_string(),
+            SurrealID::RAND => RAND.to_string(),
         }
     }
 }
 
+/// SurrealID‘s Number Type Enum
 #[derive(Debug, Serialize, Deserialize)]
 pub enum IDNumber {
     Int(i32),

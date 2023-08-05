@@ -16,8 +16,9 @@
 //! @description:
 //! ```
 
+use serde::Serialize;
 use super::BaseFunc;
-use crate::{ReturnType};
+use crate::{ReturnType, Table};
 
 pub struct CreateWrapper {
     table_param: String,
@@ -28,13 +29,39 @@ pub struct CreateWrapper {
 }
 
 impl BaseFunc for CreateWrapper {
-    fn new() -> Self {
+    fn new(table: &str) -> Self {
         CreateWrapper {
-            table_param: String::new(),
+            table_param: String::from(table),
             content_param: String::new(),
-            return_param:String::new(),
+            return_param: String::new(),
             timeout: 0,
             parallel: false,
         }
+    }
+
+    fn from<T: Serialize>(table: &Table<T>) -> Self {
+        let table_param = table.build();
+        CreateWrapper {
+            table_param,
+            content_param: String::new(),
+            return_param: String::new(),
+            timeout: 0,
+            parallel: false,
+        }
+    }
+
+    fn new_no_args() -> Self {
+        CreateWrapper {
+            table_param: String::new(),
+            content_param: String::new(),
+            return_param: String::new(),
+            timeout: 0,
+            parallel: false,
+        }
+    }
+
+    fn table(&mut self, table_name: &str, table_id: &str) -> &mut Self {
+        self.table_param = format!("{}:{}", table_name, table_id);
+        self
     }
 }

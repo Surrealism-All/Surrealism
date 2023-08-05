@@ -50,7 +50,7 @@ impl<'a> RowSql<'a> {
     pub fn new(stmt: &'a str) -> RowSql {
         let stmt = String::from(stmt);
         let mut params = vec![];
-        for i in 0..matches_count(&stmt, "{}") {
+        for i in 0..matches_count(&stmt) {
             params.push(("{}", ""));
         }
         RowSql {
@@ -106,7 +106,7 @@ impl<'a> RowSql<'a> {
 /// //num = 2
 /// let num = matches_count(stmt, "{}");
 /// ```
-fn matches_count(target: &str, k: &str) -> usize {
+fn matches_count(target: &str) -> usize {
     let reg = Regex::new(r#"\{\}"#).unwrap();
     let count = reg.find_iter(target).count();
     count
