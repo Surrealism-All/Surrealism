@@ -8,10 +8,10 @@
 
 
 mod config;
-
+mod msg;
 
 pub use config::{ConfigNotFoundError, ConfigParseError, ConfigError};
-
+pub use msg::*;
 use serde::{Serialize, Deserialize};
 
 /// # 错误级别
@@ -32,6 +32,14 @@ pub enum ErrorType {
     ConfigError = 1000,
     ConfigNotFoundError = 1001,
     ConfigParseError = 1002,
+}
+
+pub struct ErrorTypeCode;
+
+impl ErrorTypeCode {
+    pub const CONFIG_ERROR: u32 = 1000;
+    pub const CONFIG_NOT_FOUND_ERROR: u32 = 1001;
+    pub const CONFIG_PARSE_ERROR: u32 = 1002;
 }
 
 #[macro_export]

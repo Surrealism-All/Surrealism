@@ -21,7 +21,14 @@ macro_rules! sql_const {
     )
 }
 
-sql_const!((NONE,"NONE") (AFTER,"AFTER") (DIFF,"DIFF") (BEFORE,"BEFORE") (RAND,"rand()") (ULID,"ulid()") (UUID,"uuid()"));
+sql_const!(
+    (NONE,"NONE") (AFTER,"AFTER") (DIFF,"DIFF") (BEFORE,"BEFORE") (RAND,"rand()") (ULID,"ulid()") (UUID,"uuid()")
+    (MILLISECOND,"MILLISECOND") (SECOND,"SECOND") (MINUTE,"MINUTE") (HOUR,"HOUR") ( DAY,"DAY") (TIMEOUT,"TIMEOUT")
+    (PARALLEL,"PARALLEL") (NONE_DOWN,"none") (NULL,"NULL") (NULL_DOWN,"null") (EQ,"=") (EQUAL,"==") (LT,"<") (GT,">")
+    (LT_EQ,"<=") (GT_EQ,">=") (TRUE_STR,"TRUE") (FALSE_STR,"FALSE") (LEFT_BRACE,"{ ") (RIGHT_BRACE," }") (COMMA," , ")
+);
+pub const FALSE: bool = false;
+pub const TRUE: bool = true;
 
 #[cfg(test)]
 mod tests {

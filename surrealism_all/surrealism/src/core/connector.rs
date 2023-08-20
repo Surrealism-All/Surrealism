@@ -13,7 +13,7 @@ use surrealdb::engine::remote::ws::{Client, Ws};
 use surrealdb::{Error, Response, Surreal};
 use surrealdb::opt::auth::Root;
 use futures::executor::block_on;
-use surrealdb::method::{UseNs, UseNsDb, Version};
+use surrealdb::method::{Version};
 use crate::SurrealismConfig;
 use async_trait::async_trait;
 

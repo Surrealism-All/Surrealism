@@ -5,10 +5,11 @@ mod info;
 
 pub use crate::core::{
     SurrealismConfig, DefaultInitService, InitService, SurrealismConnector, SurrealismCommit, UseNSDB, RowSql,
-    Table, IDNumber, SurrealID, ReturnType,
+    Table, SurrealID, ReturnType, SQLBuilder, TimeUnit, Range, Object, Array, SurrealValue,
 };
 pub use crate::error::{ConfigNotFoundError, ErrorLevel, ConfigParseError, ConfigError};
 pub use crate::info::*;
+pub use util::{handle_str,remove_format_half};
 
 /// #Surreal返回值
 /// ``` rust

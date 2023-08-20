@@ -5,3 +5,5 @@ mod row_sql;
 mod row_sql_macro;
 mod surreal_id_test;
 mod surreal_table;
+mod handle_str_test;
+mod surreal_value;

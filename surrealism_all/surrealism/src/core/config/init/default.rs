@@ -24,6 +24,7 @@ use log::LevelFilter::{Warn, Debug, Info, Trace};
 use crate::{INIT_LOGGER, INIT_CONFIG, ConfigError, err_panic, ConfigNotFoundError};
 use simple_logger::SimpleLogger;
 use crate::core::{BANNER, SurrealismConnector};
+use except_plugin::{EasyException, easy_e, ExceptionCode, SuperBuilderImpl, Exception};
 
 #[derive(Debug)]
 pub struct DefaultInitService {
@@ -51,14 +52,15 @@ impl InitService for DefaultInitService {
                 self.log_service = SurrealLogger::from(logger);
             }
             Err(e) => {
-                err_panic!(e.description(),ConfigNotFoundError::ERROR_TYPE_ID as i32);
+                let e_code = e.code() as i32;
+                err_panic!(e.description(),e_code);
             }
         }
         // self.log_service.from()
         info!("{}",INIT_LOGGER);
     }
 
-    fn init_config_service(&mut self) -> Result<(), ConfigError> {
+    fn init_config_service(&mut self) -> Result<(), EasyException> {
         self.config_service.init()
     }
 
@@ -69,7 +71,7 @@ impl InitService for DefaultInitService {
         match self.init_config_service() {
             Ok(_) => info!("{}",INIT_CONFIG),
             Err(e) => {
-                err_panic!(e.description(),ConfigError::ERROR_TYPE_ID as i32);
+                err_panic!(e.description(),e.code() as i32);
             }
         }
         //init logger

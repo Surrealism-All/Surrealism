@@ -35,6 +35,8 @@ use super::ConfigurationService;
 use crate::{ConfigNotFoundError, SurrealismConfig, ErrorLevel, ConfigParseError, ConfigError};
 use crate::core::config::SurrealLogger;
 use crate::core::constant::{CONFIG_PATH_COMMON, CONFIG_PATH_LEVEL1, CONFIG_PATH_LEVEL2, CONFIG_NAME, CONFIG_FILE_TYPE_TOML, CONFIG_FILE_TYPE_JSON};
+use except_plugin::{EasyException, easy_e, EasyExceptionBuilder, SuperBuilderImpl, ExceptionFactory, ExceptionLevel, ExceptionCode, CommonParamImpl};
+use crate::error::{CONFIG_NOT_FOUND_ERROR, ErrorTypeCode};
 
 /// - path : final target configuration path
 /// - data : configuration
@@ -75,7 +77,7 @@ impl ConfigurationService for DefaultConfigurationService {
         }
     }
 
-    fn get_config_file(&mut self) -> Result<(), ConfigNotFoundError> {
+    fn get_config_file(&mut self) -> Result<(), EasyException> {
         /// 计算配置文件等级（初始等级1000）
         /// 等级最高的配置文件将会被启用
         /// configs = -10
@@ -120,11 +122,7 @@ impl ConfigurationService for DefaultConfigurationService {
         // Can not find Config File
         if final_files.is_empty() {
             Err(
-                ConfigNotFoundError::new(line!(), file!(), ErrorLevel::Error)
-                    .set_msg("Could not find the config file : `Surrealism.toml` or `Surrealism.json`")
-                    .set_recommend("You must make config file : `Surrealism.toml` or `Surrealism.json` under the config dir : `/ ` , `/templates/` , `/configs/`")
-                    .print_description()
-                    .deref_mut()
+                easy_e!(ErrorTypeCode::CONFIG_NOT_FOUND_ERROR,CONFIG_NOT_FOUND_ERROR,ExceptionLevel::Error,line!(),PathBuf::from(file!()))
             )
         } else {
             let scores = count_level(&final_files);
@@ -136,7 +134,7 @@ impl ConfigurationService for DefaultConfigurationService {
         }
     }
 
-    fn get_config_data(&mut self) -> Result<(), ConfigParseError> {
+    fn get_config_data(&mut self) -> Result<(), EasyException> {
         let parser = Figment::new();
         let mut data = SurrealismConfig::new();
         //get file type (toml or json)
@@ -150,28 +148,21 @@ impl ConfigurationService for DefaultConfigurationService {
         Ok(())
     }
 
-    fn init(&mut self) -> Result<(), ConfigError> {
+    fn init(&mut self) -> Result<(), EasyException> {
         let _ = self.get_config_dir();
         match self.get_config_file() {
             Ok(_) => {
                 let _ = self.get_config_data();
                 Ok(())
             }
-            Err(e) => {
-                Err(ConfigError::from_not_found(e))
-            }
+            Err(e) => Err(e)
         }
     }
 
-    fn get_logger(self) -> Result<SurrealLogger, ConfigNotFoundError> {
+    fn get_logger(self) -> Result<SurrealLogger, EasyException> {
         match self.data {
             None => {
-                Err(ConfigNotFoundError::new(line!(), file!(), ErrorLevel::Error)
-                    .set_msg("Could not find the config file : `Surrealism.toml` or `Surrealism.json`")
-                    .set_recommend("You must make config file : `Surrealism.toml` or `Surrealism.json` under the config dir : `/ ` , `/templates/` , `/configs/`")
-                    .print_description()
-                    .deref_mut()
-                )
+                Err(easy_e!(ErrorTypeCode::CONFIG_NOT_FOUND_ERROR,CONFIG_NOT_FOUND_ERROR,ExceptionLevel::Error,line!(),PathBuf::from(file!())))
             }
             Some(config_data) => Ok(config_data.get_logger())
         }

@@ -5,7 +5,7 @@
 //! @version:0.0.1
 //! @description:
 //! ```
-use super::{AFTER, BEFORE, NONE, DIFF, UUID, ULID, RAND};
+use super::{AFTER, BEFORE, NONE, DIFF, UUID, ULID, RAND, MILLISECOND, MINUTE, SECOND, HOUR, DAY, SurrealID};
 use serde::{Serialize, Deserialize};
 
 /// # build Table with ID
@@ -19,26 +19,26 @@ use serde::{Serialize, Deserialize};
 ///     let table4 = Table::new("user", SurrealID::<String>::RAND).build();
 /// ```
 #[derive(Debug, Serialize, Deserialize)]
-pub struct Table<T: Serialize> {
+pub struct Table {
     name: String,
-    id: SurrealID<T>,
+    id: SurrealID,
 }
 
-impl<T: Serialize> Table<T> {
-    pub fn new(table_name: &str, table_id: SurrealID<T>) -> Table<T> {
+impl Table {
+    pub fn new(table_name: &str, table_id: SurrealID) -> Table{
         Table {
             name: String::from(table_name),
             id: table_id,
         }
     }
     /// build a table param with name and id freely
-    pub fn new_into(table_name: &str, table_id: &str) -> Table<String> {
+    pub fn new_into(table_name: &str, table_id: &str) -> Table {
         Table {
             name: String::from(table_name),
             id: SurrealID::Str(String::from(table_id)),
         }
     }
-    pub fn new_no_arg() -> Table<T> {
+    pub fn new_no_arg() -> Table {
         Table {
             name: String::new(),
             id: SurrealID::Default,
@@ -50,7 +50,7 @@ impl<T: Serialize> Table<T> {
         self
     }
     /// build table special id
-    pub fn id(&mut self, table_id: SurrealID<T>) -> &mut Self {
+    pub fn id(&mut self, table_id: SurrealID) -> &mut Self {
         self.id = table_id;
         self
     }
@@ -66,65 +66,6 @@ impl<T: Serialize> Table<T> {
     }
 }
 
-/// # ID的枚举类型
-/// 通过SurrealID快速生成一个含有类型的ID
-/// ## example
-/// ``` code
-///     let n1 = IDNumber::Int(56).to_str();
-///     let sn1 = SurrealID::<String>::Default.to_str();
-///     let sn2 = SurrealID::<String>::Str("Joe".to_string()).to_str();
-///     let sn3 = SurrealID::<User>::Array(vec![User { name: "Joe", age: 16 }, User { name: "Mark", age: 25 }]);
-///     let sn4 = SurrealID::<f32>::Number(IDNumber::Float(23.56546_f32)).to_str();
-///     let sn5 = SurrealID::<User>::Object(User { name: "Mary", age: 23 });
-///     let sn6 =  SurrealID::<String>::UUID;
-/// ```
-#[derive(Debug, Serialize, Deserialize)]
-pub enum SurrealID<T: Serialize> {
-    Default,
-    Number(IDNumber),
-    Str(String),
-    Object(T),
-    Array(Vec<T>),
-    UUID,
-    ULID,
-    RAND,
-}
-
-impl<T: Serialize> SurrealID<T> {
-    /// Convert SurrealID to String
-    pub fn to_str(&self) -> String {
-        match self {
-            SurrealID::Default => String::new(),
-            SurrealID::Number(num) => {
-                num.to_str()
-            }
-            SurrealID::Str(s) => String::from(s),
-            SurrealID::Object(obj) => serde_json::to_string(obj).unwrap(),
-            SurrealID::Array(arr) => serde_json::to_string(arr).unwrap(),
-            SurrealID::ULID => ULID.to_string(),
-            SurrealID::UUID => UUID.to_string(),
-            SurrealID::RAND => RAND.to_string(),
-        }
-    }
-}
-
-/// SurrealID‘s Number Type Enum
-#[derive(Debug, Serialize, Deserialize)]
-pub enum IDNumber {
-    Int(i32),
-    Float(f32),
-    Decimal(f64),
-}
-
-impl IDNumber {
-    pub fn to_str(&self) -> String {
-        match self {
-            IDNumber::Int(int_num) => int_num.to_string(),
-            IDNumber::Float(float_num) => float_num.to_string(),
-            IDNumber::Decimal(decimal_num) => decimal_num.to_string()
-        }
-    }
-}
 
 /// 数字类型
 /// 主要用于直接获取Math提供的常量
@@ -152,6 +93,7 @@ impl MATH {
     pub const TAU: f32 = 6.283185307179586;
 }
 
+/// 设置返回类型枚举
 pub enum ReturnType<'a> {
     After,
     Before,
@@ -161,7 +103,7 @@ pub enum ReturnType<'a> {
 }
 
 impl<'a> ReturnType<'a> {
-    fn to_str(&self) -> &str {
+    pub fn to_str(&self) -> &str {
         match self {
             ReturnType::After => AFTER,
             ReturnType::Before => BEFORE,
@@ -172,6 +114,32 @@ impl<'a> ReturnType<'a> {
     }
 }
 
+///在SurrealDB数据库中，Timeout子句可以用于设置查询的超时时间。它接受一个时间间隔作为参数，并支持以下单位：
+///
+///     ms：毫秒
+///     s：秒
+///     m：分钟
+///     h：小时
+///     d：天
+pub enum TimeUnit {
+    MILLISECOND,
+    SECOND,
+    MINUTE,
+    HOUR,
+    DAY,
+}
+
+impl TimeUnit {
+    pub fn to_str(&self) -> &str {
+        match self {
+            TimeUnit::MILLISECOND => MILLISECOND,
+            TimeUnit::SECOND => SECOND,
+            TimeUnit::MINUTE => MINUTE,
+            TimeUnit::HOUR => HOUR,
+            TimeUnit::DAY => DAY
+        }
+    }
+}
 
 /// # Geometries
 ///
@@ -196,3 +164,4 @@ pub enum Geometry {
     MultiPolygon,
     Collection,
 }
+

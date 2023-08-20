@@ -20,7 +20,6 @@ pub struct ConfigError {
     file: String,
     level: ErrorLevel,
     msg: String,
-
 }
 
 impl ConfigError {

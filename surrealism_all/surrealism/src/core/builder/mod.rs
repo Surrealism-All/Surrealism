@@ -13,14 +13,14 @@ mod create;
 
 use serde::Serialize;
 use self::create::CreateWrapper;
-use crate::{Table};
+use crate::{Table, ReturnType, TimeUnit};
 
-pub struct SQLBuilder {}
+pub struct SQLBuilder;
 
 impl SQLBuilder {
-    fn create(table: &str) -> CreateWrapper {
-        CreateWrapper::new(table)
-    }
+    // pub fn create(table: &str) -> CreateWrapper {
+    //     CreateWrapper::new(table)
+    // }
     // fn select() -> SelectWrapper {}
     // fn update() -> UpdateWrapper {}
     // fn insert() -> InsertWrapper {}
@@ -32,17 +32,24 @@ pub trait BaseFunc {
     fn new(table: &str) -> Self;
     /// 通过使用Table工具创建一个Wrapper
     /// 这样会指定好Table的name和id
-    fn from<T: Serialize>(table: &Table<T>) -> Self;
+    fn from(table: &Table) -> Self;
     /// 直接创建一个Wrapper
     fn new_no_args() -> Self;
     /// 指定table name
-    fn table(&mut self, table_name: &str,table_id:&str) -> &mut Self;
-
+    fn table(&mut self, table_name: &str, table_id: &str) -> &mut Self;
+    fn build(&self)->String;
 }
 
-pub trait ReturnFunc {}
+pub trait ReturnFunc {
+    fn return_for(&mut self,return_type: &str) -> &mut Self;
+    fn return_from(&mut self,return_type: ReturnType) -> &mut Self;
+}
 
-pub trait TimeoutFunc {}
+pub trait TimeoutFunc {
+    fn timeout(&mut self,num: u32, unit: TimeUnit) -> &mut Self;
+}
 
 ///PARALLEL
-pub trait ParallelFunc {}
+pub trait ParallelFunc {
+    fn parallel(&mut self)->&mut Self;
+}
