@@ -1,4 +1,6 @@
+use std::any::{Any, TypeId};
 use regex::Regex;
+use crate::{SurrealIDType,Range,Array,Object};
 
 ///将一段字符串中被\"包含是字符串处理为用'包含
 pub fn handle_str(origin_str: &str) -> String {
@@ -22,7 +24,21 @@ pub fn handle_str(origin_str: &str) -> String {
 }
 
 ///将字符串中的所有\"去除
-pub fn remove_format_half(origin_str:String)->String{
+pub fn remove_format_half(origin_str: String) -> String {
     let re = Regex::new(r#"\\(.)|""#).unwrap();
-    re.replace_all(&origin_str,"").to_string()
+    re.replace_all(&origin_str, "").to_string()
+}
+
+pub fn match_id_type<T: Any>(_value: &T) -> SurrealIDType {
+    match TypeId::of::<T>() {
+        id if id == TypeId::of::<i32>() => SurrealIDType::Int,
+        id if id == TypeId::of::<f32>() => SurrealIDType::Float,
+        id if id == TypeId::of::<f64>() => SurrealIDType::Decimal,
+        id if id == TypeId::of::<&str>() => SurrealIDType::Str,
+        id if id == TypeId::of::<String>() => SurrealIDType::Str,
+        id if id == TypeId::of::<Array>() => SurrealIDType::Array,
+        id if id == TypeId::of::<Object>() => SurrealIDType::Object,
+        id if id == TypeId::of::<Range>() => SurrealIDType::Range,
+        _ => SurrealIDType::Default
+    }
 }

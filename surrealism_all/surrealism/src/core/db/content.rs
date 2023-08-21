@@ -50,9 +50,9 @@ impl<'a> ContentSet<'a> {
     pub fn new_set(data: HashMap<&'a str, SurrealValue>) -> Self {
         ContentSet::Set(data)
     }
-    // pub fn from_content()->Self{
-    //
-    // }
+    pub fn new_empty_set() -> Self {
+        ContentSet::Set(HashMap::new())
+    }
     /// judge ContentSet is SET or CONTENT
     pub fn is_content(&self) -> bool {
         match self {
@@ -107,11 +107,12 @@ impl<'a> ContentSet<'a> {
     ///         .push(SurrealValue::Str("author".to_string()));
     ///     c_set1.add("works", SurrealValue::Array(arr));
     /// ```
-    pub fn add(&mut self, field: &'a str, value: SurrealValue) {
+    pub fn add(&mut self, field: &'a str, value: SurrealValue) -> &mut Self {
         match self {
             ContentSet::Content(_) => {}
             ContentSet::Set(res) => { res.insert(field, value); }
-        }
+        };
+        self
     }
 }
 

@@ -20,7 +20,8 @@ use std::any::{Any, TypeId};
 use serde::Serialize;
 use surrealdb::method::Content;
 use super::{BaseFunc, ParallelFunc, ReturnFunc, TimeoutFunc};
-use crate::{ReturnType, Table, TimeUnit, TimeOut, ContentSet, SurrealID};
+use crate::core::{CREATE, BLANK, PARALLEL, STMT_END};
+use crate::{ReturnType, Table, TimeUnit, TimeOut, ContentSet, SurrealID, match_id_type, SurrealIDType, ParamCombine, Object, SurrealValue};
 
 #[derive(Debug)]
 pub struct CreateWrapper<'w> {
@@ -45,13 +46,83 @@ impl<'w> CreateWrapper<'w> {
         self.table.table(table);
         self
     }
-    // pub fn id<T>(&mut self, id: T) -> &mut Self {
-    //     match id.type_id() {
-    //         TypeId { .. } => {}
-    //     }
-    //     self.table.id(SurrealID::);
-    //     self
-    // }
+    pub fn id(&mut self, id: SurrealID) -> &mut Self {
+        self.table.id(id);
+        self
+    }
+    pub fn content_set(&mut self, content_set: ContentSet<'w>) -> &mut Self {
+        let _ = self.content.replace(content_set);
+        self
+    }
+    pub fn content(&mut self, obj: Object) -> &mut Self {
+        match self.content {
+            None => self.content = Some(ContentSet::new_content(obj)),
+            Some(_) => {
+                let _ = self.content.replace(ContentSet::Content(obj));
+            }
+        };
+        self
+    }
+    pub fn set(&mut self) -> &mut Self {
+        match self.content {
+            None => self.content = Some(ContentSet::new_empty_set()),
+            Some(_) => {
+                let _ = self.content.replace(ContentSet::new_empty_set());
+            }
+        };
+        self
+    }
+    pub fn add(&mut self, field: &'w str, value: SurrealValue) -> &mut Self {
+        match self.content {
+            None => {
+                let mut v = ContentSet::new_empty_set();
+                let _ = v.add(field, value);
+                self.content = Some(v);
+            }
+            Some(ref content_set) => {
+                if content_set.is_set() {
+                    let _ = self.content.as_mut().unwrap().add(field, value);
+                } else {
+                    panic!("ContentSet::Content cannot use add function")
+                }
+            }
+        };
+        self
+    }
+    pub fn return_type(&mut self, return_type: ReturnType) -> &mut Self {
+        let _ = self.return_type.replace(return_type);
+        self
+    }
+    pub fn timeout(&mut self, timeout: TimeOut) -> &mut Self {
+        let _ = self.timeout.replace(timeout);
+        self
+    }
+    pub fn parallel(&mut self) -> &mut Self {
+        self.parallel = true;
+        self
+    }
+    pub fn build(&mut self) -> String {
+        // let wrapper = self.clone();
+        let mut res = format!("{} {}", CREATE, &self.table.combine());
+        if self.content.is_some() {
+            res.push_str(BLANK);
+            res.push_str(&self.content.as_ref().unwrap().combine());
+        }
+        if self.timeout.is_some() {
+            res.push_str(BLANK);
+            res.push_str(&self.timeout.as_ref().unwrap().combine());
+        }
+        if self.return_type.is_some() {
+            res.push_str(BLANK);
+            res.push_str(&self.return_type.as_ref().unwrap().combine());
+        }
+        if self.parallel {
+            res.push_str(BLANK);
+            res.push_str(PARALLEL);
+        }
+        res.push_str(STMT_END);
+        res
+    }
 }
 
 // impl BaseFunc for CreateWrapper {

@@ -26,7 +26,7 @@ sql_const!(
     (MILLISECOND,"MILLISECOND") (SECOND,"SECOND") (MINUTE,"MINUTE") (HOUR,"HOUR") ( DAY,"DAY") (TIMEOUT,"TIMEOUT")
     (PARALLEL,"PARALLEL") (NONE_DOWN,"none") (NULL,"NULL") (NULL_DOWN,"null") (EQ,"=") (EQUAL,"==") (LT,"<") (GT,">")
     (LT_EQ,"<=") (GT_EQ,">=") (TRUE_STR,"TRUE") (FALSE_STR,"FALSE") (LEFT_BRACE,"{ ") (RIGHT_BRACE," }") (COMMA," , ")
-    (RETURN,"RETURN") (CONTENT,"CONTENT") (SET,"SET")
+    (RETURN,"RETURN") (CONTENT,"CONTENT") (SET,"SET") (CREATE,"CREATE") (BLANK," ") (STMT_END,";")
 );
 pub const FALSE: bool = false;
 pub const TRUE: bool = true;

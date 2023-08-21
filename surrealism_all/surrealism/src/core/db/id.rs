@@ -162,3 +162,16 @@ impl Range {
         };
     }
 }
+
+#[derive(Clone, Debug)]
+pub enum SurrealIDType {
+    Default,
+    Int,
+    Float,
+    Decimal,
+    /// UUID,ULID,RAND is Str too
+    Str,
+    Object,
+    Array,
+    Range,
+}

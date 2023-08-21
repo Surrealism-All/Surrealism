@@ -10,3 +10,4 @@ mod surreal_value;
 mod surreal_timeout;
 mod surreal_return_type;
 mod surreal_content_set;
+mod test_match_id_type;
