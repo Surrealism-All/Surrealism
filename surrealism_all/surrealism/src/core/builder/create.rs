@@ -17,15 +17,16 @@
 //! ```
 
 use serde::Serialize;
+use surrealdb::method::Content;
 use super::{BaseFunc, ParallelFunc, ReturnFunc, TimeoutFunc};
-use crate::{ReturnType, Table, TimeUnit};
+use crate::{ReturnType, Table, TimeUnit, TimeOut, ContentSet};
 
-pub struct CreateWrapper {
-    table_param: String,
-    content_param: String,
-    return_param: String,
-    timeout: u32,
-    time_unit: TimeUnit,
+// #[derive(Serialize)]
+pub struct CreateWrapper<'w> {
+    table: Table,
+    content: ContentSet<'w>,
+    return_type: ReturnType,
+    timeout: TimeOut,
     parallel: bool,
 }
 
@@ -74,29 +75,29 @@ pub struct CreateWrapper {
 //     }
 // }
 
-impl TimeoutFunc for CreateWrapper {
-    fn timeout(&mut self, num: u32, unit: TimeUnit) -> &mut Self {
-        self.timeout = num;
-        self.time_unit = unit;
-        self
-    }
-}
-
-impl ReturnFunc for CreateWrapper {
-    fn return_for(&mut self, return_type: &str) -> &mut Self {
-        self.return_param = String::from(return_type);
-        self
-    }
-
-    fn return_from(&mut self, return_type: ReturnType) -> &mut Self {
-        self.return_param = String::from(return_type.to_str());
-        self
-    }
-}
-
-impl ParallelFunc for CreateWrapper {
-    fn parallel(&mut self) -> &mut Self {
-        self.parallel = true;
-        self
-    }
-}
+// impl TimeoutFunc for CreateWrapper {
+//     fn timeout(&mut self, num: u32, unit: TimeUnit) -> &mut Self {
+//         self.timeout = num;
+//         self.time_unit = unit;
+//         self
+//     }
+// }
+//
+// impl ReturnFunc for CreateWrapper {
+//     fn return_for(&mut self, return_type: &str) -> &mut Self {
+//         self.return_param = String::from(return_type);
+//         self
+//     }
+//
+//     fn return_from(&mut self, return_type: ReturnType) -> &mut Self {
+//         self.return_param = String::from(return_type.to_str());
+//         self
+//     }
+// }
+//
+// impl ParallelFunc for CreateWrapper {
+//     fn parallel(&mut self) -> &mut Self {
+//         self.parallel = true;
+//         self
+//     }
+// }

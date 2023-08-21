@@ -6,11 +6,8 @@
 //! @description:
 //! ```
 
-
-mod config;
 mod msg;
 
-pub use config::{ConfigNotFoundError, ConfigParseError, ConfigError};
 pub use msg::*;
 use serde::{Serialize, Deserialize};
 

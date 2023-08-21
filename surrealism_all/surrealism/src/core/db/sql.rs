@@ -5,7 +5,7 @@
 //! @version:0.0.1
 //! @description:
 //! ```
-use super::{AFTER, BEFORE, NONE, DIFF, UUID, ULID, RAND, MILLISECOND, MINUTE, SECOND, HOUR, DAY, SurrealID};
+use super::{AFTER, BEFORE, NONE, DIFF, UUID, ULID, RAND, MILLISECOND, MINUTE, SECOND, HOUR, DAY, TIMEOUT, RETURN, SurrealID, ParamCombine};
 use serde::{Serialize, Deserialize};
 
 /// # build Table with ID
@@ -25,7 +25,7 @@ pub struct Table {
 }
 
 impl Table {
-    pub fn new(table_name: &str, table_id: SurrealID) -> Table{
+    pub fn new(table_name: &str, table_id: SurrealID) -> Table {
         Table {
             name: String::from(table_name),
             id: table_id,
@@ -94,15 +94,30 @@ impl MATH {
 }
 
 /// 设置返回类型枚举
-pub enum ReturnType<'a> {
+/// ## example
+/// ```rust
+/// use surrealism::{ParamCombine, SurrealismRes, ReturnType};
+///     let return_none = ReturnType::None;
+///     let return_before = ReturnType::Before;
+///     let return_after = ReturnType::After;
+///     let return_field = ReturnType::Field("name");
+///     dbg!(&return_none);
+///     dbg!(&return_before);
+///     dbg!(&return_after);
+///     dbg!(&return_field);
+///     dbg!(&return_field.combine());
+///     dbg!(&return_after.combine());
+/// ```
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
+pub enum ReturnType {
     After,
     Before,
     None,
     Diff,
-    Field(&'a str),
+    Field(&'static str),
 }
 
-impl<'a> ReturnType<'a> {
+impl ReturnType {
     pub fn to_str(&self) -> &str {
         match self {
             ReturnType::After => AFTER,
@@ -114,6 +129,12 @@ impl<'a> ReturnType<'a> {
     }
 }
 
+impl ParamCombine for ReturnType {
+    fn combine(&self) -> String {
+        format!("{} {}", RETURN, &self.to_str())
+    }
+}
+
 ///在SurrealDB数据库中，Timeout子句可以用于设置查询的超时时间。它接受一个时间间隔作为参数，并支持以下单位：
 ///
 ///     ms：毫秒
@@ -121,6 +142,7 @@ impl<'a> ReturnType<'a> {
 ///     m：分钟
 ///     h：小时
 ///     d：天
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
 pub enum TimeUnit {
     MILLISECOND,
     SECOND,
@@ -139,6 +161,66 @@ impl TimeUnit {
             TimeUnit::DAY => DAY
         }
     }
+    pub fn get_unit(&self) -> &str {
+        match self {
+            TimeUnit::MILLISECOND => "ms",
+            TimeUnit::SECOND => "s",
+            TimeUnit::MINUTE => "m",
+            TimeUnit::HOUR => "h",
+            TimeUnit::DAY => "d"
+        }
+    }
+}
+
+/// # TimeOut for Wrapper
+/// ## example
+/// ```rust
+/// use surrealism::{TimeOut,TimeUnit,ParamCombine};
+///     let timeout = TimeOut::new(56_usize, TimeUnit::MINUTE);
+///     dbg!(&timeout.timeout());
+///     dbg!(&timeout.unit());
+///     dbg!(&timeout);
+///     dbg!(timeout.combine());
+/// ```
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct TimeOut {
+    timeout: Option<usize>,
+    unit: TimeUnit,
+}
+
+impl TimeOut {
+    pub fn new(timeout: usize, unit: TimeUnit) -> Self {
+        TimeOut {
+            timeout: Some(timeout),
+            unit,
+        }
+    }
+    pub fn new_no_args() -> Self {
+        TimeOut {
+            timeout: None,
+            unit: TimeUnit::SECOND,
+        }
+    }
+    pub fn timeout(&self) -> Option<usize> {
+        self.timeout
+    }
+    pub fn unit(&self) -> TimeUnit {
+        self.unit.clone()
+    }
+    pub fn set_timeout(&mut self, timeout: usize) -> &mut Self {
+        self.timeout = Some(timeout);
+        self
+    }
+    pub fn set_unit(&mut self, unit: TimeUnit) -> &mut Self {
+        self.unit = unit;
+        self
+    }
+}
+
+impl ParamCombine for TimeOut {
+    fn combine(&self) -> String {
+        format!("{} {}{}", TIMEOUT, &self.timeout().unwrap(), &self.unit().get_unit())
+    }
 }
 
 /// # Geometries
@@ -155,6 +237,7 @@ impl TimeUnit {
 /// MultiPolygon :	A value which contains multiple geometry polygons
 /// Collection :	A value which contains multiple different geometry types
 /// ```
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
 pub enum Geometry {
     Point,
     Line,

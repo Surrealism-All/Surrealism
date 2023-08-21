@@ -21,10 +21,10 @@ use crate::core::config::{DefaultConfigurationService, SurrealLogger, LogLevel};
 use super::InitService;
 use log::{error, info};
 use log::LevelFilter::{Warn, Debug, Info, Trace};
-use crate::{INIT_LOGGER, INIT_CONFIG, ConfigError, err_panic, ConfigNotFoundError};
+use crate::{INIT_LOGGER, INIT_CONFIG, err_panic};
 use simple_logger::SimpleLogger;
 use crate::core::{BANNER, SurrealismConnector};
-use except_plugin::{EasyException, easy_e, ExceptionCode, SuperBuilderImpl, Exception};
+use except_plugin::{EasyException, SuperBuilderImpl, Exception};
 
 #[derive(Debug)]
 pub struct DefaultInitService {

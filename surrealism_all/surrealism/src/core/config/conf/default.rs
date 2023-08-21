@@ -32,10 +32,10 @@ use std::env::current_dir;
 use std::path::PathBuf;
 use figment::providers::Format;
 use super::ConfigurationService;
-use crate::{ConfigNotFoundError, SurrealismConfig, ErrorLevel, ConfigParseError, ConfigError};
+use crate::{SurrealismConfig};
 use crate::core::config::SurrealLogger;
 use crate::core::constant::{CONFIG_PATH_COMMON, CONFIG_PATH_LEVEL1, CONFIG_PATH_LEVEL2, CONFIG_NAME, CONFIG_FILE_TYPE_TOML, CONFIG_FILE_TYPE_JSON};
-use except_plugin::{EasyException, easy_e, EasyExceptionBuilder, SuperBuilderImpl, ExceptionFactory, ExceptionLevel, ExceptionCode, CommonParamImpl};
+use except_plugin::{EasyException, easy_e, EasyExceptionBuilder, SuperBuilderImpl, ExceptionFactory, ExceptionLevel, CommonParamImpl};
 use crate::error::{CONFIG_NOT_FOUND_ERROR, ErrorTypeCode};
 
 /// - path : final target configuration path

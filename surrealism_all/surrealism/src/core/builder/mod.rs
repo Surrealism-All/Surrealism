@@ -11,7 +11,7 @@ mod insert;
 mod delete;
 mod create;
 
-use serde::Serialize;
+
 use self::create::CreateWrapper;
 use crate::{Table, ReturnType, TimeUnit};
 

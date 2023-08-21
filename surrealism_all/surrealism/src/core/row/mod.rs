@@ -31,8 +31,6 @@
 //! @description:
 //! ```
 
-use std::collections::HashMap;
-use std::error::Error;
 use regex::Regex;
 
 pub struct RowSql<'a> {

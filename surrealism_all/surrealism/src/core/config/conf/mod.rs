@@ -1,7 +1,5 @@
 mod default;
 
-
-use crate::{ConfigNotFoundError, ConfigParseError, ConfigError};
 pub use default::DefaultConfigurationService;
 use crate::core::config::SurrealLogger;
 use except_plugin::{EasyException};

@@ -1,3 +1,42 @@
+//! # SurrealDB对应值的类型
+//! ## example
+//! ```rust
+//! use std::collections::HashMap;
+//! use surrealism::{SurrealismRes, SurrealID, handle_str, Array, Object, SurrealValue};
+//! use serde::{Serialize, Deserialize};
+//!
+//! #[derive(Serialize, Deserialize)]
+//! struct User<'a> {
+//!     name: &'a str,
+//!     age: u32,
+//! }
+//!
+//! #[tokio::main]
+//! async fn main() -> SurrealismRes<()> {
+//!     let mut id1 = Array::new();
+//!     let _ = id1.push(SurrealValue::Int(1));
+//!     let _ = id1.push(SurrealValue::None);
+//!     let _ = id1.push(SurrealValue::Bool(true));
+//!     let ss = id1.parse();
+//!     dbg!(ss);
+//!     let user = User { name: "Joe", age: 12 };
+//!     let mut item = HashMap::new();
+//!     item.insert("a".to_string(), SurrealValue::Array(id1));
+//!     item.insert("b".to_string(), SurrealValue::Int(2));
+//!     let mut id2 = Object::from(item);
+//!     dbg!(id2.parse());
+//!     let res = Object::from_obj(&user);
+//!     dbg!(res.parse());
+//!     Ok(())
+//! }
+//! ```
+//! ```txt
+//! @author:syf20020816@Outlook.com
+//! @date:2023/8/21
+//! @version:0.0.1
+//! @description:
+//! ```
+
 use std::collections::{BTreeMap, HashMap};
 use serde::{Serialize, Deserialize};
 use serde_json::Value;
@@ -33,13 +72,82 @@ impl SurrealValue {
             SurrealValue::Array(arr) => arr.parse()
         }
     }
-
+    ///从json-str进行推测，转换为serde::Value再转为SurrealValue
+    /// ## example
+    /// ```rust
+    /// use surrealism::{SurrealValue};
+    /// let v = SurrealValue::from_str("{ \"address\": \"China - Shanghai\"}");
+    /// /*[tests\src\main.rs:41] v = Object(
+    ///     Object(
+    ///         {
+    ///             "address": Str(
+    ///                 "China - Shanghai",
+    ///             ),
+    ///         },
+    ///     ),
+    /// )*/
+    /// ```
     pub fn from_str(value: &str) -> SurrealValue {
         let value_str: Value = serde_json::from_str(value).unwrap();
         let res: SurrealValue = value_str.into();
         res
     }
+    pub fn is_none(&self) -> bool {
+        match self {
+            SurrealValue::None => true,
+            _ => false
+        }
+    }
+    pub fn is_null(&self) -> bool {
+        match self {
+            SurrealValue::Null => true,
+            _ => false
+        }
+    }
+    pub fn is_bool(&self) -> bool {
+        match self {
+            SurrealValue::Bool(_) => true,
+            _ => false
+        }
+    }
+    pub fn is_int(&self) -> bool {
+        match self {
+            SurrealValue::Int(_) => true,
+            _ => false
+        }
+    }
+    pub fn is_float(&self) -> bool {
+        match self {
+            SurrealValue::Float(_) => true,
+            _ => false
+        }
+    }
+    pub fn is_decimal(&self) -> bool {
+        match self {
+            SurrealValue::Decimal(_) => true,
+            _ => false
+        }
+    }
+    pub fn is_str(&self) -> bool {
+        match self {
+            SurrealValue::Str(_) => true,
+            _ => false
+        }
+    }
+    pub fn is_object(&self) -> bool {
+        match self {
+            SurrealValue::Object(_) => true,
+            _ => false
+        }
+    }
+    pub fn is_array(&self) -> bool {
+        match self {
+            SurrealValue::Array(_) => true,
+            _ => false
+        }
+    }
 }
+
 
 ///将serde的Value类型转为为SurrealValue
 impl From<Value> for SurrealValue {
@@ -144,6 +252,17 @@ impl From<Vec<SurrealValue>> for SurrealValue {
 
 
 /// Surreal对应的对象类型，使用B-Tree
+/// ## example (expect HashMap<&str,SurrealValue>)
+/// ```rust
+/// use std::collections::HashMap;
+/// use surrealism::{SurrealValue};
+///     let mut map: HashMap<&str, SurrealValue> = HashMap::new();
+///     let _ = map.insert("name", SurrealValue::Str(String::from("Mat")));
+///     let _ = map.insert("age", SurrealValue::Int(16));
+///     let _ = map.insert("address", SurrealValue::from("China - Shanghai"));
+///     let _ = map.insert("male", SurrealValue::Bool(true));
+///     let res = Object::from(map);
+/// ```
 #[derive(Serialize, Deserialize, Debug, Clone, PartialEq)]
 pub struct Object(BTreeMap<String, SurrealValue>);
 
@@ -183,6 +302,18 @@ impl From<BTreeMap<String, SurrealValue>> for Object {
 impl From<HashMap<String, SurrealValue>> for Object {
     fn from(v: HashMap<String, SurrealValue>) -> Self {
         Self(v.into_iter().collect())
+    }
+}
+
+impl<'a> From<HashMap<&'a str, SurrealValue>> for Object {
+    fn from(value: HashMap<&'a str, SurrealValue>) -> Self {
+        let value: HashMap<String, SurrealValue> = value
+            .into_iter()
+            .map(|(k, v)| {
+                (k.to_string(), v)
+            })
+            .collect();
+        Object::from(value)
     }
 }
 
