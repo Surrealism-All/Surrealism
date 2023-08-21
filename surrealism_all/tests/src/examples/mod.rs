@@ -9,3 +9,4 @@ mod handle_str_test;
 mod surreal_value;
 mod surreal_timeout;
 mod surreal_return_type;
+mod surreal_content_set;

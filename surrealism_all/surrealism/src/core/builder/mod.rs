@@ -15,12 +15,12 @@ mod create;
 use self::create::CreateWrapper;
 use crate::{Table, ReturnType, TimeUnit};
 
-pub struct SQLBuilder;
+pub struct SQLBuilderFactory;
 
-impl SQLBuilder {
-    // pub fn create(table: &str) -> CreateWrapper {
-    //     CreateWrapper::new(table)
-    // }
+impl SQLBuilderFactory {
+    pub fn create<'f>() -> CreateWrapper<'f> {
+        CreateWrapper::new()
+    }
     // fn select() -> SelectWrapper {}
     // fn update() -> UpdateWrapper {}
     // fn insert() -> InsertWrapper {}
@@ -37,19 +37,19 @@ pub trait BaseFunc {
     fn new_no_args() -> Self;
     /// 指定table name
     fn table(&mut self, table_name: &str, table_id: &str) -> &mut Self;
-    fn build(&self)->String;
+    fn build(&self) -> String;
 }
 
 pub trait ReturnFunc {
-    fn return_for(&mut self,return_type: &str) -> &mut Self;
-    fn return_from(&mut self,return_type: ReturnType) -> &mut Self;
+    fn return_for(&mut self, return_type: &str) -> &mut Self;
+    fn return_from(&mut self, return_type: ReturnType) -> &mut Self;
 }
 
 pub trait TimeoutFunc {
-    fn timeout(&mut self,num: u32, unit: TimeUnit) -> &mut Self;
+    fn timeout(&mut self, num: u32, unit: TimeUnit) -> &mut Self;
 }
 
 ///PARALLEL
 pub trait ParallelFunc {
-    fn parallel(&mut self)->&mut Self;
+    fn parallel(&mut self) -> &mut Self;
 }

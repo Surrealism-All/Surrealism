@@ -1,18 +1,42 @@
-use surrealism::{SurrealismRes, IDNumber, SurrealID, Table};
+use surrealism::{SurrealismRes, SurrealID, Array, SurrealValue, Object, Range, ParamCombine, Table};
+use serde::{Deserialize, Serialize};
 
-// [tests\src\main.rs:18] table1 = "test:surrealdb"
-// [tests\src\main.rs:19] table2 = "temperature:17493"
-// [tests\src\main.rs:20] table3 = "temperature:['London', 'New York']"
-// [tests\src\main.rs:21] table4 = "user:rand()"
+#[derive(Debug, Serialize, Deserialize)]
+struct User<'a> {
+    name: &'a str,
+    age: u32,
+}
+
 #[tokio::main]
 async fn main() -> SurrealismRes<()> {
-    let table1 = Table::new("test", SurrealID::<String>::Str("surrealdb".to_string())).build();
-    let table2 = Table::new_no_arg().table("temperature").id(SurrealID::<IDNumber>::Number(IDNumber::Int(17493))).build();
-    let table3 = Table::<String>::new_into("temperature", "['London', 'New York']").build();
-    let table4 = Table::new("user", SurrealID::<String>::RAND).build();
-    dbg!(table1);
-    dbg!(table2);
-    dbg!(table3);
-    dbg!(table4);
+    let id1 = SurrealID::RAND;
+    let id2 = SurrealID::Default;
+    let id3 = SurrealID::Str(String::from("surrealism"));
+    let id4 = SurrealID::Int(56_i32);
+    let id5 = SurrealID::Float(45.5454647_f32);
+    let id6 = SurrealID::Array(Array::from(vec![SurrealValue::Str(String::from("John")), SurrealValue::Str(String::from("Mat"))]));
+    let user = User {
+        name: "Mat",
+        age: 16,
+    };
+    let id7 = SurrealID::Object(Object::from_obj(&user));
+    let id8 = SurrealID::Range(Range::new_from_str("2", "6", true));
+    let id9 = SurrealID::from("ulid()");
+
+    let table1 = Table::new_no_arg()
+        .table("surrealism")
+        .id(id1)
+        .build();
+
+    let table2 = Table::new_no_arg()
+        .table("surrealism")
+        .id(id4)
+        .build();
+    let table3 = Table::new("surrealism", id6).combine();
+    let table4 = Table::new_into("surrealdb", "2..6").combine();
+    dbg!(&table1);
+    dbg!(&table2);
+    dbg!(&table3);
+    dbg!(&table4);
     Ok(())
 }

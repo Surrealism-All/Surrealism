@@ -1,17 +1,25 @@
 use serde::{Serialize, Deserialize};
+use crate::{ParamCombine, handle_str};
 use super::{UUID, ULID, RAND, EQ, SurrealValue, Object, Array};
 
 /// # ID的枚举类型
 /// 通过SurrealID快速生成一个含有类型的ID
 /// ## example
-/// ``` code
-///     let n1 = IDNumber::Int(56).to_str();
-///     let sn1 = SurrealID::<String>::Default.to_str();
-///     let sn2 = SurrealID::<String>::Str("Joe".to_string()).to_str();
-///     let sn3 = SurrealID::<User>::Array(vec![User { name: "Joe", age: 16 }, User { name: "Mark", age: 25 }]);
-///     let sn4 = SurrealID::<f32>::Number(IDNumber::Float(23.56546_f32)).to_str();
-///     let sn5 = SurrealID::<User>::Object(User { name: "Mary", age: 23 });
-///     let sn6 =  SurrealID::<String>::UUID;
+/// ``` rust
+/// use surrealism::{Range,SurrealID,Array,SurrealValue,Object};
+///    let id1 = SurrealID::RAND;
+///     let id2 = SurrealID::Default;
+///     let id3 = SurrealID::Str(String::from("surrealism"));
+///     let id4 = SurrealID::Int(56_i32);
+///     let id5 = SurrealID::Float(45.5454647_f32);
+///     let id6 = SurrealID::Array(Array::from(vec![SurrealValue::Str(String::from("John")), SurrealValue::Str(String::from("Mat"))]));
+///     let user = User {
+///         name: "Mat",
+///         age: 16,
+///     };
+///     let id7 = SurrealID::Object(Object::from_obj(&user));
+///     let id8 = SurrealID::Range(Range::new_from_str("2", "6", true));
+///     let id9 = SurrealID::from("ulid()");
 /// ```
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub enum SurrealID {
@@ -28,6 +36,18 @@ pub enum SurrealID {
     Range(Range),
 }
 
+impl Default for SurrealID {
+    fn default() -> Self {
+        SurrealID::RAND
+    }
+}
+
+impl ParamCombine for SurrealID {
+    fn combine(&self) -> String {
+        self.to_str()
+    }
+}
+
 impl SurrealID {
     /// Convert SurrealID to String
     pub fn to_str(&self) -> String {
@@ -37,8 +57,8 @@ impl SurrealID {
             SurrealID::Float(f) => f.to_string(),
             SurrealID::Decimal(b_f) => b_f.to_string(),
             SurrealID::Str(s) => String::from(s),
-            SurrealID::Object(obj) => serde_json::to_string(obj).unwrap(),
-            SurrealID::Array(arr) => serde_json::to_string(arr).unwrap(),
+            SurrealID::Object(obj) => obj.parse(),
+            SurrealID::Array(arr) => arr.parse(),
             SurrealID::ULID => ULID.to_string(),
             SurrealID::UUID => UUID.to_string(),
             SurrealID::RAND => RAND.to_string(),
@@ -47,6 +67,71 @@ impl SurrealID {
     }
 }
 
+impl From<i32> for SurrealID {
+    fn from(value: i32) -> Self {
+        SurrealID::Int(value)
+    }
+}
+
+impl From<f32> for SurrealID {
+    fn from(value: f32) -> Self {
+        SurrealID::Float(value)
+    }
+}
+
+impl From<f64> for SurrealID {
+    fn from(value: f64) -> Self {
+        SurrealID::Decimal(value)
+    }
+}
+
+impl From<&str> for SurrealID {
+    fn from(value: &str) -> Self {
+        match value {
+            RAND => SurrealID::RAND,
+            UUID => SurrealID::UUID,
+            ULID => SurrealID::ULID,
+            other => SurrealID::Str(String::from(other))
+        }
+    }
+}
+
+impl From<String> for SurrealID {
+    fn from(value: String) -> Self {
+        match value.as_str() {
+            RAND => SurrealID::RAND,
+            UUID => SurrealID::UUID,
+            ULID => SurrealID::ULID,
+            other => SurrealID::Str(String::from(other))
+        }
+    }
+}
+
+impl From<Array> for SurrealID {
+    fn from(value: Array) -> Self {
+        SurrealID::Array(value)
+    }
+}
+
+impl From<Object> for SurrealID {
+    fn from(value: Object) -> Self {
+        SurrealID::Object(value)
+    }
+}
+
+impl From<Range> for SurrealID {
+    fn from(value: Range) -> Self {
+        SurrealID::Range(value)
+    }
+}
+
+/// # Id type range
+/// ## example
+/// ```rust
+/// use surrealism::{Range,SurrealValue};
+///     let range1 = Range::new(SurrealValue::Int(1), SurrealValue::Int(32), true).to_str();
+///     let range2 = Range::new_from_str("2", "23", false).to_str();
+/// ```
 #[derive(Serialize, Deserialize, Debug, Clone, PartialEq)]
 pub struct Range {
     eq: bool,

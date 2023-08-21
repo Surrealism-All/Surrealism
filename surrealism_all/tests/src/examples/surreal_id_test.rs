@@ -1,4 +1,4 @@
-use surrealism::{SurrealismRes, IDNumber, SurrealID};
+use surrealism::{SurrealismRes, SurrealID, Array, SurrealValue, Object, Range};
 use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Serialize, Deserialize)]
@@ -7,43 +7,29 @@ struct User<'a> {
     age: u32,
 }
 
-// [tests\src\main.rs:20] sn1 = ""
-// [tests\src\main.rs:21] sn2 = "Joe"
-// [tests\src\main.rs:22] sn3 = Array(
-//     [
-//         User {
-//             name: "Joe",
-//             age: 16,
-//         },
-//         User {
-//             name: "Mark",
-//             age: 25,
-//         },
-//     ],
-// )
-// [tests\src\main.rs:23] sn4 = "23.56546"
-// [tests\src\main.rs:24] sn5 = Object(
-//     User {
-//         name: "Mary",
-//         age: 23,
-//     },
-// )
-// 56
 #[tokio::main]
 async fn main() -> SurrealismRes<()> {
-    let n1 = IDNumber::Int(56).to_str();
-    let sn1 = SurrealID::<String>::Default.to_str();
-    let sn2 = SurrealID::<String>::Str("Joe".to_string()).to_str();
-    let sn3 = SurrealID::<User>::Array(vec![User { name: "Joe", age: 16 }, User { name: "Mark", age: 25 }]);
-    let sn4 = SurrealID::<f32>::Number(IDNumber::Float(23.56546_f32)).to_str();
-    let sn5 = SurrealID::<User>::Object(User { name: "Mary", age: 23 });
-    let sn6 =  SurrealID::<String>::UUID;
-    dbg!(sn1);
-    dbg!(sn2);
-    dbg!(sn3);
-    dbg!(sn4);
-    dbg!(sn5);
-    dbg!(sn6);
-    println!("{}", &n1);
+    let id1 = SurrealID::RAND;
+    let id2 = SurrealID::Default;
+    let id3 = SurrealID::Str(String::from("surrealism"));
+    let id4 = SurrealID::Int(56_i32);
+    let id5 = SurrealID::Float(45.5454647_f32);
+    let id6 = SurrealID::Array(Array::from(vec![SurrealValue::Str(String::from("John")), SurrealValue::Str(String::from("Mat"))]));
+    let user = User {
+        name: "Mat",
+        age: 16,
+    };
+    let id7 = SurrealID::Object(Object::from_obj(&user));
+    let id8 = SurrealID::Range(Range::new_from_str("2", "6", true));
+    let id9 = SurrealID::from("ulid()");
+    dbg!(id1);
+    dbg!(id2);
+    dbg!(id3);
+    dbg!(id4);
+    dbg!(id5);
+    dbg!(id6);
+    dbg!(id7);
+    dbg!(id8);
+    dbg!(id9);
     Ok(())
 }

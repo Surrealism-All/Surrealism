@@ -12,16 +12,47 @@ use serde::{Serialize, Deserialize};
 /// If you don't want to specify the type, you can create it directly using `new_into()`
 /// > `Table::<String>::new_into("temperature", "['London', 'New York']").build();`
 /// ## example
-/// ```code
-///     let table1 = Table::new("test", SurrealID::<String>::Str("surrealdb".to_string())).build();
-///     let table2 = Table::new_no_arg().table("temperature").id(SurrealID::<IDNumber>::Number(IDNumber::Int(17493))).build();
-///     let table3 = Table::<String>::new_into("temperature", "['London', 'New York']").build();
-///     let table4 = Table::new("user", SurrealID::<String>::RAND).build();
+/// ```rust
+/// use surrealism::{SurrealID,SurrealValue,Table,Array,Object,Range,ParamCombine};
+///     let id1 = SurrealID::RAND;
+///     let id2 = SurrealID::Default;
+///     let id3 = SurrealID::Str(String::from("surrealism"));
+///     let id4 = SurrealID::Int(56_i32);
+///     let id5 = SurrealID::Float(45.5454647_f32);
+///     let id6 = SurrealID::Array(Array::from(vec![SurrealValue::Str(String::from("John")), SurrealValue::Str(String::from("Mat"))]));
+///     let user = User {
+///         name: "Mat",
+///         age: 16,
+///     };
+///     let id7 = SurrealID::Object(Object::from_obj(&user));
+///     let id8 = SurrealID::Range(Range::new_from_str("2", "6", true));
+///     let id9 = SurrealID::from("ulid()");
+///
+///     let table1 = Table::new_no_arg()
+///         .table("surrealism")
+///         .id(id1)
+///         .build();
+///
+///     let table2 = Table::new_no_arg()
+///         .table("surrealism")
+///         .id(id4)
+///         .build();
+///     let table3 = Table::new("surrealism", id6).combine();
+///     let table4 = Table::new_into("surrealdb", "2..6").combine();
 /// ```
 #[derive(Debug, Serialize, Deserialize)]
 pub struct Table {
     name: String,
     id: SurrealID,
+}
+
+impl Default for Table {
+    fn default() -> Self {
+        Table {
+            name: String::new(),
+            id: SurrealID::default(),
+        }
+    }
 }
 
 impl Table {
@@ -39,10 +70,7 @@ impl Table {
         }
     }
     pub fn new_no_arg() -> Table {
-        Table {
-            name: String::new(),
-            id: SurrealID::Default,
-        }
+        Table::default()
     }
     /// build table name
     pub fn table(&mut self, table_name: &str) -> &mut Self {
@@ -60,12 +88,17 @@ impl Table {
         let mut table_stmt = String::new();
         match self.id {
             SurrealID::Default => table_stmt = format!("{}", &self.name),
-            _ => table_stmt = format!("{}:{}", &self.name, &self.id.to_str())
+            _ => table_stmt = format!("{}:{}", &self.name, &self.id.combine())
         };
         table_stmt
     }
 }
 
+impl ParamCombine for Table {
+    fn combine(&self) -> String {
+        self.build()
+    }
+}
 
 /// 数字类型
 /// 主要用于直接获取Math提供的常量

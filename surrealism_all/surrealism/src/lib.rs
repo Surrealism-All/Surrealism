@@ -5,8 +5,8 @@ mod info;
 
 pub use crate::core::{
     SurrealismConfig, DefaultInitService, InitService, SurrealismConnector, SurrealismCommit, UseNSDB, RowSql,
-    Table, SurrealID, ReturnType, SQLBuilder, TimeUnit, Range, Object, Array, SurrealValue, TimeOut, ParamCombine,
-    ContentSet,
+    Table, SurrealID, ReturnType, TimeUnit, Range, Object, Array, SurrealValue, TimeOut, ParamCombine,
+    ContentSet,SQLBuilderFactory
 };
 pub use crate::error::ErrorLevel;
 pub use crate::info::*;

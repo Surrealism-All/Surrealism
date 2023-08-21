@@ -16,18 +16,42 @@
 //! @description:
 //! ```
 
+use std::any::{Any, TypeId};
 use serde::Serialize;
 use surrealdb::method::Content;
 use super::{BaseFunc, ParallelFunc, ReturnFunc, TimeoutFunc};
-use crate::{ReturnType, Table, TimeUnit, TimeOut, ContentSet};
+use crate::{ReturnType, Table, TimeUnit, TimeOut, ContentSet, SurrealID};
 
-// #[derive(Serialize)]
+#[derive(Debug)]
 pub struct CreateWrapper<'w> {
     table: Table,
-    content: ContentSet<'w>,
-    return_type: ReturnType,
-    timeout: TimeOut,
+    content: Option<ContentSet<'w>>,
+    return_type: Option<ReturnType>,
+    timeout: Option<TimeOut>,
     parallel: bool,
+}
+
+impl<'w> CreateWrapper<'w> {
+    pub fn new() -> Self {
+        CreateWrapper {
+            table: Table::default(),
+            content: None,
+            return_type: None,
+            timeout: None,
+            parallel: false,
+        }
+    }
+    pub fn table(&mut self, table: &str) -> &mut Self {
+        self.table.table(table);
+        self
+    }
+    // pub fn id<T>(&mut self, id: T) -> &mut Self {
+    //     match id.type_id() {
+    //         TypeId { .. } => {}
+    //     }
+    //     self.table.id(SurrealID::);
+    //     self
+    // }
 }
 
 // impl BaseFunc for CreateWrapper {

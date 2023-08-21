@@ -31,10 +31,10 @@
 
 use std::collections::HashMap;
 use serde::Serialize;
-use super::{SurrealValue, Object};
+use super::{SurrealValue, Object, ParamCombine, CONTENT, SET};
 
 /// # SurrealContent
-///
+/// ContentSet is used to create wrapper `content | set` param
 #[derive(Debug)]
 pub enum ContentSet<'a> {
     Content(Object),
@@ -114,3 +114,24 @@ impl<'a> ContentSet<'a> {
         }
     }
 }
+
+impl<'a> ParamCombine for ContentSet<'a> {
+    fn combine(&self) -> String {
+        fn build(map: &HashMap<&str, SurrealValue>) -> String {
+            map.iter()
+                .map(|(k, v)| format!("{} = {}", k, v.to_str()))
+                .collect::<Vec<String>>()
+                .join(" , ")
+        }
+        match self {
+            ContentSet::Content(content) => {
+                format!("{} {}", CONTENT, content.parse())
+            }
+            ContentSet::Set(set) => {
+                // convert to SurrealValue
+                format!("{} {}", SET, build(set))
+            }
+        }
+    }
+}
+
