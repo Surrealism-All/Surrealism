@@ -40,8 +40,8 @@
 use std::collections::{BTreeMap, HashMap};
 use serde::{Serialize, Deserialize};
 use serde_json::Value;
-use crate::{handle_str, remove_format_half};
-use super::{NULL, NULL_DOWN, NONE_DOWN, NONE, TRUE, TRUE_STR, FALSE, FALSE_STR, LEFT_BRACE, RIGHT_BRACE, COMMA};
+use crate::util::{remove_format_half, handle_str};
+use super::constants::{NULL, NULL_DOWN, NONE_DOWN, NONE, TRUE, TRUE_STR, FALSE, FALSE_STR, LEFT_BRACE, RIGHT_BRACE, COMMA};
 
 /// SurrealDB对应的值类型
 #[derive(Serialize, Deserialize, Debug, Clone, PartialEq)]

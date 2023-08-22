@@ -14,8 +14,8 @@ use surrealdb::{Error, Response, Surreal};
 use surrealdb::opt::auth::Root;
 use futures::executor::block_on;
 use surrealdb::method::{Version};
-use crate::SurrealismConfig;
 use async_trait::async_trait;
+use crate::core::SurrealismConfig;
 
 #[async_trait]
 pub trait UseNSDB {

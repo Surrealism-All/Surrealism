@@ -10,7 +10,7 @@
 use std::path::PathBuf;
 use serde_json;
 use serde::{Deserialize, Serialize};
-use super::{SurrealLogger};
+use super::logger::SurrealLogger;
 
 /// Surrealism configuration
 /// surreal:单机本地连接Single还是分布式连接Multi

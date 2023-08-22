@@ -5,8 +5,9 @@
 //! @version:0.0.1
 //! @description:
 //! ```
-use super::{AFTER, BEFORE, NONE, DIFF, UUID, ULID, RAND, MILLISECOND, MINUTE, SECOND, HOUR, DAY, TIMEOUT, RETURN, SurrealID, ParamCombine};
 use serde::{Serialize, Deserialize};
+use super::constants::{AFTER, BEFORE, NONE, DIFF, UUID, ULID, RAND, MINUTE, MILLISECOND, SECOND, HOUR, DAY, TIMEOUT, RETURN};
+use super::{SurrealID, ParamCombine};
 
 /// # build Table with ID
 /// If you don't want to specify the type, you can create it directly using `new_into()`
@@ -40,7 +41,7 @@ use serde::{Serialize, Deserialize};
 ///     let table3 = Table::new("surrealism", id6).combine();
 ///     let table4 = Table::new_into("surrealdb", "2..6").combine();
 /// ```
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct Table {
     name: String,
     id: SurrealID,

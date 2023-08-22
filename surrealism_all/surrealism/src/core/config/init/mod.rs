@@ -1,7 +1,7 @@
 mod default;
 
 pub use default::DefaultInitService;
-use crate::{SurrealismConnector};
+use crate::core::connector::SurrealismConnector;
 use simple_logger::SimpleLogger;
 use except_plugin::{EasyException};
 

@@ -31,11 +31,12 @@
 
 use std::collections::HashMap;
 use serde::Serialize;
-use super::{SurrealValue, Object, ParamCombine, CONTENT, SET};
+use super::{SurrealValue, Object, ParamCombine};
+use super::constants::{CONTENT, SET};
 
 /// # SurrealContent
 /// ContentSet is used to create wrapper `content | set` param
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub enum ContentSet<'a> {
     Content(Object),
     Set(HashMap<&'a str, SurrealValue>),

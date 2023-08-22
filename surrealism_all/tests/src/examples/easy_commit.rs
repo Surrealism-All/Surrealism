@@ -1,4 +1,4 @@
-use surrealism::{DefaultInitService, InitService, SurrealismConnector, SurrealismRes, SurrealismCommit, UseNSDB};
+use surrealism::{DefaultInitService, SurrealismRes, InitService, UseNSDB, SurrealismCommit};
 
 #[tokio::main]
 async fn main() -> SurrealismRes<()> {

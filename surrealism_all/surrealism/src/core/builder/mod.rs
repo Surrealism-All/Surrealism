@@ -12,8 +12,8 @@ mod delete;
 mod create;
 
 
-use self::create::CreateWrapper;
-use crate::{Table, ReturnType, TimeUnit};
+use self::create::{CreateWrapper, CreateWrapperImpl};
+use crate::core::db::{Table, ReturnType, TimeUnit, TimeOut, SurrealID, ContentSet, Object, SurrealValue};
 
 pub struct SQLBuilderFactory;
 
@@ -27,29 +27,34 @@ impl SQLBuilderFactory {
     // fn delete() -> DeleteWrapper {}
 }
 
-pub trait BaseFunc {
-    /// 创建一个Table指定name和id
-    fn new(table: &str) -> Self;
-    /// 通过使用Table工具创建一个Wrapper
-    /// 这样会指定好Table的name和id
-    fn from(table: &Table) -> Self;
-    /// 直接创建一个Wrapper
-    fn new_no_args() -> Self;
-    /// 指定table name
-    fn table(&mut self, table_name: &str, table_id: &str) -> &mut Self;
-    fn build(&self) -> String;
+
+pub trait BaseWrapperImpl {
+    fn new() -> Self;
+    fn deref_mut(&mut self) -> Self;
+    fn build(&mut self) -> String;
 }
 
-pub trait ReturnFunc {
-    fn return_for(&mut self, return_type: &str) -> &mut Self;
-    fn return_from(&mut self, return_type: ReturnType) -> &mut Self;
+pub trait TableImpl {
+    fn table(&mut self, table: &str) -> &mut Self;
+    fn id(&mut self, id: SurrealID) -> &mut Self;
 }
 
-pub trait TimeoutFunc {
-    fn timeout(&mut self, num: u32, unit: TimeUnit) -> &mut Self;
+pub trait ContentSetImpl<'w> {
+    fn content_set(&mut self, content_set: ContentSet<'w>) -> &mut Self;
+    fn content(&mut self, obj: Object) -> &mut Self;
+    fn set(&mut self) -> &mut Self;
+    fn add(&mut self, field: &'w str, value: SurrealValue) -> &mut Self;
+}
+
+pub trait ReturnImpl {
+    fn return_type(&mut self, return_type: ReturnType) -> &mut Self;
+}
+
+pub trait TimeoutImpl {
+    fn timeout(&mut self, timeout: TimeOut) -> &mut Self;
 }
 
 ///PARALLEL
-pub trait ParallelFunc {
+pub trait ParallelImpl {
     fn parallel(&mut self) -> &mut Self;
 }

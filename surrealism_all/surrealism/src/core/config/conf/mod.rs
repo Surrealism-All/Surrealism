@@ -1,8 +1,8 @@
 mod default;
 
 pub use default::DefaultConfigurationService;
-use crate::core::config::SurrealLogger;
 use except_plugin::{EasyException};
+use crate::core::config::logger::SurrealLogger;
 
 /// Super Configuration Service
 ///

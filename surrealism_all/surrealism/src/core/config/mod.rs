@@ -13,9 +13,8 @@ mod configuration;
 mod logger;
 
 pub use configuration::SurrealismConfig;
-pub use conf::DefaultConfigurationService;
-pub use init::{DefaultInitService, InitService};
-pub use logger::{LogLevel, SurrealLogger};
+pub use conf::{DefaultConfigurationService, ConfigurationService};
+pub use init::{DefaultInitService,InitService};
 
 
 

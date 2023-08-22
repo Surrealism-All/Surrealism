@@ -2,23 +2,6 @@
 //!
 //! # impl DefineConfiguration
 //!
-//! be like:
-//! ``` code
-//!  fn define_config_dir(&mut self, path: &str) -> Result<(), ConfigNotFoundError> {
-//!          let target_dir = PathBuf::from(path);
-//!          if target_dir.try_exists().unwrap() {
-//!              self.tmp_dirs.push(target_dir);
-//!              Ok(())
-//!          } else {
-//!              Err(ConfigNotFoundError::new(line!(), file!(), ErrorLevel::Error)
-//!                  .set_msg(format!("Could not find the path : {}", path).as_str())
-//!                  .set_recommend(format!("You must make dir : {}", path).as_str())
-//!                  .print_description()
-//!                  .deref_mut()
-//!              )
-//!          }
-//!      }
-//! ```
 //!
 //! ```txt
 //! @author:syf20020816@Outlook.com
@@ -31,12 +14,12 @@ use figment::{Figment, providers::{Toml, Json}};
 use std::env::current_dir;
 use std::path::PathBuf;
 use figment::providers::Format;
-use super::ConfigurationService;
-use crate::{SurrealismConfig};
-use crate::core::config::SurrealLogger;
-use crate::core::constant::{CONFIG_PATH_COMMON, CONFIG_PATH_LEVEL1, CONFIG_PATH_LEVEL2, CONFIG_NAME, CONFIG_FILE_TYPE_TOML, CONFIG_FILE_TYPE_JSON};
 use except_plugin::{EasyException, easy_e, EasyExceptionBuilder, SuperBuilderImpl, ExceptionFactory, ExceptionLevel, CommonParamImpl};
+use crate::core::config::{SurrealismConfig};
 use crate::error::{CONFIG_NOT_FOUND_ERROR, ErrorTypeCode};
+use super::ConfigurationService;
+use crate::core::config::logger::SurrealLogger;
+use crate::core::constant::{CONFIG_PATH_COMMON, CONFIG_PATH_LEVEL1, CONFIG_PATH_LEVEL2, CONFIG_NAME, CONFIG_FILE_TYPE_TOML, CONFIG_FILE_TYPE_JSON};
 
 /// - path : final target configuration path
 /// - data : configuration

@@ -1,7 +1,8 @@
 use serde::{Serialize, Deserialize};
-use crate::{ParamCombine, handle_str};
-use super::{UUID, ULID, RAND, EQ, SurrealValue, Object, Array};
 
+use crate::util::handle_str;
+use super::constants::{UUID, ULID, RAND, EQ};
+use super::{SurrealValue,Object,Array,ParamCombine};
 /// # ID的枚举类型
 /// 通过SurrealID快速生成一个含有类型的ID
 /// ## example
