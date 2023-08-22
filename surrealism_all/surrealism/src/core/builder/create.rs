@@ -108,13 +108,13 @@ impl<'w> BaseWrapperImpl for CreateWrapper<'w> {
             res.push_str(BLANK);
             res.push_str(&self.content.as_ref().unwrap().combine());
         }
-        if self.timeout.is_some() {
-            res.push_str(BLANK);
-            res.push_str(&self.timeout.as_ref().unwrap().combine());
-        }
         if self.return_type.is_some() {
             res.push_str(BLANK);
             res.push_str(&self.return_type.as_ref().unwrap().combine());
+        }
+        if self.timeout.is_some() {
+            res.push_str(BLANK);
+            res.push_str(&self.timeout.as_ref().unwrap().combine());
         }
         if self.parallel {
             res.push_str(BLANK);

@@ -15,17 +15,19 @@
 //! ```
 
 use std::error::Error;
+use std::future::Future;
 use std::process::exit;
 use log::{error, info};
 use log::LevelFilter::{Warn, Debug, Info, Trace};
 use simple_logger::SimpleLogger;
 use except_plugin::{EasyException, SuperBuilderImpl, Exception};
+use futures::executor::block_on;
 use crate::core::constant::{BANNER};
 use crate::info::{INIT_CONFIG, INIT_LOGGER};
 use crate::core::connector::{SurrealismConnector};
 use crate::core::config::logger::{SurrealLogger, LogLevel};
 use crate::{err_panic};
-use crate::core::config::{DefaultConfigurationService,ConfigurationService};
+use crate::core::config::{DefaultConfigurationService, ConfigurationService};
 use super::InitService;
 
 #[derive(Debug)]
@@ -86,6 +88,13 @@ impl InitService for DefaultInitService {
                 let version = res.version();
                 info!("Please focus following print to check!\n{:#?}",version);
                 info!("Init Service : `Connection Service` Successfully!");
+                let data = config_data.get_username_password();
+                match block_on(res.try_connect(data[0], data[1])) {
+                    Ok(_) => {}
+                    Err(e) => {
+                        panic!("{:?}", e)
+                    }
+                }
                 res
             }
             Err(e) => panic!("{:?}", e)

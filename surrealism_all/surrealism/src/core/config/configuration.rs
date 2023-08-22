@@ -80,6 +80,9 @@ impl SurrealismConfig {
     pub fn get_password(&self) -> &str {
         &self.password
     }
+    pub fn get_username_password(&self) -> Vec<&str> {
+        vec![self.get_username(), self.get_password()]
+    }
     pub fn get_url(&self) -> &str { &self.url }
     pub fn get_port(&self) -> u16 { self.port }
 }

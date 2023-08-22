@@ -1,6 +1,6 @@
 mod lib;
 
-use surrealism::{SurrealismRes, SurrealID, TimeOut, SurrealValue, TimeUnit, ReturnType, Object};
+use surrealism::{SurrealismRes, SurrealID, TimeOut, SurrealValue, TimeUnit, ReturnType, Object, DefaultInitService, InitService, UseNSDB, SurrealismCommit};
 use surrealism::builder::*;
 use serde::{Serialize, Deserialize};
 
@@ -13,18 +13,19 @@ struct User<'a> {
 
 #[tokio::main]
 async fn main() -> SurrealismRes<()> {
-    // use set : CREATE surrealism:rand() SET name = 'Mat' TIMEOUT 5s RETURN AFTER PARALLEL;
+    let service = DefaultInitService::new().init();
+    let _ = service.use_commit("test", "test").await?;
+
+    // use set : CREATE surrealism:10086 SET name = 'Mat' RETURN AFTER TIMEOUT 5s ;
     let mut create = SQLBuilderFactory::create()
         .table("surrealism")
-        .id(SurrealID::RAND)
+        .id(SurrealID::Int(10086))
         .set()
         .add("name", SurrealValue::Str(String::from("Mat")))
         .timeout(TimeOut::new(5, TimeUnit::SECOND))
         .return_type(ReturnType::After)
-        .parallel()
         .deref_mut();
-    dbg!(&create.build());
-    // use content : CREATE surrealdb:ulid() CONTENT { age : 16 , name : 'Mat' , works : ['cook'] } RETURN name;
+    // use content : CREATE surrealdb:10087 CONTENT { age : 16 , name : 'Mat' , works : ['cook'] } RETURN name;
     let user = User {
         name: "Mat",
         age: 16,
@@ -32,11 +33,15 @@ async fn main() -> SurrealismRes<()> {
     };
     let mut create2 = SQLBuilderFactory::create()
         .table("surrealdb")
-        .id(SurrealID::ULID)
+        .id(SurrealID::Int(10087))
         .content(Object::from_obj(&user))
         .return_type(ReturnType::Field("name"))
         .deref_mut();
-    dbg!(create2.build());
+
+    let res1 = service.commit_sql(&create.build()).await;
+    dbg!(res1);
+    let res2 = service.commit_sql(&create2.build()).await;
+    dbg!(res2);
     Ok(())
 }
 
