@@ -1,5 +1,5 @@
 use std::collections::HashMap;
-use surrealism::{SurrealismRes, SurrealID, handle_str, Array, Object, SurrealValue};
+use surrealism::{SurrealismRes, SurrealID, Array, Object, SurrealValue};
 use serde::{Serialize, Deserialize};
 
 #[derive(Serialize, Deserialize)]

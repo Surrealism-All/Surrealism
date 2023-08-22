@@ -112,6 +112,7 @@ fn matches_count(target: &str) -> usize {
 
 /// An easy way to use row sql
 /// ```rust
+/// use surrealism::{row_sql,RowSql};
 ///    let sql = row_sql!("SELECT {} FROM {} WHERE {} = 56;")
 ///         .bind_index(0, "*")
 ///         .bind_index(2, "age")

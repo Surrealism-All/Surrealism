@@ -1,5 +1,3 @@
-mod lib;
-
 use surrealism::{SurrealismRes, SurrealID, TimeOut, SurrealValue, TimeUnit, ReturnType, Object};
 use surrealism::builder::*;
 use serde::{Serialize, Deserialize};
@@ -39,6 +37,3 @@ async fn main() -> SurrealismRes<()> {
     dbg!(create2.build());
     Ok(())
 }
-
-
-
