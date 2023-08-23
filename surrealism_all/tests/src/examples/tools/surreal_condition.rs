@@ -1,13 +1,4 @@
 use surrealism::{SurrealismRes, Condition, SurrealValue, ParamCombine, Criteria, CriteriaSign, ConditionSign};
-use surrealism::builder::*;
-use serde::{Serialize, Deserialize};
-
-#[derive(Debug, Serialize, Deserialize)]
-struct User<'a> {
-    name: &'a str,
-    age: u32,
-    works: Vec<&'a str>,
-}
 
 #[tokio::main]
 async fn main() -> SurrealismRes<()> {
@@ -25,6 +16,3 @@ async fn main() -> SurrealismRes<()> {
     dbg!(link.combine());
     Ok(())
 }
-
-
-
