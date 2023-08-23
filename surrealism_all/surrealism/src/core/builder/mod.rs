@@ -15,7 +15,12 @@ pub mod create;
 use self::create::{CreateWrapper, CreateWrapperImpl};
 use crate::core::db::{Table, ReturnType, TimeUnit, TimeOut, SurrealID, ContentSet, Object, SurrealValue};
 
-
+/// SQLBuilderFactory for Surrealism
+/// - CreateWrapper
+/// - SelectWrapper
+/// - UpdateWrapper
+/// - InsertWrapper
+/// - DeleteWrapper
 pub struct SQLBuilderFactory;
 
 impl SQLBuilderFactory {

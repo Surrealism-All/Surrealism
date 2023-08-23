@@ -5,6 +5,12 @@ use super::constants::{UUID, ULID, RAND, EQ};
 use super::{SurrealValue,Object,Array,ParamCombine};
 /// # ID的枚举类型
 /// 通过SurrealID快速生成一个含有类型的ID
+/// >    ⛔ UnPublished
+/// >    UUID,
+/// >    ⛔ UnPublished
+/// >    ULID,
+/// >    ⛔ UnPublished
+/// >    RAND,
 /// ## example
 /// ``` rust
 /// use surrealism::{Range,SurrealID,Array,SurrealValue,Object};
@@ -31,8 +37,11 @@ pub enum SurrealID {
     Str(String),
     Object(Object),
     Array(Array),
+    /// ⛔ UnPublished
     UUID,
+    /// ⛔ UnPublished
     ULID,
+    /// ⛔ UnPublished
     RAND,
     Range(Range),
 }

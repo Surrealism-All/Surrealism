@@ -1,6 +1,6 @@
 mod lib;
 
-use surrealism::{SurrealismRes, SurrealID, TimeOut, SurrealValue, TimeUnit, ReturnType, Object, DefaultInitService, InitService, UseNSDB, SurrealismCommit};
+use surrealism::{SurrealismRes, ConditionUnit, Condition, CompareSign, ValueUnit, SurrealValue, ParamCombine};
 use surrealism::builder::*;
 use serde::{Serialize, Deserialize};
 
@@ -13,35 +13,20 @@ struct User<'a> {
 
 #[tokio::main]
 async fn main() -> SurrealismRes<()> {
-    let service = DefaultInitService::new().init();
-    let _ = service.use_commit("test", "test").await?;
+    // let mut condition1 = Condition::new_no_args();
+    // let _ = condition1.left_from_str("username");
+    // dbg!(condition1);
+    // let condition2 = Condition::new(ConditionUnit::from("age"), ValueUnit::Value(SurrealValue::Int(16)), CompareSign::Neq);
+    // dbg!(condition2);
+    // let mut condition3 = Condition::new_no_args();
+    // let _ = condition3.left_from_vec(vec!["user", "person"]);
+    // let _ = condition3.add_to_left("job");
+    // dbg!(condition3);
 
-    // use set : CREATE surrealism:10086 SET name = 'Mat' RETURN AFTER TIMEOUT 5s ;
-    let mut create = SQLBuilderFactory::create()
-        .table("surrealism")
-        .id(SurrealID::Int(10086))
-        .set()
-        .add("name", SurrealValue::Str(String::from("Mat")))
-        .timeout(TimeOut::new(5, TimeUnit::SECOND))
-        .return_type(ReturnType::After)
-        .deref_mut();
-    // use content : CREATE surrealdb:10087 CONTENT { age : 16 , name : 'Mat' , works : ['cook'] } RETURN name;
-    let user = User {
-        name: "Mat",
-        age: 16,
-        works: vec!["cook"],
-    };
-    let mut create2 = SQLBuilderFactory::create()
-        .table("surrealdb")
-        .id(SurrealID::Int(10087))
-        .content(Object::from_obj(&user))
-        .return_type(ReturnType::Field("name"))
-        .deref_mut();
 
-    let res1 = service.commit_sql(&create.build()).await;
-    dbg!(res1);
-    let res2 = service.commit_sql(&create2.build()).await;
-    dbg!(res2);
+    dbg!(u1);
+    dbg!(u2);
+    dbg!(u3);
     Ok(())
 }
 
