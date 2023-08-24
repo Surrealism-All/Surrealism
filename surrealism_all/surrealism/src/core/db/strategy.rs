@@ -5,7 +5,5 @@
 //! @version:0.0.1
 //! @description:
 //! ```
+use super::{ContentSet,Patch};
 
-pub struct UpdateStrategy{
-
-}

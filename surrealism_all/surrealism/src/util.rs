@@ -29,6 +29,12 @@ pub fn remove_format_half(origin_str: String) -> String {
     re.replace_all(&origin_str, "").to_string()
 }
 
+///将字符串中的所有\去除
+pub fn remove_half(origin_str: String) -> String {
+    let re = Regex::new(r#"\\(.)"#).unwrap();
+    re.replace_all(&origin_str, "").to_string()
+}
+
 pub fn match_id_type<T: Any>(_value: &T) -> SurrealIDType {
     match TypeId::of::<T>() {
         id if id == TypeId::of::<i32>() => SurrealIDType::Int,

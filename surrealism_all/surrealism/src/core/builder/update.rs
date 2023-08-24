@@ -21,13 +21,19 @@
 //! @description:
 //! ```
 
-use crate::{ReturnType, TimeOut};
+use crate::{Condition, ReturnType, TimeOut};
+use crate::{ContentSet, Patch};
 use super::{BaseWrapperImpl, ReturnImpl, ParallelImpl, TimeoutImpl};
 
-// pub struct UpdateWrapper {
-//     strategy: UpdateStrategy,
-//     condition: Condition,
-//     return_type: ReturnType,
-//     timeout: TimeOut,
-//     parallel: bool,
-// }
+pub struct UpdateWrapper<'w> {
+    strategy: UpdateStrategy<'w>,
+    condition: Condition,
+    return_type: ReturnType,
+    timeout: TimeOut,
+    parallel: bool,
+}
+
+pub enum UpdateStrategy<'u> {
+    Basic(ContentSet<'u>),
+    Patch(Patch<'u>),
+}

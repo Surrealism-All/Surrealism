@@ -32,7 +32,7 @@
 use std::collections::HashMap;
 use serde::Serialize;
 use super::{SurrealValue, Object, ParamCombine};
-use super::constants::{CONTENT, SET};
+use super::constants::{CONTENT, SET, PATCH, MERGE, LEFT_BRACE, RIGHT_BRACE};
 
 /// # SurrealContent
 /// ContentSet is used to create wrapper `content | set` param
@@ -92,7 +92,7 @@ impl<'a> ContentSet<'a> {
             ContentSet::Set(res) => Some(SurrealValue::Object(Object::from(res)))
         }
     }
-    /// add K-V to ContentSet::Set
+    /// add K-V to ContentSet::Set use SurrealValue
     /// ## example
     /// ```rust
     /// use std::collections::HashMap;
@@ -106,20 +106,27 @@ impl<'a> ContentSet<'a> {
     ///     let mut arr = Array::new();
     ///     let _ = arr.push(SurrealValue::Str(String::from("cook")))
     ///         .push(SurrealValue::Str("author".to_string()));
-    ///     c_set1.add("works", SurrealValue::Array(arr));
+    ///     c_set1.add_from_value("works", SurrealValue::Array(arr));
     /// ```
-    pub fn add(&mut self, field: &'a str, value: SurrealValue) -> &mut Self {
+    pub fn add_from_value(&mut self, field: &'a str, value: SurrealValue) -> &mut Self {
         match self {
             ContentSet::Content(_) => {}
             ContentSet::Set(res) => { res.insert(field, value); }
         };
         self
     }
-}
+    /// easy add K-V to ContentSet::Set
+    /// ## example
+    /// `c_set1.add("works", vec!["author", "worker", "lawyer"]);`
+    pub fn add<T>(&mut self, field: &'a str, value: T) -> &mut Self where T: Serialize, {
+        self.add_from_value(field, SurrealValue::from(serde_json::to_value(value).unwrap()))
+    }
 
-impl<'a> ParamCombine for ContentSet<'a> {
-    fn combine(&self) -> String {
-        fn build(map: &HashMap<&str, SurrealValue>) -> String {
+    /// build to String
+    /// - build to Content String
+    /// - build to Set String
+    pub fn build(&self) -> String {
+        fn build_inner(map: &HashMap<&str, SurrealValue>) -> String {
             map.iter()
                 .map(|(k, v)| format!("{} = {}", k, v.to_str()))
                 .collect::<Vec<String>>()
@@ -131,9 +138,36 @@ impl<'a> ParamCombine for ContentSet<'a> {
             }
             ContentSet::Set(set) => {
                 // convert to SurrealValue
-                format!("{} {}", SET, build(set))
+                format!("{} {}", SET, build_inner(set))
             }
         }
+    }
+    /// build to Merge String
+    pub fn build_to_merge(&self) -> String {
+        fn build_inner(map: &HashMap<&str, SurrealValue>) -> String {
+            let res = map.iter()
+                .map(|(k, v)| format!("{}: {}", k, v.to_str()))
+                .collect::<Vec<String>>()
+                .join(" , ");
+            format!("{}{}{}", LEFT_BRACE, res, RIGHT_BRACE)
+        }
+        let mut res = String::new();
+        match self {
+            ContentSet::Content(content) => {
+                res = content.parse();
+            }
+            ContentSet::Set(set) => {
+                res = build_inner(set);
+            }
+        };
+
+        format!("{} {}{}", MERGE, "settings:", &res)
+    }
+}
+
+impl<'a> ParamCombine for ContentSet<'a> {
+    fn combine(&self) -> String {
+        self.build()
     }
 }
 

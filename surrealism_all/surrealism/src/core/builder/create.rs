@@ -17,6 +17,7 @@
 //! ```
 
 
+use serde::Serialize;
 use super::{BaseWrapperImpl, TableImpl, ContentSetImpl, ReturnImpl, TimeoutImpl, ParallelImpl};
 use crate::core::db::constants::{CREATE, BLANK, PARALLEL, STMT_END};
 use crate::core::db::{ReturnType, Table, TimeOut, ContentSet, SurrealID, ParamCombine, Object, SurrealValue};
@@ -50,7 +51,7 @@ pub trait CreateWrapperImpl<'w>: BaseWrapperImpl + TableImpl + ContentSetImpl<'w
 ///         .table("surrealism")
 ///         .id(SurrealID::RAND)
 ///         .set()
-///         .add("name", SurrealValue::Str(String::from("Mat")))
+///         .add("name", "Mat")
 ///         .timeout(TimeOut::new(5, TimeUnit::SECOND))
 ///         .return_type(ReturnType::After)
 ///         .parallel()
@@ -65,7 +66,7 @@ pub trait CreateWrapperImpl<'w>: BaseWrapperImpl + TableImpl + ContentSetImpl<'w
 ///     let mut create2 = SQLBuilderFactory::create()
 ///         .table("surrealdb")
 ///         .id(SurrealID::ULID)
-///         .content(Object::from_obj(&user))
+///         .content(&user)
 ///         .return_type(ReturnType::Field("name"))
 ///         .deref_mut();
 ///     dbg!(create2.build());
@@ -142,8 +143,7 @@ impl<'w> ContentSetImpl<'w> for CreateWrapper<'w> {
         let _ = self.content.replace(content_set);
         self
     }
-
-    fn content(&mut self, obj: Object) -> &mut Self {
+    fn content_obj(&mut self, obj: Object) -> &mut Self {
         match self.content {
             None => self.content = Some(ContentSet::new_content(obj)),
             Some(_) => {
@@ -151,6 +151,9 @@ impl<'w> ContentSetImpl<'w> for CreateWrapper<'w> {
             }
         };
         self
+    }
+    fn content<T>(&mut self, obj: &'w T) -> &mut Self where T: Serialize {
+        self.content_obj(Object::from_obj(obj))
     }
 
     fn set(&mut self) -> &mut Self {
@@ -162,8 +165,7 @@ impl<'w> ContentSetImpl<'w> for CreateWrapper<'w> {
         };
         self
     }
-
-    fn add(&mut self, field: &'w str, value: SurrealValue) -> &mut Self {
+    fn add_from_value(&mut self, field: &'w str, value: SurrealValue) -> &mut Self {
         match self.content {
             None => {
                 let mut v = ContentSet::new_empty_set();
@@ -179,6 +181,9 @@ impl<'w> ContentSetImpl<'w> for CreateWrapper<'w> {
             }
         };
         self
+    }
+    fn add<T>(&mut self, field: &'w str, value: T) -> &mut Self where T: Serialize {
+        self.add_from_value(field, SurrealValue::from(serde_json::to_value(value).unwrap()))
     }
 }
 

@@ -12,6 +12,7 @@ mod delete;
 pub mod create;
 
 
+use serde::Serialize;
 use self::create::{CreateWrapper, CreateWrapperImpl};
 use crate::core::db::{Table, ReturnType, TimeUnit, TimeOut, SurrealID, ContentSet, Object, SurrealValue};
 
@@ -59,18 +60,21 @@ pub trait TableImpl {
 pub trait ContentSetImpl<'w> {
     /// add content | set stmt
     fn content_set(&mut self, content_set: ContentSet<'w>) -> &mut Self;
+    fn content_obj(&mut self, obj: Object) -> &mut Self ;
     /// create content_set : ContentSet::Content
-    fn content(&mut self, obj: Object) -> &mut Self;
+    fn content<T>(&mut self, obj: &'w T) -> &mut Self where T: Serialize;
     /// create content_set : ContentSet::Set
     fn set(&mut self) -> &mut Self;
+    fn add_from_value(&mut self, field: &'w str, value: SurrealValue) -> &mut Self;
     /// add K-V to ContentSet::Set
-    fn add(&mut self, field: &'w str, value: SurrealValue) -> &mut Self;
+    fn add<T>(&mut self, field: &'w str, value: T) -> &mut Self where T: Serialize;
 }
 
 /// wrapper param need return_type:ReturnType(Option<ReturnType>)
 pub trait ReturnImpl {
     fn return_type(&mut self, return_type: ReturnType) -> &mut Self;
 }
+
 /// wrapper param need timeout:TimeOut(Option<TimeOut>)
 pub trait TimeoutImpl {
     fn timeout(&mut self, timeout: TimeOut) -> &mut Self;
