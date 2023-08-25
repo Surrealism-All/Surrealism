@@ -5,6 +5,7 @@
 //! @version:0.0.1
 //! @description:
 //! ```
+use serde::{Serialize, Deserialize};
 use crate::SurrealValue;
 use super::{ParamCombine};
 use super::constants::{EQ, LT, GT, GTE, LTE, LINK, NEQ, WHERE, BLANK, AND, OR};
@@ -15,14 +16,14 @@ use super::constants::{EQ, LT, GT, GTE, LTE, LINK, NEQ, WHERE, BLANK, AND, OR};
 /// use surrealism::{ConditionSign,Condition,Criteria,ParamCombine,SurrealValue,CriteriaSign};
 ///     // WHERE username = 'Mat' AND age != 16
 ///     let condition = Condition::new()
-///         .push(Criteria::new("username", SurrealValue::Str(String::from("Mat")), CriteriaSign::Eq), ConditionSign::And)
-///         .push(Criteria::new("age", SurrealValue::Int(16), CriteriaSign::Neq), ConditionSign::None)
+///         .push(Criteria::new("username","Mat", CriteriaSign::Eq), ConditionSign::And)
+///         .push(Criteria::new("age", 16, CriteriaSign::Neq), ConditionSign::None)
 ///         .deref_mut();
 ///     dbg!(condition.combine());
 ///     // WHERE -> knows -> person -> (knows WHERE influencer = true)
 ///     // use cheat to build complex statements
 ///     let link = Condition::new()
-///         .push(Criteria::new("knows", SurrealValue::from("person"), CriteriaSign::Link), ConditionSign::Link)
+///         .push(Criteria::new("knows", "person", CriteriaSign::Link), ConditionSign::Link)
 ///         .push(Criteria::cheat("knows","influencer = true","WHERE"),ConditionSign::None)
 ///         .deref_mut();
 ///     dbg!(link.combine());
@@ -146,7 +147,7 @@ impl From<String> for ConditionSign {
 /// as :
 /// - name = 'Mat;
 /// - age != 10
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub struct Criteria {
     left: String,
     right: SurrealValue,
@@ -155,10 +156,10 @@ pub struct Criteria {
 
 impl Criteria {
     /// new a easy criteria : left = right
-    pub fn new(left: &str, right: SurrealValue, sign: CriteriaSign) -> Self {
+    pub fn new<T>(left: &str, right: T, sign: CriteriaSign) -> Self where T: Serialize, {
         Criteria {
             left: String::from(left),
-            right,
+            right: SurrealValue::from(serde_json::to_value(right).unwrap()),
             sign,
         }
     }
@@ -177,8 +178,8 @@ impl Criteria {
         self.left = String::from(left);
         self
     }
-    pub fn right(&mut self, right: SurrealValue) -> &mut Self {
-        self.right = right;
+    pub fn right<T>(&mut self, right: T) -> &mut Self where T: Serialize, {
+        self.right = SurrealValue::from(serde_json::to_value(right).unwrap());
         self
     }
     pub fn sign(&mut self, sign: CriteriaSign) -> &mut Self {
@@ -225,7 +226,7 @@ impl ParamCombine for Criteria {
 /// - Lte:小于等于
 /// - Gte:大于等于
 /// - Link:连接`->`
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub enum CriteriaSign {
     Eq,
     Lt,

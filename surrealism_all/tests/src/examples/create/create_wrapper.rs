@@ -1,6 +1,7 @@
 use surrealism::{SurrealismRes, SurrealID, TimeOut, SurrealValue, TimeUnit, ReturnType, Object, DefaultInitService, InitService, UseNSDB, SurrealismCommit};
 use surrealism::builder::*;
 use serde::{Serialize, Deserialize};
+use surrealism::builder::create::CreateWrapperImpl;
 
 #[derive(Debug, Serialize, Deserialize)]
 struct User<'a> {
@@ -19,7 +20,7 @@ async fn main() -> SurrealismRes<()> {
         .table("surrealism")
         .id(SurrealID::Int(10086))
         .set()
-        .add("name", SurrealValue::Str(String::from("Mat")))
+        .add("name", "Mat")
         .timeout(TimeOut::new(5, TimeUnit::SECOND))
         .return_type(ReturnType::After)
         .deref_mut();
@@ -32,7 +33,7 @@ async fn main() -> SurrealismRes<()> {
     let mut create2 = SQLBuilderFactory::create()
         .table("surrealdb")
         .id(SurrealID::Int(10087))
-        .content(Object::from_obj(&user))
+        .content(&user)
         .return_type(ReturnType::Field("name"))
         .deref_mut();
 

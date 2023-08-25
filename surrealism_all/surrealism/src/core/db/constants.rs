@@ -27,7 +27,8 @@ sql_const!(
     (PARALLEL,"PARALLEL") (NONE_DOWN,"none") (NULL,"NULL") (NULL_DOWN,"null") (EQ,"=") (EQUAL,"==") (LT,"<") (GT,">")
     (LT_EQ,"<=") (GT_EQ,">=") (TRUE_STR,"TRUE") (FALSE_STR,"FALSE") (LEFT_BRACE,"{ ") (RIGHT_BRACE," }") (COMMA," , ")
     (RETURN,"RETURN") (CONTENT,"CONTENT") (SET,"SET") (CREATE,"CREATE") (BLANK," ") (STMT_END,";") (NEQ,"!=") (LINK,"->")
-    (GTE,">=") (LTE,"<=") (WHERE,"WHERE") (AND,"AND") (OR,"OR") (MERGE,"MERGE") (PATCH,"PATCH")
+    (GTE,">=") (LTE,"<=") (WHERE,"WHERE") (AND,"AND") (OR,"OR") (MERGE,"MERGE") (PATCH,"PATCH") (ADD_OP,"+=") (MINUS_OP,"-=")
+    (PLUS_OP,"*=") (DIVIDE_OP,"/=") (UPDATE,"UPDATE")
 );
 pub const FALSE: bool = false;
 pub const TRUE: bool = true;

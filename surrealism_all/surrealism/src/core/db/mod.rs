@@ -6,6 +6,7 @@ mod content;
 mod strategy;
 mod condition;
 mod patch;
+mod set;
 
 pub use sql::*;
 pub use value::*;
@@ -13,6 +14,8 @@ pub use id::*;
 pub use condition::*;
 pub use content::ContentSet;
 pub use patch::Patch;
+pub use set::Set;
+pub use strategy::*;
 
 
 /// # param combine trait

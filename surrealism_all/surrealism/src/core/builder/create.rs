@@ -18,11 +18,18 @@
 
 
 use serde::Serialize;
-use super::{BaseWrapperImpl, TableImpl, ContentSetImpl, ReturnImpl, TimeoutImpl, ParallelImpl};
+use super::{BaseWrapperImpl, TableImpl, ReturnImpl, TimeoutImpl, ParallelImpl};
 use crate::core::db::constants::{CREATE, BLANK, PARALLEL, STMT_END};
-use crate::core::db::{ReturnType, Table, TimeOut, ContentSet, SurrealID, ParamCombine, Object, SurrealValue};
+use crate::core::db::{ReturnType, Table, TimeOut, SurrealID, ParamCombine, Object, SurrealValue, CreateStrategy};
+use crate::{Operator, Set, TimeUnit};
 
-pub trait CreateWrapperImpl<'w>: BaseWrapperImpl + TableImpl + ContentSetImpl<'w> + ReturnImpl + TimeoutImpl + ParallelImpl {}
+pub trait CreateWrapperImpl: BaseWrapperImpl + TableImpl + ReturnImpl + TimeoutImpl + ParallelImpl {
+    fn content<T>(&mut self, obj: &T) -> &mut Self where T: Serialize;
+    fn content_obj(&mut self, obj: Object) -> &mut Self;
+    fn set(&mut self) -> &mut Self;
+    fn add<T>(&mut self, field: &str, value: T) -> &mut Self where T: Serialize;
+    fn add_from_value(&mut self, field: &str, value: SurrealValue) -> &mut Self;
+}
 
 /// # CreateWrapper
 /// 1. TableImpl
@@ -52,7 +59,7 @@ pub trait CreateWrapperImpl<'w>: BaseWrapperImpl + TableImpl + ContentSetImpl<'w
 ///         .id(SurrealID::RAND)
 ///         .set()
 ///         .add("name", "Mat")
-///         .timeout(TimeOut::new(5, TimeUnit::SECOND))
+///         .timeout(5,TimeUnit::SECOND)
 ///         .return_type(ReturnType::After)
 ///         .parallel()
 ///         .deref_mut();
@@ -73,16 +80,16 @@ pub trait CreateWrapperImpl<'w>: BaseWrapperImpl + TableImpl + ContentSetImpl<'w
 ///     Ok(())
 /// }
 /// ```
-#[derive(Debug)]
-pub struct CreateWrapper<'w> {
+#[derive(Debug, Clone)]
+pub struct CreateWrapper {
     table: Table,
-    content: Option<ContentSet<'w>>,
+    content: Option<CreateStrategy>,
     return_type: Option<ReturnType>,
     timeout: Option<TimeOut>,
     parallel: bool,
 }
 
-impl<'w> BaseWrapperImpl for CreateWrapper<'w> {
+impl BaseWrapperImpl for CreateWrapper {
     fn new() -> Self {
         CreateWrapper {
             table: Table::default(),
@@ -126,7 +133,7 @@ impl<'w> BaseWrapperImpl for CreateWrapper<'w> {
     }
 }
 
-impl<'w> TableImpl for CreateWrapper<'w> {
+impl TableImpl for CreateWrapper {
     fn table(&mut self, table: &str) -> &mut Self {
         self.table.table(table);
         self
@@ -138,75 +145,67 @@ impl<'w> TableImpl for CreateWrapper<'w> {
     }
 }
 
-impl<'w> ContentSetImpl<'w> for CreateWrapper<'w> {
-    fn content_set(&mut self, content_set: ContentSet<'w>) -> &mut Self {
-        let _ = self.content.replace(content_set);
-        self
+impl CreateWrapperImpl for CreateWrapper {
+    fn content<T>(&mut self, obj: &T) -> &mut Self where T: Serialize {
+        self.content_obj(Object::from_obj(obj))
     }
     fn content_obj(&mut self, obj: Object) -> &mut Self {
         match self.content {
-            None => self.content = Some(ContentSet::new_content(obj)),
+            None => self.content = Some(CreateStrategy::from(obj)),
             Some(_) => {
-                let _ = self.content.replace(ContentSet::Content(obj));
+                let _ = self.content.replace(CreateStrategy::from(obj));
             }
         };
         self
     }
-    fn content<T>(&mut self, obj: &'w T) -> &mut Self where T: Serialize {
-        self.content_obj(Object::from_obj(obj))
-    }
-
     fn set(&mut self) -> &mut Self {
         match self.content {
-            None => self.content = Some(ContentSet::new_empty_set()),
+            None => self.content = Some(CreateStrategy::from(vec![])),
             Some(_) => {
-                let _ = self.content.replace(ContentSet::new_empty_set());
+                let _ = self.content.replace(CreateStrategy::from(vec![]));
             }
         };
         self
     }
-    fn add_from_value(&mut self, field: &'w str, value: SurrealValue) -> &mut Self {
+    fn add<T>(&mut self, field: &str, value: T) -> &mut Self where T: Serialize {
+        self.add_from_value(field, SurrealValue::from(serde_json::to_value(value).unwrap()))
+    }
+    fn add_from_value(&mut self, field: &str, value: SurrealValue) -> &mut Self {
+        let item = Set::new(field, value, Operator::Eq);
         match self.content {
             None => {
-                let mut v = ContentSet::new_empty_set();
-                let _ = v.add(field, value);
-                self.content = Some(v);
+                self.content = Some(CreateStrategy::Set(vec![item]));
             }
-            Some(ref content_set) => {
-                if content_set.is_set() {
-                    let _ = self.content.as_mut().unwrap().add(field, value);
-                } else {
-                    panic!("ContentSet::Content cannot use add function")
-                }
+            Some(ref mut strategy) => {
+                strategy.push(item);
             }
         };
         self
-    }
-    fn add<T>(&mut self, field: &'w str, value: T) -> &mut Self where T: Serialize {
-        self.add_from_value(field, SurrealValue::from(serde_json::to_value(value).unwrap()))
     }
 }
 
-impl<'w> ReturnImpl for CreateWrapper<'w> {
+impl ReturnImpl for CreateWrapper {
     fn return_type(&mut self, return_type: ReturnType) -> &mut Self {
         let _ = self.return_type.replace(return_type);
         self
     }
 }
 
-impl<'w> TimeoutImpl for CreateWrapper<'w> {
-    fn timeout(&mut self, timeout: TimeOut) -> &mut Self {
+impl TimeoutImpl for CreateWrapper {
+    fn timeout_from(&mut self, timeout: TimeOut) -> &mut Self {
         let _ = self.timeout.replace(timeout);
         self
     }
+    fn timeout(&mut self, timeout: usize, unit: TimeUnit) -> &mut Self {
+        self.timeout_from(TimeOut::new(timeout, unit))
+    }
 }
 
-impl<'w> ParallelImpl for CreateWrapper<'w> {
+impl ParallelImpl for CreateWrapper {
     fn parallel(&mut self) -> &mut Self {
         self.parallel = true;
         self
     }
 }
 
-impl<'w> CreateWrapperImpl<'w> for CreateWrapper<'w> {}
 

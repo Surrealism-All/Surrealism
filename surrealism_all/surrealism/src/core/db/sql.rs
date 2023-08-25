@@ -6,7 +6,7 @@
 //! @description:
 //! ```
 use serde::{Serialize, Deserialize};
-use super::constants::{AFTER, BEFORE, NONE, DIFF, UUID, ULID, RAND, MINUTE, MILLISECOND, SECOND, HOUR, DAY, TIMEOUT, RETURN};
+use super::constants::{AFTER, BEFORE, NONE, DIFF, MINUTE, MILLISECOND, SECOND, HOUR, DAY, TIMEOUT, RETURN, ADD_OP, MINUS_OP, DIVIDE_OP, PLUS_OP, EQ};
 use super::{SurrealID, ParamCombine};
 
 /// # build Table with ID
@@ -282,3 +282,29 @@ pub enum Geometry {
     Collection,
 }
 
+/// Operator运算符 for Create | Update ...
+/// - Add : +=
+/// - Minus : -=
+/// - Plus : *=
+/// - Divide : /=
+/// - Eq : =
+#[derive(Debug, Clone, Serialize, Deserialize,PartialEq)]
+pub enum Operator {
+    Add,
+    Minus,
+    Plus,
+    Divide,
+    Eq,
+}
+
+impl Operator {
+    pub fn to_str(&self) -> &str {
+        match self {
+            Operator::Add => ADD_OP,
+            Operator::Minus => MINUS_OP,
+            Operator::Plus => PLUS_OP,
+            Operator::Divide => DIVIDE_OP,
+            Operator::Eq => EQ,
+        }
+    }
+}

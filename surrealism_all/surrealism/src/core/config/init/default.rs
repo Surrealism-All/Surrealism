@@ -15,7 +15,6 @@
 //! ```
 
 use std::error::Error;
-use std::future::Future;
 use std::process::exit;
 use log::{error, info};
 use log::LevelFilter::{Warn, Debug, Info, Trace};
