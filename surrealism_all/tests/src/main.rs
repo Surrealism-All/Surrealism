@@ -11,7 +11,9 @@ async fn main() -> SurrealismRes<()> {
         .table_with("wrote", SurrealID::Default)
         .table_to("article", SurrealID::from("8nkk6uj4yprt49z7y3zm"))
         .deref_mut();
-    dbg!(relate1.build());
+    // convert to delete
+    // DELETE person:l19zjikkw1p1h9o6ixrg->wrote WHERE out=article:8nkk6uj4yprt49z7y3zm
+    dbg!(relate1.delete());
     Ok(())
 }
 

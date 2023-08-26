@@ -1,4 +1,14 @@
 //! # RelateWrapper
+//! ```code
+//! RELATE @from_record -> @table -> @to_record
+//! 	[ CONTENT @value
+//! 	  | SET @field = @value ...
+//! 	]
+//! 	[ RETURN [ NONE | BEFORE | AFTER | DIFF | @fields ... ]
+//! 	[ TIMEOUT @duration ]
+//! 	[ PARALLEL ]
+//! ;
+//! ```
 //! ```txt
 //! @author:syf20020816@Outlook.com
 //! @date:2023/8/26
@@ -8,9 +18,9 @@
 
 use serde::Serialize;
 use super::{BaseWrapperImpl, TableImpl, ReturnImpl, TimeoutImpl, ParallelImpl};
-use crate::core::db::constants::{CREATE, BLANK, PARALLEL, STMT_END,LINK};
+use crate::core::db::constants::{CREATE, BLANK, PARALLEL, STMT_END, LINK,DELETE,WHERE};
 use crate::core::db::{ReturnType, Table, TimeOut, SurrealID, ParamCombine, Object, SurrealValue, CreateStrategy};
-use crate::{Operator, Set, TimeUnit};
+use crate::{Operator, Set, TimeUnit, timeout_impl, return_impl, parallel_impl};
 
 pub trait RelateWrapperImpl: BaseWrapperImpl + ReturnImpl + TimeoutImpl + ParallelImpl {
     fn table_from(&mut self, table: &str, id: SurrealID) -> &mut Self;
@@ -21,6 +31,13 @@ pub trait RelateWrapperImpl: BaseWrapperImpl + ReturnImpl + TimeoutImpl + Parall
     fn set(&mut self) -> &mut Self;
     fn add<T>(&mut self, field: &str, value: T) -> &mut Self where T: Serialize;
     fn add_from_value(&mut self, field: &str, value: SurrealValue) -> &mut Self;
+    /// convert relate to delete
+    /// ```code
+    /// RELATE person:tobie->bought->product:iphone;
+    /// ↓ ↓ ↓ ↓ ↓ ↓ ↓ ↓
+    /// DELETE person:tobie->bought WHERE out=product:iphone;
+    /// ```
+    fn delete(&self) -> String;
 }
 
 /// # RelateWrapper
@@ -81,7 +98,7 @@ impl BaseWrapperImpl for RelateWrapper {
     }
 
     fn build(&mut self) -> String {
-        let mut res = format!("{} {}{}{}{}{}", CREATE, &self.table_from.combine(),LINK,&self.table_with.combine(),LINK,&self.table_to.combine());
+        let mut res = format!("{} {}{}{}{}{}", CREATE, &self.table_from.combine(), LINK, &self.table_with.combine(), LINK, &self.table_to.combine());
         if self.content.is_some() {
             res.push_str(BLANK);
             res.push_str(&self.content.as_ref().unwrap().combine());
@@ -156,30 +173,11 @@ impl RelateWrapperImpl for RelateWrapper {
         };
         self
     }
-}
-
-impl ReturnImpl for RelateWrapper {
-    fn return_type(&mut self, return_type: ReturnType) -> &mut Self {
-        let _ = self.return_type.replace(return_type);
-        self
+    fn delete(&self) -> String {
+        format!("{} {}{}{} {} out={}",DELETE,&self.table_from.combine(),LINK,&self.table_with.combine(),WHERE,&self.table_to.combine())
     }
 }
 
-impl TimeoutImpl for RelateWrapper {
-    fn timeout_from(&mut self, timeout: TimeOut) -> &mut Self {
-        let _ = self.timeout.replace(timeout);
-        self
-    }
-    fn timeout(&mut self, timeout: usize, unit: TimeUnit) -> &mut Self {
-        self.timeout_from(TimeOut::new(timeout, unit))
-    }
-}
-
-impl ParallelImpl for RelateWrapper {
-    fn parallel(&mut self) -> &mut Self {
-        self.parallel = true;
-        self
-    }
-}
-
-
+timeout_impl!(RelateWrapper);
+return_impl!(RelateWrapper);
+parallel_impl!(RelateWrapper);

@@ -8,7 +8,7 @@
 mod select;
 pub mod update;
 mod insert;
-mod delete;
+pub mod delete;
 pub mod create;
 pub mod relate;
 mod macros;
@@ -17,6 +17,7 @@ mod macros;
 use serde::Serialize;
 use crate::Condition;
 use self::relate::{RelateWrapper};
+use self::delete::{DeleteWrapper};
 use self::update::{UpdateWrapper, UpdateWrapperImpl};
 use self::create::{CreateWrapper, CreateWrapperImpl};
 use crate::core::db::{ReturnType, TimeOut, SurrealID, TimeUnit};
@@ -39,7 +40,9 @@ impl SQLBuilderFactory {
     // fn select() -> SelectWrapper {}
     pub fn update<'w>() -> UpdateWrapper<'w> { UpdateWrapper::new() }
     // fn insert() -> InsertWrapper {}
-    // fn delete() -> DeleteWrapper {}
+    pub fn delete() -> DeleteWrapper {
+        DeleteWrapper::new()
+    }
 }
 
 /// Base Wrapper trait
