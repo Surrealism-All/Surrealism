@@ -40,7 +40,7 @@ pub enum SurrealID {
 
 impl Default for SurrealID {
     fn default() -> Self {
-        SurrealID::RAND
+        SurrealID::Default
     }
 }
 

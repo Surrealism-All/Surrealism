@@ -7,7 +7,7 @@
 //! ```
 mod select;
 pub mod update;
-mod insert;
+pub mod insert;
 pub mod delete;
 pub mod create;
 pub mod relate;
@@ -16,6 +16,7 @@ mod macros;
 
 use serde::Serialize;
 use crate::Condition;
+use self::insert::{InsertWrapper};
 use self::relate::{RelateWrapper};
 use self::delete::{DeleteWrapper};
 use self::update::{UpdateWrapper, UpdateWrapperImpl};
@@ -39,7 +40,9 @@ impl SQLBuilderFactory {
     }
     // fn select() -> SelectWrapper {}
     pub fn update<'w>() -> UpdateWrapper<'w> { UpdateWrapper::new() }
-    // fn insert() -> InsertWrapper {}
+    pub fn insert() -> InsertWrapper {
+        InsertWrapper::new()
+    }
     pub fn delete() -> DeleteWrapper {
         DeleteWrapper::new()
     }

@@ -1,4 +1,4 @@
-//!
+//! # Const for SurrealDB Statement
 //! ```txt
 //! @author:syf20020816@Outlook.com
 //! @date:2023/8/5
@@ -28,7 +28,8 @@ sql_const!(
     (LT_EQ,"<=") (GT_EQ,">=") (TRUE_STR,"TRUE") (FALSE_STR,"FALSE") (LEFT_BRACE,"{ ") (RIGHT_BRACE," }") (COMMA," , ")
     (RETURN,"RETURN") (CONTENT,"CONTENT") (SET,"SET") (CREATE,"CREATE") (BLANK," ") (STMT_END,";") (NEQ,"!=") (LINK,"->")
     (GTE,">=") (LTE,"<=") (WHERE,"WHERE") (AND,"AND") (OR,"OR") (MERGE,"MERGE") (PATCH,"PATCH") (ADD_OP,"+=") (MINUS_OP,"-=")
-    (PLUS_OP,"*=") (DIVIDE_OP,"/=") (UPDATE,"UPDATE") (DELETE,"DELETE")
+    (PLUS_OP,"*=") (DIVIDE_OP,"/=") (UPDATE,"UPDATE") (DELETE,"DELETE") (INSERT,"INSERT") (INSERT_UPDATE,"ON DUPLICATE KEY UPDATE")
+    (VALUES,"VALUES") (INTO,"INTO")
 );
 pub const FALSE: bool = false;
 pub const TRUE: bool = true;

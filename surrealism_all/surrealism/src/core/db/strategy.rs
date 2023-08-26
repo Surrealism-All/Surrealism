@@ -111,3 +111,82 @@ impl<'u> ParamCombine for UpdateStrategy<'u> {
         self.build()
     }
 }
+
+/// # strategy for InsertWrapper
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub enum InsertStrategy {
+    Content(Vec<Object>),
+    Set(Vec<Set>),
+    Stmt(String),
+}
+
+impl InsertStrategy {
+    pub fn push_content(&mut self, item: Object) -> &mut Self {
+        match self {
+            InsertStrategy::Content(ref mut content) => content.push(item),
+            _ => panic!("{}", "push_content function can just use in InsertStrategy::Content"),
+        }
+        self
+    }
+    pub fn push_set(&mut self, item: Set) -> &mut Self {
+        match self {
+            InsertStrategy::Set(ref mut set) => set.push(item),
+            _ => panic!("{}", "push_set function can just use in InsertStrategy::Set"),
+        }
+        self
+    }
+    pub fn push(&mut self, stmt: &str) -> &mut Self {
+        match self {
+            InsertStrategy::Stmt(s) => *s = String::from(stmt),
+            _ => panic!("{}", "push_set function can just use in InsertStrategy::Set"),
+        }
+        self
+    }
+    pub fn get_set(&self, index: usize) -> &Set {
+        match self {
+            InsertStrategy::Set(ref set) => &set[index],
+            _ => panic!("{}", "get_set function can just use in InsertStrategy::Set"),
+        }
+    }
+}
+
+impl From<Vec<Object>> for InsertStrategy {
+    fn from(value: Vec<Object>) -> Self {
+        InsertStrategy::Content(value)
+    }
+}
+
+impl From<Vec<Set>> for InsertStrategy {
+    fn from(value: Vec<Set>) -> Self {
+        InsertStrategy::Set(value)
+    }
+}
+
+impl From<&str> for InsertStrategy {
+    fn from(value: &str) -> Self {
+        InsertStrategy::Stmt(value.to_string())
+    }
+}
+
+impl From<String> for InsertStrategy {
+    fn from(value: String) -> Self {
+        InsertStrategy::Stmt(value)
+    }
+}
+
+impl ParamCombine for InsertStrategy {
+    fn combine(&self) -> String {
+        match self {
+            InsertStrategy::Content(content) => {
+
+                return if 1.eq(&content.len()) {
+                    format!("{} {}", CONTENT, content[0].parse())
+                } else {
+                    format!("{} [ {} ]", CONTENT, content.iter().map(|x| x.parse()).collect::<Vec<String>>().join(" , "))
+                };
+            }
+            InsertStrategy::Set(set) => format!("{} {}", SET, set.iter().map(|x| x.combine()).collect::<Vec<String>>().join(" , ")),
+            InsertStrategy::Stmt(stmt) => format!("( {} )", stmt)
+        }
+    }
+}

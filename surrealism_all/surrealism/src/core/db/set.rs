@@ -28,6 +28,10 @@ impl Set {
     pub fn build(&self) -> String {
         format!("{} {} {}", &self.column, self.sign.to_str(), self.value.to_str())
     }
+    /// get column and value
+    pub fn get(&self) -> (&str, &SurrealValue) {
+        (&self.column, &self.value)
+    }
 }
 
 impl ParamCombine for Set {
