@@ -1,29 +1,21 @@
-//! # CreateWrapper
-//! ```code
-//! CREATE @targets
-//! 	[ CONTENT @value
-//! 	  | SET @field = @value ...
-//! 	]
-//! 	[ RETURN [ NONE | BEFORE | AFTER | DIFF | @projections ... ]
-//! 	[ TIMEOUT @duration ]
-//! 	[ PARALLEL ]
-//! ;
-//! ```
+//! # RelateWrapper
 //! ```txt
 //! @author:syf20020816@Outlook.com
-//! @date:2023/8/4
+//! @date:2023/8/26
 //! @version:0.0.1
 //! @description:
 //! ```
 
-
 use serde::Serialize;
 use super::{BaseWrapperImpl, TableImpl, ReturnImpl, TimeoutImpl, ParallelImpl};
-use crate::core::db::constants::{CREATE, BLANK, PARALLEL, STMT_END};
+use crate::core::db::constants::{CREATE, BLANK, PARALLEL, STMT_END,LINK};
 use crate::core::db::{ReturnType, Table, TimeOut, SurrealID, ParamCombine, Object, SurrealValue, CreateStrategy};
-use crate::{Operator, Set, TimeUnit,parallel_impl,return_impl,timeout_impl,table_impl};
+use crate::{Operator, Set, TimeUnit};
 
-pub trait CreateWrapperImpl: BaseWrapperImpl + TableImpl + ReturnImpl + TimeoutImpl + ParallelImpl {
+pub trait RelateWrapperImpl: BaseWrapperImpl + ReturnImpl + TimeoutImpl + ParallelImpl {
+    fn table_from(&mut self, table: &str, id: SurrealID) -> &mut Self;
+    fn table_with(&mut self, table: &str, id: SurrealID) -> &mut Self;
+    fn table_to(&mut self, table: &str, id: SurrealID) -> &mut Self;
     fn content<T>(&mut self, obj: &T) -> &mut Self where T: Serialize;
     fn content_obj(&mut self, obj: Object) -> &mut Self;
     fn set(&mut self) -> &mut Self;
@@ -31,68 +23,43 @@ pub trait CreateWrapperImpl: BaseWrapperImpl + TableImpl + ReturnImpl + TimeoutI
     fn add_from_value(&mut self, field: &str, value: SurrealValue) -> &mut Self;
 }
 
-/// # CreateWrapper
-/// 1. TableImpl
-/// 2. ContentSetImpl
-/// 3. BaseWrapperImpl
-/// 4. ReturnImpl
-/// 5. TimeoutImpl
-/// 6. ParallelImpl
-/// ## example
+/// # RelateWrapper
+/// the wrapper for RELATE
 /// ```rust
-/// use surrealism::{SurrealismRes, SurrealID, TimeOut, SurrealValue, TimeUnit, ReturnType, Object};
+/// use surrealism::{SurrealismRes,SurrealID};
 /// use surrealism::builder::*;
-/// use serde::{Serialize, Deserialize};
+/// use surrealism::builder::relate::RelateWrapperImpl;
 ///
-/// #[derive(Debug, Serialize, Deserialize)]
-/// struct User<'a> {
-///     name: &'a str,
-///     age: u32,
-///     works: Vec<&'a str>,
-/// }
 ///
 /// #[tokio::main]
 /// async fn main() -> SurrealismRes<()> {
-///     // use set : CREATE surrealism:rand() SET name = 'Mat' RETURN AFTER TIMEOUT 5s PARALLEL;
-///     let mut create = SQLBuilderFactory::create()
-///         .table("surrealism")
-///         .id(SurrealID::RAND)
-///         .set()
-///         .add("name", "Mat")
-///         .timeout(5,TimeUnit::SECOND)
-///         .return_type(ReturnType::After)
-///         .parallel()
+///     // RELATE person:l19zjikkw1p1h9o6ixrg->wrote->article:8nkk6uj4yprt49z7y3zm;
+///     let mut relate1 = SQLBuilderFactory::relate()
+///         .table_from("person", SurrealID::from("l19zjikkw1p1h9o6ixrg"))
+///         .table_with("wrote", SurrealID::Default)
+///         .table_to("article", SurrealID::from("8nkk6uj4yprt49z7y3zm"))
 ///         .deref_mut();
-///     dbg!(&create.build());
-///     // use content : CREATE surrealdb:ulid() CONTENT { age : 16 , name : 'Mat' , works : ['cook'] } RETURN name;
-///     let user = User {
-///         name: "Mat",
-///         age: 16,
-///         works: vec!["cook"],
-///     };
-///     let mut create2 = SQLBuilderFactory::create()
-///         .table("surrealdb")
-///         .id(SurrealID::ULID)
-///         .content(&user)
-///         .return_type(ReturnType::Field("name"))
-///         .deref_mut();
-///     dbg!(create2.build());
+///     dbg!(relate1.build());
 ///     Ok(())
 /// }
 /// ```
 #[derive(Debug, Clone)]
-pub struct CreateWrapper {
-    table: Table,
+pub struct RelateWrapper {
+    table_from: Table,
+    table_with: Table,
+    table_to: Table,
     content: Option<CreateStrategy>,
     return_type: Option<ReturnType>,
     timeout: Option<TimeOut>,
     parallel: bool,
 }
 
-impl BaseWrapperImpl for CreateWrapper {
+impl BaseWrapperImpl for RelateWrapper {
     fn new() -> Self {
-        CreateWrapper {
-            table: Table::default(),
+        RelateWrapper {
+            table_from: Default::default(),
+            table_with: Default::default(),
+            table_to: Default::default(),
             content: None,
             return_type: None,
             timeout: None,
@@ -101,17 +68,20 @@ impl BaseWrapperImpl for CreateWrapper {
     }
 
     fn deref_mut(&mut self) -> Self {
-        CreateWrapper {
-            table: self.table.clone(),
+        RelateWrapper {
+            table_from: self.table_from.clone(),
+            table_with: self.table_with.clone(),
+            table_to: self.table_to.clone(),
             content: self.content.clone(),
             return_type: self.return_type.clone(),
             timeout: self.timeout.clone(),
             parallel: self.parallel,
+
         }
     }
 
     fn build(&mut self) -> String {
-        let mut res = format!("{} {}", CREATE, &self.table.combine());
+        let mut res = format!("{} {}{}{}{}{}", CREATE, &self.table_from.combine(),LINK,&self.table_with.combine(),LINK,&self.table_to.combine());
         if self.content.is_some() {
             res.push_str(BLANK);
             res.push_str(&self.content.as_ref().unwrap().combine());
@@ -134,7 +104,22 @@ impl BaseWrapperImpl for CreateWrapper {
 }
 
 
-impl CreateWrapperImpl for CreateWrapper {
+impl RelateWrapperImpl for RelateWrapper {
+    fn table_from(&mut self, table: &str, id: SurrealID) -> &mut Self {
+        self.table_from.table(table).id(id);
+        self
+    }
+
+    fn table_with(&mut self, table: &str, id: SurrealID) -> &mut Self {
+        self.table_with.table(table).id(id);
+        self
+    }
+
+    fn table_to(&mut self, table: &str, id: SurrealID) -> &mut Self {
+        self.table_to.table(table).id(id);
+        self
+    }
+
     fn content<T>(&mut self, obj: &T) -> &mut Self where T: Serialize {
         self.content_obj(Object::from_obj(obj))
     }
@@ -173,7 +158,28 @@ impl CreateWrapperImpl for CreateWrapper {
     }
 }
 
-table_impl!(CreateWrapper);
-timeout_impl!(CreateWrapper);
-parallel_impl!(CreateWrapper);
-return_impl!(CreateWrapper);
+impl ReturnImpl for RelateWrapper {
+    fn return_type(&mut self, return_type: ReturnType) -> &mut Self {
+        let _ = self.return_type.replace(return_type);
+        self
+    }
+}
+
+impl TimeoutImpl for RelateWrapper {
+    fn timeout_from(&mut self, timeout: TimeOut) -> &mut Self {
+        let _ = self.timeout.replace(timeout);
+        self
+    }
+    fn timeout(&mut self, timeout: usize, unit: TimeUnit) -> &mut Self {
+        self.timeout_from(TimeOut::new(timeout, unit))
+    }
+}
+
+impl ParallelImpl for RelateWrapper {
+    fn parallel(&mut self) -> &mut Self {
+        self.parallel = true;
+        self
+    }
+}
+
+

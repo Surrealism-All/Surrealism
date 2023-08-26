@@ -10,10 +10,13 @@ pub mod update;
 mod insert;
 mod delete;
 pub mod create;
+pub mod relate;
+mod macros;
 
 
 use serde::Serialize;
 use crate::Condition;
+use self::relate::{RelateWrapper};
 use self::update::{UpdateWrapper, UpdateWrapperImpl};
 use self::create::{CreateWrapper, CreateWrapperImpl};
 use crate::core::db::{ReturnType, TimeOut, SurrealID, TimeUnit};
@@ -29,6 +32,9 @@ pub struct SQLBuilderFactory;
 impl SQLBuilderFactory {
     pub fn create() -> CreateWrapper {
         CreateWrapper::new()
+    }
+    pub fn relate() -> RelateWrapper {
+        RelateWrapper::new()
     }
     // fn select() -> SelectWrapper {}
     pub fn update<'w>() -> UpdateWrapper<'w> { UpdateWrapper::new() }
@@ -58,19 +64,6 @@ pub trait TableImpl {
     fn id(&mut self, id: SurrealID) -> &mut Self;
 }
 
-// /// wrapper param need content_set:ContentSet(Option<ContentSet>)
-// pub trait ContentSetImpl<'w> {
-//     /// add content | set stmt
-//     fn content_set(&mut self, content_set: ContentSet<'w>) -> &mut Self;
-//     fn content_obj(&mut self, obj: Object) -> &mut Self ;
-//     /// create content_set : ContentSet::Content
-//     fn content<T>(&mut self, obj: &'w T) -> &mut Self where T: Serialize;
-//     /// create content_set : ContentSet::Set
-//     fn set(&mut self) -> &mut Self;
-//     fn add_from_value(&mut self, field: &'w str, value: SurrealValue) -> &mut Self;
-//     /// add K-V to ContentSet::Set
-//     fn add<T>(&mut self, field: &'w str, value: T) -> &mut Self where T: Serialize;
-// }
 
 pub trait ConditionImpl {
     fn where_condition(&mut self, condition: Condition) -> &mut Self;

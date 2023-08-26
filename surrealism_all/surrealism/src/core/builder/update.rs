@@ -22,7 +22,10 @@
 //! ```
 
 use serde::Serialize;
-use crate::{Condition, ReturnType, TimeOut, Patch, Object, SurrealValue, UpdateStrategy, Table, ParamCombine, Operator, Set, SurrealID, TimeUnit};
+use crate::{
+    Condition, ReturnType, TimeOut, Patch, Object, SurrealValue, UpdateStrategy, Table, ParamCombine, Operator, Set, SurrealID, TimeUnit,
+    parallel_lifetime_impl, table_lifetime_impl, return_lifetime_impl, timeout_lifetime_impl
+};
 use super::{BaseWrapperImpl, ReturnImpl, ParallelImpl, TimeoutImpl, ConditionImpl, TableImpl};
 use crate::core::db::constants::{UPDATE, BLANK, STMT_END, PARALLEL};
 
@@ -183,45 +186,10 @@ impl<'w> BaseWrapperImpl for UpdateWrapper<'w> {
     }
 }
 
-impl<'w> ReturnImpl for UpdateWrapper<'w> {
-    fn return_type(&mut self, return_type: ReturnType) -> &mut Self {
-        let _ = self.return_type.replace(return_type);
-        self
-    }
-}
-
-impl<'w> ParallelImpl for UpdateWrapper<'w> {
-    fn parallel(&mut self) -> &mut Self {
-        self.parallel = true;
-        self
-    }
-}
-
-impl<'w> TimeoutImpl for UpdateWrapper<'w> {
-    fn timeout_from(&mut self, timeout: TimeOut) -> &mut Self {
-        let _ = self.timeout.replace(timeout);
-        self
-    }
-    fn timeout(&mut self, timeout: usize, unit: TimeUnit) -> &mut Self {
-        self.timeout_from(TimeOut::new(timeout, unit))
-    }
-}
 
 impl<'w> ConditionImpl for UpdateWrapper<'w> {
     fn where_condition(&mut self, condition: Condition) -> &mut Self {
         self.condition = Some(condition);
-        self
-    }
-}
-
-impl<'w> TableImpl for UpdateWrapper<'w> {
-    fn table(&mut self, table: &str) -> &mut Self {
-        self.table.table(table);
-        self
-    }
-
-    fn id(&mut self, id: SurrealID) -> &mut Self {
-        self.table.id(id);
         self
     }
 }
@@ -287,3 +255,7 @@ impl<'w> UpdateWrapperImpl<'w> for UpdateWrapper<'w> {
     }
 }
 
+parallel_lifetime_impl!(UpdateWrapper);
+table_lifetime_impl!(UpdateWrapper);
+return_lifetime_impl!(UpdateWrapper);
+timeout_lifetime_impl!(UpdateWrapper);
