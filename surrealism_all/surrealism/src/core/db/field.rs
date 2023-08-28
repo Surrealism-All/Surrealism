@@ -6,8 +6,10 @@
 //! @description:
 //! ```
 
+use crate::ParamCombine;
 use super::constants::{ALL};
 
+#[derive(Debug, Clone)]
 pub enum Field<'f> {
     All,
     Fields(Vec<&'f str>),
@@ -40,5 +42,17 @@ impl<'f> Field<'f> {
             Field::All => ALL.to_string(),
             Field::Fields(fields) => fields.join(" , ")
         }
+    }
+    pub fn push(&mut self, item: &'f str) -> () {
+        match self {
+            Field::All => (),
+            Field::Fields(ref mut field) => field.push(item)
+        }
+    }
+}
+
+impl<'f> ParamCombine for Field<'f> {
+    fn combine(&self) -> String {
+        self.to_str()
     }
 }

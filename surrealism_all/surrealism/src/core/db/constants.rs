@@ -29,7 +29,9 @@ sql_const!(
     (RETURN,"RETURN") (CONTENT,"CONTENT") (SET,"SET") (CREATE,"CREATE") (BLANK," ") (STMT_END,";") (NEQ,"!=") (LINK,"->")
     (GTE,">=") (LTE,"<=") (WHERE,"WHERE") (AND,"AND") (OR,"OR") (MERGE,"MERGE") (PATCH,"PATCH") (ADD_OP,"+=") (MINUS_OP,"-=")
     (PLUS_OP,"*=") (DIVIDE_OP,"/=") (UPDATE,"UPDATE") (DELETE,"DELETE") (INSERT,"INSERT") (INSERT_UPDATE,"ON DUPLICATE KEY UPDATE")
-    (VALUES,"VALUES") (INTO,"INTO") (ASC,"ASC") (DESC,"DESC") (ALL,"*")
+    (VALUES,"VALUES") (INTO,"INTO") (ASC,"ASC") (DESC,"DESC") (ALL,"*") (SPLIT,"SPLIT") (ORDER_BY,"ORDER BY") (GROUP_BY,"GROUP BY")
+    (LIMIT,"LIMIT") (START,"START") (SELECT,"SELECT") (FETCH,"FETCH") (FROM,"FROM") (INFO,"INFO FOR") (KV,"KV") (SCOPE,"SCOPE")
+    (DB,"DB") (TABLE,"TABLE") (NS,"NS")
 );
 pub const FALSE: bool = false;
 pub const TRUE: bool = true;

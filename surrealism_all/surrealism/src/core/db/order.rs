@@ -9,6 +9,7 @@
 use crate::ParamCombine;
 use super::constants::{RAND, ASC, DESC};
 
+#[derive(Debug,Clone)]
 pub enum Order<'o> {
     Asc(Vec<&'o str>),
     Desc(Vec<&'o str>),

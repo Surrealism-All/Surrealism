@@ -20,6 +20,7 @@ pub use patch::Patch;
 pub use set::Set;
 pub use strategy::*;
 pub use order::Order;
+pub use field::Field;
 
 
 /// # param combine trait

@@ -5,12 +5,13 @@
 //! @version:0.0.1
 //! @description:
 //! ```
-mod select;
+pub mod select;
 pub mod update;
 pub mod insert;
 pub mod delete;
 pub mod create;
 pub mod relate;
+pub mod info;
 mod macros;
 
 
@@ -19,6 +20,8 @@ use crate::Condition;
 use self::insert::{InsertWrapper};
 use self::relate::{RelateWrapper};
 use self::delete::{DeleteWrapper};
+use self::select::{SelectWrapper};
+use self::info::InfoWrapper;
 use self::update::{UpdateWrapper, UpdateWrapperImpl};
 use self::create::{CreateWrapper, CreateWrapperImpl};
 use crate::core::db::{ReturnType, TimeOut, SurrealID, TimeUnit};
@@ -38,7 +41,9 @@ impl SQLBuilderFactory {
     pub fn relate() -> RelateWrapper {
         RelateWrapper::new()
     }
-    // fn select() -> SelectWrapper {}
+    pub fn select<'w>() -> SelectWrapper<'w> {
+        SelectWrapper::new()
+    }
     pub fn update<'w>() -> UpdateWrapper<'w> { UpdateWrapper::new() }
     pub fn insert() -> InsertWrapper {
         InsertWrapper::new()
@@ -46,6 +51,7 @@ impl SQLBuilderFactory {
     pub fn delete() -> DeleteWrapper {
         DeleteWrapper::new()
     }
+    pub fn info<'w>() -> InfoWrapper<'w> { InfoWrapper::new() }
 }
 
 /// Base Wrapper trait

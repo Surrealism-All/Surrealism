@@ -18,4 +18,3 @@ async fn main() -> SurrealismRes<()> {
     dbg!(info4.build());
     Ok(())
 }
-
