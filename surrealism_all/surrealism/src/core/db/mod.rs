@@ -7,6 +7,9 @@ mod strategy;
 mod condition;
 mod patch;
 mod set;
+mod field;
+mod order;
+pub mod functions;
 
 pub use sql::*;
 pub use value::*;
@@ -16,6 +19,7 @@ pub use content::ContentSet;
 pub use patch::Patch;
 pub use set::Set;
 pub use strategy::*;
+pub use order::Order;
 
 
 /// # param combine trait

@@ -250,6 +250,12 @@ impl From<Vec<SurrealValue>> for SurrealValue {
     }
 }
 
+impl From<Vec<&str>> for SurrealValue {
+    fn from(value: Vec<&str>) -> Self {
+        SurrealValue::Array(Array::from_lower(value))
+    }
+}
+
 
 /// Surreal对应的对象类型，使用B-Tree
 /// ## example (expect HashMap<&str,SurrealValue>)
@@ -344,6 +350,11 @@ impl Array {
             res.push(item_str);
         }
         remove_format_half(format!("{:?}", res))
+    }
+    pub fn from_lower(value: Vec<&str>) -> Self {
+        // &str -> SurrealValue
+        let res = value.iter().map(|x|SurrealValue::from(*x)).collect::<Vec<SurrealValue>>();
+        Array(res)
     }
 }
 
