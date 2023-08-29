@@ -38,14 +38,31 @@
 //! ```
 
 use std::collections::{BTreeMap, HashMap};
+
 use serde::{Serialize, Deserialize};
 use serde_json::Value;
+use surrealdb::sql::{Datetime, Duration};
+use crate::{Condition, Criteria};
+use crate::core::db::constants::{BLANK, STMT_END};
 use crate::util::{remove_format_half, handle_str};
 use super::constants::{NULL, NULL_DOWN, NONE_DOWN, NONE, TRUE, TRUE_STR, FALSE, FALSE_STR, LEFT_BRACE, RIGHT_BRACE, COMMA};
 
 /// SurrealDB对应的值类型
+/// Geometry类型当前版本不支持，预计版本 > 0.2.1
+/// - feature
+/// - point
+/// - line
+/// - polygon
+/// - multipoint
+/// - multiline
+/// - multipolygon
+/// - collection
+/// 0.2.2版本后将消除SurrealValue 与 ValueType之间的隔阂 （这里的设计并不合理）
 #[derive(Serialize, Deserialize, Debug, Clone, PartialEq)]
 pub enum SurrealValue {
+    DateTime(Datetime),
+    Duration(Duration),
+    Record(String),
     None,
     Null,
     Bool(bool),
@@ -58,6 +75,21 @@ pub enum SurrealValue {
 }
 
 impl SurrealValue {
+    pub fn value_type(&self) -> ValueType {
+        match self {
+            SurrealValue::DateTime(_) => ValueType::DateTime,
+            SurrealValue::Duration(_) => ValueType::Duration,
+            SurrealValue::Record(_) => ValueType::Record,
+            SurrealValue::Bool(_) => ValueType::Bool,
+            SurrealValue::Int(_) => ValueType::Number,
+            SurrealValue::Float(_) => ValueType::Number,
+            SurrealValue::Decimal(_) => ValueType::Number,
+            SurrealValue::Str(_) => ValueType::String,
+            SurrealValue::Object(_) => ValueType::Object,
+            SurrealValue::Array(_) => ValueType::Array,
+            _ => ValueType::String
+        }
+    }
     ///将SurrealValue转换为String
     pub fn to_str(&self) -> String {
         match self {
@@ -69,7 +101,10 @@ impl SurrealValue {
             SurrealValue::Decimal(decimal) => decimal.to_string(),
             SurrealValue::Str(s) => handle_str(serde_json::to_string(s).unwrap().as_str()),
             SurrealValue::Object(obj) => obj.parse(),
-            SurrealValue::Array(arr) => arr.parse()
+            SurrealValue::Array(arr) => arr.parse(),
+            SurrealValue::DateTime(time) => time.to_string(),
+            SurrealValue::Duration(duration) => duration.to_string(),
+            SurrealValue::Record(record) => format!("record({})", record),
         }
     }
     ///从json-str进行推测，转换为serde::Value再转为SurrealValue
@@ -353,7 +388,7 @@ impl Array {
     }
     pub fn from_lower(value: Vec<&str>) -> Self {
         // &str -> SurrealValue
-        let res = value.iter().map(|x|SurrealValue::from(*x)).collect::<Vec<SurrealValue>>();
+        let res = value.iter().map(|x| SurrealValue::from(*x)).collect::<Vec<SurrealValue>>();
         Array(res)
     }
 }
@@ -361,5 +396,102 @@ impl Array {
 impl From<Vec<SurrealValue>> for Array {
     fn from(value: Vec<SurrealValue>) -> Self {
         Array(value)
+    }
+}
+
+/// # Value Type
+/// 未来计划移除
+///     ///当您明确不想指定字段的数据类型时，请使用此选项。该字段将允许SurrealDB支持的任何数据类型。
+///     Any,
+///     Array,
+///     Bool,
+///     ///一种符合ISO 8601的数据类型，用于存储带有时间和时区的日期。
+///     Datetime,
+///     ///使用BigDecimal以任意精度存储任何真实的。
+///     Decimal,
+///     ///存储表示时间长度的值。可以从日期时间或其他持续时间中添加或减去。
+///     Duration,
+///     ///将值存储在64位浮点数中。
+///     Float,
+///     ///将值存储为64位整数。
+///     Int,
+///     ///存储数字而不指定类型。SurrealDB将检测数字的类型，并使用最小的字节数存储它。对于以字符串形式传入的数字，此字段将数字存储在BigDecimal中。
+///     Number,
+///     ///存储包含任何受支持类型的值的格式化对象，对对象深度或嵌套没有限制。
+///     Object,
+///     String,
+///     ///存储对另一个记录的引用。该值必须是记录ID。
+///     Record,
+///     ///RFC 7946 兼容的数据类型，用于在GeoJson格式.
+///     Geometry(Geometry),
+#[derive(Debug, Clone, PartialEq)]
+pub enum ValueType {
+    Any,
+    Bool,
+    Array,
+    DateTime,
+    Duration,
+    Float,
+    Int,
+    Number,
+    Object,
+    String,
+    Record,
+    Geometry,
+}
+
+impl ValueType {
+    pub fn to_str(&self) -> &str {
+        match self {
+            ValueType::Any => "any",
+            ValueType::Bool => "bool",
+            ValueType::Array => "array",
+            ValueType::DateTime => "datetime",
+            ValueType::Duration => "duration",
+            ValueType::Float => "float",
+            ValueType::Int => "int",
+            ValueType::Number => "number",
+            ValueType::Object => "object",
+            ValueType::String => "string",
+            ValueType::Record => "record",
+            ValueType::Geometry => "geometry"
+        }
+    }
+}
+
+/// 用于构造Define Field 语句
+/// 生成有模式的表
+#[derive(Debug, Clone)]
+pub struct ValueConstructor {
+    value_type: ValueType,
+    default_value: Option<SurrealValue>,
+    assert: Option<Condition>,
+}
+
+impl ValueConstructor {
+    pub fn new(value_type: ValueType, default_value: Option<SurrealValue>, assert: Option<Condition>) -> Self {
+        //try to confirm value type == value's type
+        if default_value.is_some() {
+            if default_value.as_ref().unwrap().value_type().ne(&value_type) {
+                panic!("value type match error!")
+            }
+        }
+        ValueConstructor {
+            value_type,
+            default_value,
+            assert,
+        }
+    }
+    pub fn build(&self) -> String {
+        let mut res = format!("TYPE {}", self.value_type.to_str());
+        if self.default_value.is_some() {
+            res.push_str(BLANK);
+            res.push_str(format!("VALUE $value OR {}", self.default_value.as_ref().unwrap().to_str()).as_str());
+        }
+        if self.assert.is_some() {
+            res.push_str(BLANK);
+            res.push_str(format!("ASSERT {}", self.assert.as_ref().unwrap().build()).as_str());
+        }
+        res
     }
 }

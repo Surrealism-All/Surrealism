@@ -16,7 +16,6 @@
 //! ```
 
 
-use super::{BaseWrapperImpl};
 use crate::core::db::constants::{INFO, KV, DB, SCOPE, TABLE, STMT_END, NS};
 
 #[derive(Debug, Clone)]

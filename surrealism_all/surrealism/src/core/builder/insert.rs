@@ -14,7 +14,7 @@
 //! @description:
 //! ```
 
-use std::collections::{BTreeMap, HashMap, HashSet};
+use std::collections::{BTreeMap};
 use serde::Serialize;
 use crate::{Table, Criteria, SurrealValue, Object, SurrealID, table_impl, ParamCombine, Set, Operator, InsertStrategy};
 use super::{BaseWrapperImpl, TableImpl};

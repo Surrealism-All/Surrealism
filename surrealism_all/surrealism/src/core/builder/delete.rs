@@ -15,11 +15,10 @@
 //! ```
 
 
-use serde::Serialize;
 use super::{BaseWrapperImpl, TableImpl, ReturnImpl, TimeoutImpl, ParallelImpl, ConditionImpl};
 use crate::core::db::constants::{DELETE, BLANK, PARALLEL, STMT_END};
-use crate::core::db::{ReturnType, Table, TimeOut, SurrealID, ParamCombine, Object, SurrealValue, CreateStrategy};
-use crate::{Operator, Set, TimeUnit, parallel_impl, return_impl, timeout_impl, table_impl, Condition};
+use crate::core::db::{ReturnType, Table, TimeOut, SurrealID, ParamCombine};
+use crate::{TimeUnit, parallel_impl, return_impl, timeout_impl, table_impl, Condition};
 
 pub trait DeleteWrapperImpl: BaseWrapperImpl + TableImpl + ReturnImpl + TimeoutImpl + ParallelImpl + ConditionImpl {}
 

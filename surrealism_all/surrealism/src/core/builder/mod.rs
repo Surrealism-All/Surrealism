@@ -12,16 +12,19 @@ pub mod delete;
 pub mod create;
 pub mod relate;
 pub mod info;
+pub mod transaction;
+pub mod define;
 mod macros;
 
 
-use serde::Serialize;
 use crate::Condition;
 use self::insert::{InsertWrapper};
+use self::transaction::Transaction;
 use self::relate::{RelateWrapper};
 use self::delete::{DeleteWrapper};
 use self::select::{SelectWrapper};
 use self::info::InfoWrapper;
+use self::define::*;
 use self::update::{UpdateWrapper, UpdateWrapperImpl};
 use self::create::{CreateWrapper, CreateWrapperImpl};
 use crate::core::db::{ReturnType, TimeOut, SurrealID, TimeUnit};
@@ -52,6 +55,12 @@ impl SQLBuilderFactory {
         DeleteWrapper::new()
     }
     pub fn info<'w>() -> InfoWrapper<'w> { InfoWrapper::new() }
+    pub fn transaction<'w>() -> Transaction<'w> {
+        Transaction::new()
+    }
+    pub fn define<'w>() -> DefineWrapper<'w> {
+        DefineWrapper::new()
+    }
 }
 
 /// Base Wrapper trait

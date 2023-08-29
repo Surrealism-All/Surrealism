@@ -163,6 +163,21 @@ impl Criteria {
             sign,
         }
     }
+    /// use when define field
+    pub fn new_field<T>(right: T, sign: CriteriaSign)-> Self where T: Serialize,{
+        Criteria {
+            left: String::from("$value"),
+            right: SurrealValue::from(serde_json::to_value(right).unwrap()),
+            sign,
+        }
+    }
+    pub fn new_event<T>(right: T, sign: CriteriaSign)-> Self where T: Serialize,{
+        Criteria {
+            left: String::from("$event"),
+            right: SurrealValue::from(serde_json::to_value(right).unwrap()),
+            sign,
+        }
+    }
     /// # Cheat Condition Builder
     /// When encountering difficulties in directly constructing statements with conditional constructors
     ///
