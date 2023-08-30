@@ -1,2 +1,0 @@
-[workspace]
-members = ["surrealism", "surrealism_tools", "tests"]
