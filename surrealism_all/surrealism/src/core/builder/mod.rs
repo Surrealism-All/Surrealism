@@ -14,6 +14,7 @@ pub mod relate;
 pub mod info;
 pub mod transaction;
 pub mod define;
+pub mod remove;
 mod macros;
 
 
@@ -24,6 +25,7 @@ use self::relate::{RelateWrapper};
 use self::delete::{DeleteWrapper};
 use self::select::{SelectWrapper};
 use self::info::InfoWrapper;
+use self::remove::RemoveWrapper;
 use self::define::*;
 use self::update::{UpdateWrapper, UpdateWrapperImpl};
 use self::create::{CreateWrapper, CreateWrapperImpl};
@@ -60,6 +62,9 @@ impl SQLBuilderFactory {
     }
     pub fn define<'w>() -> DefineWrapper<'w> {
         DefineWrapper::new()
+    }
+    pub fn remove<'w>() -> RemoveWrapper<'w> {
+        RemoveWrapper::new()
     }
 }
 
