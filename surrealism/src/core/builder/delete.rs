@@ -42,7 +42,6 @@ pub trait DeleteWrapperImpl: BaseWrapperImpl + TableImpl + ReturnImpl + TimeoutI
 ///     Ok(())
 /// }
 /// ```
-#[cfg(feature = "builder")]
 #[derive(Debug, Clone)]
 pub struct DeleteWrapper {
     table: Table,

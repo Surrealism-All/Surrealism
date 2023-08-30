@@ -80,7 +80,6 @@ pub trait CreateWrapperImpl: BaseWrapperImpl + TableImpl + ReturnImpl + TimeoutI
 ///     Ok(())
 /// }
 /// ```
-#[cfg(feature = "builder")]
 #[derive(Debug, Clone)]
 pub struct CreateWrapper {
     table: Table,

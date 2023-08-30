@@ -42,10 +42,10 @@ use std::collections::{BTreeMap, HashMap};
 use serde::{Serialize, Deserialize};
 use serde_json::Value;
 use surrealdb::sql::{Datetime, Duration};
-use crate::{Condition, Criteria};
-use crate::core::db::constants::{BLANK, STMT_END};
+use crate::{Condition};
+use crate::core::db::constants::{BLANK};
 use crate::util::{remove_format_half, handle_str};
-use super::constants::{NULL, NULL_DOWN, NONE_DOWN, NONE, TRUE, TRUE_STR, FALSE, FALSE_STR, LEFT_BRACE, RIGHT_BRACE, COMMA};
+use super::constants::{NULL, NULL_DOWN, NONE_DOWN, NONE, LEFT_BRACE, RIGHT_BRACE, COMMA};
 
 /// SurrealDB对应的值类型
 /// Geometry类型当前版本不支持，预计版本 > 0.2.1

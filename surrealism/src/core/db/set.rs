@@ -5,7 +5,6 @@
 //! @version:0.0.1
 //! @description:
 //! ```
-use std::ops::Deref;
 use crate::{ParamCombine, SurrealValue};
 use serde::{Serialize, Deserialize};
 use super::{Operator};

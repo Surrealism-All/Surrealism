@@ -60,7 +60,6 @@ use crate::core::db::constants::{REMOVE_INDEX, REMOVE_PARAM, ON, ON_TABLE, REMOV
 ///     Ok(())
 /// }
 /// ```
-#[cfg(feature = "builder")]
 #[derive(Debug, Clone)]
 pub enum RemoveWrapper<'w> {
     NONE,

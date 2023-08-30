@@ -60,7 +60,6 @@ pub trait RelateWrapperImpl: BaseWrapperImpl + ReturnImpl + TimeoutImpl + Parall
 ///     Ok(())
 /// }
 /// ```
-#[cfg(feature = "builder")]
 #[derive(Debug, Clone)]
 pub struct RelateWrapper {
     table_from: Table,

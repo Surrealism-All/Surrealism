@@ -85,7 +85,6 @@ pub trait SelectWrapperImpl<'w>: TableImpl + ParallelImpl + ConditionImpl + Time
 ///     Ok(())
 /// }
 /// ```
-#[cfg(feature = "builder")]
 #[derive(Debug, Clone)]
 pub struct SelectWrapper<'w> {
     field: Field<'w>,

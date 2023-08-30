@@ -126,7 +126,6 @@ pub trait UpdateWrapperImpl<'w>: BaseWrapperImpl + ReturnImpl + ParallelImpl + T
 ///     Ok(())
 /// }
 /// ```
-#[cfg(feature = "builder")]
 #[derive(Debug, Clone)]
 pub struct UpdateWrapper<'w> {
     table: Table,

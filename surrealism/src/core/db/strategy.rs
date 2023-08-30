@@ -6,7 +6,7 @@
 //! @description:
 //! ```
 use crate::{Object, ParamCombine, Set};
-use super::{ContentSet, Patch};
+use super::{Patch};
 use super::constants::{SET, CONTENT, MERGE, PATCH};
 use serde::{Serialize, Deserialize};
 

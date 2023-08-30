@@ -11,8 +11,6 @@
 use serde::{Serialize, Deserialize};
 use serde_json::json;
 use crate::{ParamCombine, SurrealValue};
-use crate::util::remove_half;
-use super::constants::{LEFT_BRACE, RIGHT_BRACE};
 
 const ADD: &str = "add";
 const REPLACE: &str = "replace";

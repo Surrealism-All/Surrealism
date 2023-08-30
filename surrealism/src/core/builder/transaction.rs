@@ -15,7 +15,6 @@ use crate::core::db::constants::{BEGIN_TRANSACTION, CANCEL_TRANSACTION, COMMIT_T
 /// 1. BEGIN [ TRANSACTION ]; 开始
 /// 2. CANCEL [ TRANSACTION ]; 取消
 /// 3. COMMIT [ TRANSACTION ]; 提交
-#[cfg(feature = "builder")]
 #[derive(Debug, Clone)]
 pub struct Transaction<'t> {
     stmts: Vec<&'t str>,

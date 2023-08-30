@@ -8,7 +8,7 @@
 use serde::{Serialize, Deserialize};
 use crate::SurrealValue;
 use super::{ParamCombine};
-use super::constants::{EQ, LT, GT, GTE, LTE, LINK, NEQ, WHERE, BLANK, AND, OR};
+use super::constants::{EQ, LT, GT, GTE, LTE, LINK, NEQ, WHERE, AND, OR};
 
 /// where condition for statment
 /// ## example

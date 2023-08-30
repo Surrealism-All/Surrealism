@@ -34,7 +34,7 @@ impl<'o> Order<'o> {
     pub fn build(&self) -> String {
         match self {
             Order::Asc(asc) => format!("{} {}", asc.join(" , "), ASC),
-            Order::Desc(desc) => format!("{} {}", desc.join(" , "), ASC),
+            Order::Desc(desc) => format!("{} {}", desc.join(" , "), DESC),
             Order::Rand => String::from(RAND)
         }
     }

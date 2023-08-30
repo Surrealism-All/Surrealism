@@ -27,8 +27,8 @@ use self::select::{SelectWrapper};
 use self::info::InfoWrapper;
 use self::remove::RemoveWrapper;
 use self::define::*;
-use self::update::{UpdateWrapper, UpdateWrapperImpl};
-use self::create::{CreateWrapper, CreateWrapperImpl};
+use self::update::{UpdateWrapper};
+use self::create::{CreateWrapper};
 use crate::core::db::{ReturnType, TimeOut, SurrealID, TimeUnit};
 
 /// SQLBuilderFactory for Surrealism
@@ -37,7 +37,6 @@ use crate::core::db::{ReturnType, TimeOut, SurrealID, TimeUnit};
 /// - UpdateWrapper
 /// - InsertWrapper
 /// - DeleteWrapper
-#[cfg(feature = "builder")]
 pub struct SQLBuilderFactory;
 
 impl SQLBuilderFactory {

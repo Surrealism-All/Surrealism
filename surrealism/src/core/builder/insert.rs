@@ -85,7 +85,6 @@ pub trait InsertWrapperImpl: BaseWrapperImpl + TableImpl {
 ///     Ok(())
 /// }
 /// ```
-#[cfg(feature = "builder")]
 #[derive(Debug, Clone)]
 pub struct InsertWrapper {
     table: Table,

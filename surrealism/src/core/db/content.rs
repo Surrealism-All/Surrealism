@@ -32,7 +32,7 @@
 use std::collections::HashMap;
 use serde::Serialize;
 use super::{SurrealValue, Object, ParamCombine};
-use super::constants::{CONTENT, SET, PATCH, MERGE, LEFT_BRACE, RIGHT_BRACE};
+use super::constants::{CONTENT, SET, MERGE, LEFT_BRACE, RIGHT_BRACE};
 
 /// # SurrealContent
 /// ContentSet is used to create wrapper `content | set` param

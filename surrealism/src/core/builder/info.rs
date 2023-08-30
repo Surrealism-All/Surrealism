@@ -18,7 +18,6 @@
 
 use crate::core::db::constants::{INFO, KV, DB, SCOPE, TABLE, STMT_END, NS};
 
-#[cfg(feature = "builder")]
 #[derive(Debug, Clone)]
 pub enum InfoWrapper<'w> {
     KV,
