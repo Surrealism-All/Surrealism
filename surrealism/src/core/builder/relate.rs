@@ -18,7 +18,7 @@
 
 use serde::Serialize;
 use super::{BaseWrapperImpl, TableImpl, ReturnImpl, TimeoutImpl, ParallelImpl};
-use crate::core::db::constants::{CREATE, BLANK, PARALLEL, STMT_END, LINK,DELETE,WHERE};
+use crate::core::db::constants::{RELATE, BLANK, PARALLEL, STMT_END, LINK,DELETE,WHERE};
 use crate::core::db::{ReturnType, Table, TimeOut, SurrealID, ParamCombine, Object, SurrealValue, CreateStrategy};
 use crate::{Operator, Set, TimeUnit, timeout_impl, return_impl, parallel_impl};
 
@@ -98,7 +98,7 @@ impl BaseWrapperImpl for RelateWrapper {
     }
 
     fn build(&mut self) -> String {
-        let mut res = format!("{} {}{}{}{}{}", CREATE, &self.table_from.combine(), LINK, &self.table_with.combine(), LINK, &self.table_to.combine());
+        let mut res = format!("{} {}{}{}{}{}", RELATE, &self.table_from.combine(), LINK, &self.table_with.combine(), LINK, &self.table_to.combine());
         if self.content.is_some() {
             res.push_str(BLANK);
             res.push_str(&self.content.as_ref().unwrap().combine());

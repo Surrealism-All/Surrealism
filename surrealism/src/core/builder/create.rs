@@ -54,7 +54,8 @@ pub trait CreateWrapperImpl: BaseWrapperImpl + TableImpl + ReturnImpl + TimeoutI
 /// #[tokio::main]
 /// async fn main() -> SurrealismRes<()> {
 ///     // use set : CREATE surrealism:rand() SET name = 'Mat' RETURN AFTER TIMEOUT 5s PARALLEL;
-///     let mut create = SQLBuilderFactory::create()
+///     use surrealism::builder::create::CreateWrapperImpl;
+/// let mut create = SQLBuilderFactory::create()
 ///         .table("surrealism")
 ///         .id(SurrealID::RAND)
 ///         .set()

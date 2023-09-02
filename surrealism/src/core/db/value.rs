@@ -37,6 +37,7 @@
 //! @description:
 //! ```
 
+use std::any::{Any, TypeId};
 use std::collections::{BTreeMap, HashMap};
 
 use serde::{Serialize, Deserialize};
@@ -181,8 +182,15 @@ impl SurrealValue {
             _ => false
         }
     }
+    /// try to from each Type to SurrealValue
+    pub fn from_each<T>(value: T) -> Self where T: Serialize {
+        let value = serde_json::to_value(&value).unwrap();
+        SurrealValue::from(value)
+    }
+    pub fn from_vec<T>(value: Vec<T>) -> Vec<SurrealValue> where T: Serialize {
+        value.iter().map(|x| SurrealValue::from_each(x)).collect::<Vec<SurrealValue>>()
+    }
 }
-
 
 ///将serde的Value类型转为为SurrealValue
 impl From<Value> for SurrealValue {

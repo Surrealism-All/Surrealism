@@ -92,7 +92,7 @@ The configuration file address can be set to：
 	"port" : 10086
 	"mode" : "Memory"
 	"path" : "E:/Rust/surreal"
-	"log" : {"level" : "Info", "print" : true," path" : "E:/surrealism/log" }
+	"log" : {"level" : "Info", "print" : true,"path" : "E:/surrealism/log" }
 }
 ```
 #### Surrealism.toml(TOML)
