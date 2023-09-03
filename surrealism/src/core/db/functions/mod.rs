@@ -5,6 +5,9 @@ use array::ArrayFunc;
 use crate::SurrealValue;
 pub use crypto::{CryptoFunc, GenerateCompare};
 
+/// # SurrealDB Functions
+/// SurrealDB comes with a large number of in-built functions for checking, manipulating, and working with many different types of data.
+/// These functions are grouped into a number of different packages, which can be seen below.
 pub struct Function;
 
 impl Function {

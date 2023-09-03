@@ -1,12 +1,12 @@
-<img src="https://img.shields.io/badge/surrealism-0.2.0-orange?style=flat-square&logo=rust&logoColor=%23fff&labelColor=%23DEA584&color=%23DEA584">  <img src="https://img.shields.io/badge/License-MIT-orange?style=flat-square&logoColor=%23fff&labelColor=%2323B898&color=%2323B898">
+<img src="https://img.shields.io/badge/surrealism-0.2.1-orange?style=flat-square&logo=rust&logoColor=%23fff&labelColor=%23DEA584&color=%23DEA584">  <img src="https://img.shields.io/badge/License-MIT-orange?style=flat-square&logoColor=%23fff&labelColor=%2323B898&color=%2323B898">
 
 # Surrealism
 
 - author：syf20020816@outlook.com
 - docName：Surrealism README
 - createDate：20230506
-- updateDate：20230830
-- version：0.2.0
+- updateDate：20230904
+- version：0.2.1
 - email：syf20020816@outlook.com
 
 ## LICEMSE
@@ -27,7 +27,7 @@ Surrealism relies on Surrealdb's official Rust standard library:surrealdb,The pu
 
 ```toml
 [dependencies]
-surrealism = {version="0.2.0"}
+surrealism = {version="0.2.1"}
 tokio = { version = "1.28.0", features = ["macros", "rt-multi-thread"] }
 ```
 
@@ -92,7 +92,7 @@ The configuration file address can be set to：
 	"port" : 10086
 	"mode" : "Memory"
 	"path" : "E:/Rust/surreal"
-	"log" : {"level" : "Info", "print" : true," path" : "E:/surrealism/log" }
+	"log" : {"level" : "Info", "print" : true,"path" : "E:/surrealism/log" }
 }
 ```
 #### Surrealism.toml(TOML)
@@ -214,10 +214,26 @@ Version {
 
 ## Update Des
 
+- 0.2.1：
+
+  - 添加SurrealDB内置方法Function (Add SurrealDB built-in method Function)
+    - `Function::array`
+    - `Function::count`
+    - `Function::crypto`
+  - 修复 `RELATE` 语句构造错误的问题，感谢`timlagrande <notifications@github.com>` (Fix the issue of incorrect construction of the `RELATE` statement. Thank `timlagrande <notifications@github.com>`)
+  - `SELECT`语句`Column`构建添加`AS`关键字功能 (`SELECT` statement `Column` construction adds `AS`keyword )
+  - SurrealDB内置加密功能，见`surrealism::functions::{GenerateCompare, CryptoFunc}` (SurrealDB built-in encryption function，See `surrealism::functions::{GenerateCompare, CryptoFunc}`)
+
 - 0.2.0：
+
   - 重构了各类Wrapper，使用简单统一的构造器+工厂模式（Reconstructed various Wrappers using a simple and unified constructor+factory pattern）
+
   - 增加row sql进行语句构建（Add row SQL for statement construction）
+
   - 启动与初始化更新，你可以基于框架提供的trait和struct自己构建初始化服务（Starting and initializing updates, you can build your own initialization services based on the traits and structs provided by the framework）
+
   - 增加大量构建工具（Add a large number of construction tools）
+
   - 分离语句构造和语句提交（Separate statement construction and statement submission）
+
 - 0.1.1：更新配置，增加基于Namespace和Database的支持，但是基于当前SurrealDB无法支持，所以并不能使用🥲（Update the configuration and add support based on Namespace and Database, but it cannot be used due to the current SurrealDB support 🥲）
