@@ -11,14 +11,14 @@ use surrealism::functions::Function;
 #[tokio::main]
 async fn main() -> SurrealismRes<()> {
     let select1 = SQLBuilderFactory::select()
-        .column("name")
+        .column("name",None)
         .table("SurrealDB")
         .id(SurrealID::from("great"))
         .group_by(vec!["id"])
         .build();
     dbg!(select1);
     let select2 = SQLBuilderFactory::select()
-        .column("name")
+        .column("name",None)
         .table("SurrealDB")
         .id(SurrealID::from("great"))
         .where_condition(Condition::new().push(Criteria::new("name", "Mat", CriteriaSign::Neq), ConditionSign::None).deref_mut())
@@ -26,13 +26,13 @@ async fn main() -> SurrealismRes<()> {
         .build();
     dbg!(select2);
     let select3 = SQLBuilderFactory::select()
-        .column("*")
+        .column("*",None)
         .table("article")
         .order_by(Order::new_asc(vec!["title", "des"]))
         .build();
     dbg!(select3);
     let select4 = SQLBuilderFactory::select()
-        .column("*")
+        .column("*",None)
         .table("person")
         .limit(50)
         .build();

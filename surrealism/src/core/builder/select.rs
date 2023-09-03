@@ -31,7 +31,7 @@ use super::{TimeoutImpl, ParallelImpl, TableImpl, ConditionImpl, BaseWrapperImpl
 use crate::core::db::constants::{SELECT, STMT_END, BLANK, PARALLEL, ALL, GROUP_BY, ORDER_BY, SPLIT, START, LIMIT, FETCH, FROM};
 
 pub trait SelectWrapperImpl<'w>: TableImpl + ParallelImpl + ConditionImpl + TimeoutImpl + BaseWrapperImpl {
-    fn column(&mut self, column: &'w str) -> &mut Self;
+    fn column(&mut self, column: &'w str, as_name: Option<&'w str>) -> &mut Self;
     fn split_at(&mut self, column: &'w str) -> &mut Self;
     fn group_by(&mut self, group: Vec<&'w str>) -> &mut Self;
     fn order_by(&mut self, order: Order<'w>) -> &mut Self;
@@ -56,14 +56,14 @@ pub trait SelectWrapperImpl<'w>: TableImpl + ParallelImpl + ConditionImpl + Time
 /// #[tokio::main]
 /// async fn main() -> SurrealismRes<()> {
 ///     let select1 = SQLBuilderFactory::select()
-///         .column("name")
+///         .column("name",None)
 ///         .table("SurrealDB")
 ///         .id(SurrealID::from("great"))
 ///         .group_by(vec!["id"])
 ///         .build();
 ///     dbg!(select1);
 ///     let select2 = SQLBuilderFactory::select()
-///         .column("name")
+///         .column("name",None)
 ///         .table("SurrealDB")
 ///         .id(SurrealID::from("great"))
 ///         .where_condition(Condition::new().push(Criteria::new("name", "Mat", CriteriaSign::Neq), ConditionSign::None).deref_mut())
@@ -71,13 +71,13 @@ pub trait SelectWrapperImpl<'w>: TableImpl + ParallelImpl + ConditionImpl + Time
 ///         .build();
 ///     dbg!(select2);
 ///     let select3 = SQLBuilderFactory::select()
-///         .column("*")
+///         .column("*",None)
 ///         .table("article")
 ///         .order_by(Order::new_asc(vec!["title", "des"]))
 ///         .build();
 ///     dbg!(select3);
 ///     let select4 = SQLBuilderFactory::select()
-///         .column("*")
+///         .column("*",None)
 ///         .table("person")
 ///         .limit(50)
 ///         .build();
@@ -185,13 +185,19 @@ impl<'w> BaseWrapperImpl for SelectWrapper<'w> {
 }
 
 impl<'w> SelectWrapperImpl<'w> for SelectWrapper<'w> {
-    fn column(&mut self, column: &'w str) -> &mut Self {
+    /// build column : column_name AS as_name
+    ///
+    /// such as : name AS username
+    fn column(&mut self, column: &'w str, as_name: Option<&'w str>) -> &mut Self {
         match column {
             ALL => self.field = Field::All,
             other => {
                 match self.field {
-                    Field::All => self.field = Field::Fields(vec![other]),
-                    Field::Fields(_) => self.field.push(other)
+                    Field::All => {
+                        self.field = Field::Fields(vec![]);
+                        self.field.push(other, as_name);
+                    }
+                    Field::Fields(_) => self.field.push(other, as_name)
                 }
             }
         }

@@ -190,6 +190,13 @@ impl SurrealValue {
     pub fn from_vec<T>(value: Vec<T>) -> Vec<SurrealValue> where T: Serialize {
         value.iter().map(|x| SurrealValue::from_each(x)).collect::<Vec<SurrealValue>>()
     }
+    /// get str from SurrealValue::Str
+    pub fn inner_str(&self) -> Option<String> {
+        match self {
+            SurrealValue::Str(s) => Some(s.to_string()),
+            _ =>Some( self.to_str())
+        }
+    }
 }
 
 ///将serde的Value类型转为为SurrealValue

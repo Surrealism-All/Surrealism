@@ -178,6 +178,14 @@ impl Criteria {
             sign,
         }
     }
+    /// This is a simple but unreasonable method to new Criteria
+    pub fn new_easy<T>(left: T, right: T, sign: CriteriaSign) ->Self where T:Serialize,{
+        Criteria{
+            left:  SurrealValue::from(serde_json::to_value(left).unwrap()).inner_str().unwrap(),
+            right:  SurrealValue::from(serde_json::to_value(right).unwrap()),
+            sign
+        }
+    }
     /// # Cheat Condition Builder
     /// When encountering difficulties in directly constructing statements with conditional constructors
     ///
@@ -222,6 +230,10 @@ impl Criteria {
             }
             _ => format!("{} {} {}", &self.left, self.sign.to_str(), &self.right.to_str())
         }
+    }
+    /// consume self to SurrealValue
+    pub fn to_value(self)->SurrealValue{
+        SurrealValue::from(self.build())
     }
 }
 
