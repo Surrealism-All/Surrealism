@@ -28,7 +28,7 @@
 
 use crate::{Condition, Table, TimeOut, Order, Field, SurrealID, TimeUnit, timeout_lifetime_impl, parallel_lifetime_impl, table_lifetime_impl, ParamCombine};
 use super::{TimeoutImpl, ParallelImpl, TableImpl, ConditionImpl, BaseWrapperImpl};
-use crate::core::db::constants::{SELECT, STMT_END, BLANK, PARALLEL, ALL, GROUP_BY, ORDER_BY, SPLIT, START, LIMIT, FETCH, FROM};
+use crate::core::db::constants::{SELECT, STMT_END, BLANK, PARALLEL, ALL, GROUP_BY, ORDER_BY, SPLIT, START, LIMIT, FETCH, FROM, DIFF, LIVE_SELECT};
 
 pub trait SelectWrapperImpl<'w>: TableImpl + ParallelImpl + ConditionImpl + TimeoutImpl + BaseWrapperImpl {
     fn column(&mut self, column: &'w str, as_name: Option<&'w str>) -> &mut Self;
@@ -38,7 +38,9 @@ pub trait SelectWrapperImpl<'w>: TableImpl + ParallelImpl + ConditionImpl + Time
     fn start(&mut self, start: usize) -> &mut Self;
     fn limit(&mut self, limit: usize) -> &mut Self;
     fn fetch(&mut self, fetch: Vec<&'w str>) -> &mut Self;
+    fn to_live(&mut self) -> LiveSelectWrapper<'w>;
 }
+
 
 /// # SelectWrapper
 /// ## example
@@ -191,13 +193,14 @@ impl<'w> SelectWrapperImpl<'w> for SelectWrapper<'w> {
     fn column(&mut self, column: &'w str, as_name: Option<&'w str>) -> &mut Self {
         match column {
             ALL => self.field = Field::All,
+            DIFF | "diff" => self.field = Field::Diff,
             other => {
                 match self.field {
-                    Field::All => {
+                    Field::All | Field::Diff => {
                         self.field = Field::Fields(vec![]);
                         self.field.push(other, as_name);
                     }
-                    Field::Fields(_) => self.field.push(other, as_name)
+                    Field::Fields(_) => self.field.push(other, as_name),
                 }
             }
         }
@@ -233,8 +236,113 @@ impl<'w> SelectWrapperImpl<'w> for SelectWrapper<'w> {
         self.fetch = Some(fetch);
         self
     }
+
+    fn to_live(&mut self) -> LiveSelectWrapper<'w> {
+        LiveSelectWrapper{
+            field: self.field.to_owned(),
+            table: self.table.to_owned(),
+            condition: self.condition.to_owned(),
+            fetch: self.fetch.to_owned()
+        }
+    }
 }
 
 timeout_lifetime_impl!(SelectWrapper);
 parallel_lifetime_impl!(SelectWrapper);
 table_lifetime_impl!(SelectWrapper);
+
+/// # LiveSelectWrapper
+/// The LIVE SELECT statement can be used to initiate a real-time selection from a table, including the option to apply filters.
+///
+/// In practical terms, when you execute a LIVE SELECT query, it triggers an ongoing session that captures any subsequent changes to the data in real-time.
+///
+/// These changes are then immediately transmitted to the client, ensuring that the client is consistently updated with the latest data modifications.
+/// ```code
+/// LIVE SELECT
+/// 	[
+/// 		[ VALUE ] @fields [ AS @alias ]
+/// 		| DIFF
+/// 	]
+/// 	FROM @targets
+/// 	[ WHERE @conditions ]
+/// 	[ FETCH @fields ... ]
+/// ;
+/// ```
+/// ## example
+/// ```rust
+/// use surrealism::{SurrealismRes, SurrealID, SurrealValue, Condition, Criteria, CriteriaSign, ConditionSign, TimeUnit, Order};
+/// use surrealism::builder::*;
+/// use surrealism::builder::select::SelectWrapperImpl;
+/// use surrealism::functions::Function;
+///
+///
+/// // [tests\src\main.rs:18] live_select1 = "LIVE SELECT * FROM person;"
+/// // [tests\src\main.rs:24] live_select2 = "LIVE SELECT DIFF FROM person;"
+/// // [tests\src\main.rs:33] live_select3 = "LIVE SELECT * FROM person WHERE age > 18;"
+/// #[tokio::main]
+/// async fn main() -> SurrealismRes<()> {
+///     let live_select1 = SQLBuilderFactory::select()
+///         .column("*",None)
+///         .table("person")
+///         .to_live()
+///         .build();
+///     dbg!(live_select1);
+///     let live_select2 = SQLBuilderFactory::select()
+///         .column("DIFF",None)
+///         .table("person")
+///         .to_live()
+///         .build();
+///     dbg!(live_select2);
+///     let live_select3 = SQLBuilderFactory::select()
+///         .column("*",None)
+///         .table("person")
+///         .where_condition(
+///             Condition::new().push(Criteria::new("age",18,CriteriaSign::Gt),ConditionSign::None).deref_mut()
+///         )
+///         .to_live()
+///         .build();
+///     dbg!(live_select3);
+///     Ok(())
+/// }
+/// ```
+#[derive(Debug, Clone)]
+pub struct LiveSelectWrapper<'w> {
+    field: Field<'w>,
+    table: Table,
+    condition: Option<Condition>,
+    fetch: Option<Vec<&'w str>>,
+}
+
+impl<'w> BaseWrapperImpl for LiveSelectWrapper<'w> {
+    fn new() -> Self {
+        LiveSelectWrapper {
+            field: Field::default(),
+            table: Table::default(),
+            condition: None,
+            fetch: None,
+        }
+    }
+
+    fn deref_mut(&mut self) -> Self {
+        LiveSelectWrapper {
+            field: self.field.clone(),
+            table: self.table.clone(),
+            condition: self.condition.clone(),
+            fetch: self.fetch.clone(),
+        }
+    }
+
+    fn build(&mut self) -> String {
+        let mut res = format!("{} {} {} {}", LIVE_SELECT, &self.field.combine(), FROM, &self.table.combine());
+        if self.condition.is_some() {
+            res.push_str(BLANK);
+            res.push_str(&self.condition.as_ref().unwrap().combine())
+        }
+        if self.fetch.is_some() {
+            res.push_str(format!(" {} ", FETCH).as_str());
+            res.push_str(&self.fetch.as_ref().unwrap().join(" , "))
+        }
+        res.push_str(STMT_END);
+        res
+    }
+}

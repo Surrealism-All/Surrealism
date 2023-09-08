@@ -7,11 +7,12 @@
 //! ```
 
 use crate::ParamCombine;
-use super::constants::{ALL};
+use super::constants::{ALL,DIFF};
 
 #[derive(Debug, Clone)]
 pub enum Field<'f> {
     All,
+    Diff,
     Fields(Vec<(&'f str, &'f str)>),
 }
 
@@ -31,6 +32,8 @@ impl<'f> From<&'f str> for Field<'f> {
     fn from(value: &'f str) -> Self {
         match value {
             ALL => Field::All,
+            DIFF => Field::Diff,
+            "diff" => Field::Diff,
             other => Field::Fields(vec![(other, "")])
         }
     }
@@ -63,11 +66,12 @@ impl<'f> Field<'f> {
                 }).collect::<Vec<String>>()
                     .join(" , ")
             }
+            Field::Diff => DIFF.to_string()
         }
     }
     pub fn push(&mut self, item: &'f str, as_name: Option<&'f str>) -> () {
         match self {
-            Field::All => (),
+            Field::All|Field::Diff => (),
             Field::Fields(ref mut field) => {
                 if as_name.is_some() {
                     field.push((item, as_name.as_ref().unwrap()))

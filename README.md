@@ -214,6 +214,14 @@ Version {
 
 ## Update Des
 
+- 0.2.2（预计发布时间：9月21日前）：
+  
+  - 添加SelectWrapper向LiveSelectWrapper的转变
+  - 添加Field::Diff，针对LiveSelect语句的构建
+  - 添加SurrealValue对Geo的支持（未实现）
+  - 添加所有内置方法Function（未实现）
+  - 取消ValueType、ValueConstructor和SurrealValue之间的隔阂，合并功能SurrealValue（未实现）
+  
 - 0.2.1：
 
   - 添加SurrealDB内置方法Function (Add SurrealDB built-in method Function)
