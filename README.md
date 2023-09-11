@@ -220,7 +220,8 @@ Version {
   - 添加Field::Diff，针对LiveSelect语句的构建
   - 添加SurrealValue对Geometries的支持,GeoJSON
   - 添加所有内置方法Function（未实现）
-  - 取消ValueType、ValueConstructor和SurrealValue之间的隔阂，合并功能SurrealValue（未实现）
+  - 补充ValueTyped类型Geometries,Decimal,Option
+  - 添加ValueConstructor的new_infer()用于通过默认值推测值类型
   
 - 0.2.1：
 

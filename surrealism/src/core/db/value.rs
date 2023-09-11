@@ -45,7 +45,7 @@ use surrealdb::sql::{Duration, Datetime};
 use crate::{Condition, Geometries};
 use crate::core::db::constants::{BLANK};
 use crate::util::{remove_format_half, handle_str};
-use super::constants::{NULL, NULL_DOWN, NONE_DOWN, NONE, LEFT_BRACE, RIGHT_BRACE, COMMA};
+use super::constants::{NULL, NULL_DOWN, NONE_DOWN, NONE, LEFT_BRACE, RIGHT_BRACE, COMMA, ANY, BOOL, ARRAY, DATETIME, DURATION, NUMBER, INT, FLOAT, STRING, OBJECT, GEOMETRY, RECORD, DECIMAL};
 
 /// SurrealDB对应的值类型
 /// Geometry类型当前版本不支持，预计版本 > 0.2.1
@@ -98,11 +98,17 @@ impl SurrealValue {
             SurrealValue::Duration(_) => ValueType::Duration,
             SurrealValue::Record(_) => ValueType::Record,
             SurrealValue::Bool(_) => ValueType::Bool,
-            SurrealValue::Number(_) => ValueType::Number,
-            SurrealValue::Str(_) => ValueType::String,
+            SurrealValue::Number(n) => {
+                match n {
+                    Number::Int(_) => ValueType::Int,
+                    Number::Float(_) => ValueType::Float,
+                    Number::Decimal(_) => ValueType::Decimal
+                }
+            }
+            SurrealValue::Str(_) | SurrealValue::None | SurrealValue::Null => ValueType::String,
             SurrealValue::Object(_) => ValueType::Object,
             SurrealValue::Array(_) => ValueType::Array,
-            _ => ValueType::String
+            SurrealValue::Geometries(_) => ValueType::Geometry
         }
     }
     ///将SurrealValue转换为String
@@ -471,6 +477,7 @@ pub enum ValueType {
     Array,
     DateTime,
     Duration,
+    Decimal,
     Float,
     Int,
     Number,
@@ -478,24 +485,30 @@ pub enum ValueType {
     String,
     Record,
     Geometry,
+    Option(Box<ValueType>),
 }
 
 impl ValueType {
-    pub fn to_str(&self) -> &str {
-        match self {
-            ValueType::Any => "any",
-            ValueType::Bool => "bool",
-            ValueType::Array => "array",
-            ValueType::DateTime => "datetime",
-            ValueType::Duration => "duration",
-            ValueType::Float => "float",
-            ValueType::Int => "int",
-            ValueType::Number => "number",
-            ValueType::Object => "object",
-            ValueType::String => "string",
-            ValueType::Record => "record",
-            ValueType::Geometry => "geometry"
-        }
+    pub fn to_string(&self) -> String {
+        let res = match self {
+            ValueType::Any => ANY,
+            ValueType::Bool => BOOL,
+            ValueType::Array => ARRAY,
+            ValueType::DateTime => DATETIME,
+            ValueType::Duration => DURATION,
+            ValueType::Float => FLOAT,
+            ValueType::Int => INT,
+            ValueType::Number => NUMBER,
+            ValueType::Object => OBJECT,
+            ValueType::String => STRING,
+            ValueType::Record => RECORD,
+            ValueType::Geometry => GEOMETRY,
+            ValueType::Decimal => DECIMAL,
+            ValueType::Option(v) => {
+                return format!("option<{}>", v.to_string());
+            }
+        };
+        res.to_string()
     }
 }
 
@@ -522,8 +535,23 @@ impl ValueConstructor {
             assert,
         }
     }
+    /// You do not need to specify value type , this function will help to infer value type by default value
+    /// ## example
+    /// ```code
+    ///     let define_field3 = SQLBuilderFactory::define()
+    ///         .field("countrycode", "user",
+    ///         ValueConstructor::new_infer(Some(SurrealValue::from(true)),None),None).build();
+    /// ```
+    pub fn new_infer(default_value: Option<SurrealValue>, assert: Option<Condition>) -> Self {
+        if default_value.is_some() {
+            //guess type
+            Self::new(default_value.as_ref().unwrap().value_type(), default_value, assert)
+        } else {
+            panic!("if you wanna use None | Null to specify value , you should use new function!")
+        }
+    }
     pub fn build(&self) -> String {
-        let mut res = format!("TYPE {}", self.value_type.to_str());
+        let mut res = format!("TYPE {}", self.value_type.to_string());
         if self.default_value.is_some() {
             res.push_str(BLANK);
             res.push_str(format!("VALUE $value OR {}", self.default_value.as_ref().unwrap().to_str()).as_str());
