@@ -9,6 +9,7 @@ mod patch;
 mod set;
 mod field;
 mod order;
+mod geo;
 pub mod functions;
 
 pub use sql::*;
@@ -21,6 +22,7 @@ pub use set::Set;
 pub use strategy::*;
 pub use order::Order;
 pub use field::Field;
+pub use geo::*;
 
 
 /// # param combine trait

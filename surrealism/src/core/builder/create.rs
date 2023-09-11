@@ -21,7 +21,7 @@ use serde::Serialize;
 use super::{BaseWrapperImpl, TableImpl, ReturnImpl, TimeoutImpl, ParallelImpl};
 use crate::core::db::constants::{CREATE, BLANK, PARALLEL, STMT_END};
 use crate::core::db::{ReturnType, Table, TimeOut, SurrealID, ParamCombine, Object, SurrealValue, CreateStrategy};
-use crate::{Operator, Set, TimeUnit,parallel_impl,return_impl,timeout_impl,table_impl};
+use crate::{Operator, Set, TimeUnit, parallel_impl, return_impl, timeout_impl, table_impl};
 
 pub trait CreateWrapperImpl: BaseWrapperImpl + TableImpl + ReturnImpl + TimeoutImpl + ParallelImpl {
     fn content<T>(&mut self, obj: &T) -> &mut Self where T: Serialize;

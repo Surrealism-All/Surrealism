@@ -39,11 +39,10 @@
 
 use std::any::{Any, TypeId};
 use std::collections::{BTreeMap, HashMap};
-
 use serde::{Serialize, Deserialize};
 use serde_json::Value;
-use surrealdb::sql::{Datetime, Duration};
-use crate::{Condition};
+use surrealdb::sql::{Duration, Datetime};
+use crate::{Condition, Geometries};
 use crate::core::db::constants::{BLANK};
 use crate::util::{remove_format_half, handle_str};
 use super::constants::{NULL, NULL_DOWN, NONE_DOWN, NONE, LEFT_BRACE, RIGHT_BRACE, COMMA};
@@ -67,24 +66,39 @@ pub enum SurrealValue {
     None,
     Null,
     Bool(bool),
-    Int(i32),
-    Float(f32),
-    Decimal(f64),
+    Number(Number),
     Str(String),
     Object(Object),
     Array(Array),
+    Geometries(Geometries),
 }
 
+
 impl SurrealValue {
+    /// get datetime , GMT 0
+    /// format just like : `2023-09-10T23:13:23.520847500Z`
+    pub fn datetime() -> Self {
+        SurrealValue::DateTime(Datetime::default())
+    }
+    pub fn record(id: &str) -> Self {
+        SurrealValue::Record(id.to_string())
+    }
+    pub fn number_int(num: i32) -> Self {
+        SurrealValue::from(num)
+    }
+    pub fn number_float(num: f32) -> Self {
+        SurrealValue::from(num)
+    }
+    pub fn number_decimal(num: f64) -> Self {
+        SurrealValue::from(num)
+    }
     pub fn value_type(&self) -> ValueType {
         match self {
             SurrealValue::DateTime(_) => ValueType::DateTime,
             SurrealValue::Duration(_) => ValueType::Duration,
             SurrealValue::Record(_) => ValueType::Record,
             SurrealValue::Bool(_) => ValueType::Bool,
-            SurrealValue::Int(_) => ValueType::Number,
-            SurrealValue::Float(_) => ValueType::Number,
-            SurrealValue::Decimal(_) => ValueType::Number,
+            SurrealValue::Number(_) => ValueType::Number,
             SurrealValue::Str(_) => ValueType::String,
             SurrealValue::Object(_) => ValueType::Object,
             SurrealValue::Array(_) => ValueType::Array,
@@ -97,15 +111,14 @@ impl SurrealValue {
             SurrealValue::None => format!("'{}'", NONE),
             SurrealValue::Null => format!("'{}'", NULL),
             SurrealValue::Bool(b) => b.to_string(),
-            SurrealValue::Int(int) => int.to_string(),
-            SurrealValue::Float(float) => float.to_string(),
-            SurrealValue::Decimal(decimal) => decimal.to_string(),
+            SurrealValue::Number(n) => n.parse(),
             SurrealValue::Str(s) => handle_str(serde_json::to_string(s).unwrap().as_str()),
             SurrealValue::Object(obj) => obj.parse(),
             SurrealValue::Array(arr) => arr.parse(),
             SurrealValue::DateTime(time) => time.to_string(),
             SurrealValue::Duration(duration) => duration.to_string(),
             SurrealValue::Record(record) => format!("record({})", record),
+            SurrealValue::Geometries(geo) => geo.to_string(),
         }
     }
     ///从json-str进行推测，转换为serde::Value再转为SurrealValue
@@ -148,19 +161,19 @@ impl SurrealValue {
     }
     pub fn is_int(&self) -> bool {
         match self {
-            SurrealValue::Int(_) => true,
+            SurrealValue::Number(n) => n.is_int(),
             _ => false
         }
     }
     pub fn is_float(&self) -> bool {
         match self {
-            SurrealValue::Float(_) => true,
+            SurrealValue::Number(n) => n.is_float(),
             _ => false
         }
     }
     pub fn is_decimal(&self) -> bool {
         match self {
-            SurrealValue::Decimal(_) => true,
+            SurrealValue::Number(n) => n.is_decimal(),
             _ => false
         }
     }
@@ -194,7 +207,7 @@ impl SurrealValue {
     pub fn inner_str(&self) -> Option<String> {
         match self {
             SurrealValue::Str(s) => Some(s.to_string()),
-            _ =>Some( self.to_str())
+            _ => Some(self.to_str())
         }
     }
 }
@@ -207,10 +220,10 @@ impl From<Value> for SurrealValue {
             Value::Bool(b) => SurrealValue::Bool(b),
             Value::Number(n) => {
                 if n.is_f64() {
-                    SurrealValue::Decimal(n.as_f64().unwrap())
+                    SurrealValue::from(n.as_f64().unwrap())
                 } else {
                     let num = n.as_u64().unwrap();
-                    SurrealValue::Int(num as i32)
+                    SurrealValue::from(num as i32)
                 }
             }
             Value::String(s) => {
@@ -233,6 +246,12 @@ impl From<Value> for SurrealValue {
     }
 }
 
+impl From<Geometries> for SurrealValue {
+    fn from(value: Geometries) -> Self {
+        SurrealValue::Geometries(value)
+    }
+}
+
 impl From<&str> for SurrealValue {
     fn from(value: &str) -> Self {
         match value {
@@ -251,39 +270,45 @@ impl From<bool> for SurrealValue {
     }
 }
 
+impl From<Number> for SurrealValue {
+    fn from(value: Number) -> Self {
+        SurrealValue::Number(value)
+    }
+}
+
 impl From<i32> for SurrealValue {
     fn from(value: i32) -> Self {
-        SurrealValue::Int(value)
+        SurrealValue::from(Number::from(value))
     }
 }
 
 impl From<u32> for SurrealValue {
     fn from(value: u32) -> Self {
-        SurrealValue::Int(value as i32)
+        SurrealValue::from(value as i32)
     }
 }
 
 impl From<usize> for SurrealValue {
     fn from(value: usize) -> Self {
-        SurrealValue::Int(value as i32)
+        SurrealValue::from(value as i32)
     }
 }
 
 impl From<isize> for SurrealValue {
     fn from(value: isize) -> Self {
-        SurrealValue::Int(value as i32)
+        SurrealValue::from(value as i32)
     }
 }
 
 impl From<f32> for SurrealValue {
     fn from(value: f32) -> Self {
-        SurrealValue::Float(value)
+        SurrealValue::from(Number::from(value))
     }
 }
 
 impl From<f64> for SurrealValue {
     fn from(value: f64) -> Self {
-        SurrealValue::Decimal(value)
+        SurrealValue::from(Number::from(value))
     }
 }
 
@@ -508,5 +533,59 @@ impl ValueConstructor {
             res.push_str(format!("ASSERT {}", self.assert.as_ref().unwrap().build()).as_str());
         }
         res
+    }
+}
+
+#[derive(Serialize, Deserialize, Debug, Clone, PartialEq)]
+pub enum Number {
+    Int(i32),
+    Float(f32),
+    Decimal(f64),
+}
+
+impl Number {
+    /// convert Number to string
+    pub fn parse(&self) -> String {
+        match self {
+            Number::Int(i) => i.to_string(),
+            Number::Float(f) => f.to_string(),
+            Number::Decimal(d) => d.to_string(),
+        }
+    }
+    pub fn is_int(&self) -> bool {
+        match self {
+            Number::Int(_) => true,
+            _ => false
+        }
+    }
+    pub fn is_float(&self) -> bool {
+        match self {
+            Number::Float(_) => true,
+            _ => false
+        }
+    }
+    pub fn is_decimal(&self) -> bool {
+        match self {
+            Number::Decimal(_) => true,
+            _ => false
+        }
+    }
+}
+
+impl From<i32> for Number {
+    fn from(value: i32) -> Self {
+        Number::Int(value)
+    }
+}
+
+impl From<f32> for Number {
+    fn from(value: f32) -> Self {
+        Number::Float(value)
+    }
+}
+
+impl From<f64> for Number {
+    fn from(value: f64) -> Self {
+        Number::Decimal(value)
     }
 }
