@@ -43,11 +43,11 @@ async fn main() -> SurrealismRes<()> {
     // let info_res = service.commit_sql(&info).await?;
     // dbg!(info_res);
     // create a table
-    // let create_stmt = crate_user_table().build();
-    // let create_res = service.commit_sql(&create_stmt).await?;
+    let create_stmt = crate_user_table().build();
+    let create_res = service.commit_sql(&create_stmt).await?;
     // dbg!(create_res);
     // select user::surrealism table
-    let select = SQLBuilderFactory::select().table("user").id(SurrealID::from("surrealism")).column("*").build();
+    let select = SQLBuilderFactory::select().table("user").id(SurrealID::from("surrealism")).column("*",None).build();
     let select_res = service.commit_sql(&select).await?;
     //parse response to any type you want
     let res: User = parse_response(select_res);

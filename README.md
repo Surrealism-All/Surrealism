@@ -1,4 +1,4 @@
-<img src="https://img.shields.io/badge/surrealism-0.2.1-orange?style=flat-square&logo=rust&logoColor=%23fff&labelColor=%23DEA584&color=%23DEA584">  <img src="https://img.shields.io/badge/License-MIT-orange?style=flat-square&logoColor=%23fff&labelColor=%2323B898&color=%2323B898">
+<img src="https://img.shields.io/badge/surrealism-0.2.2-orange?style=flat-square&logo=rust&logoColor=%23fff&labelColor=%23DEA584&color=%23DEA584">  <img src="https://img.shields.io/badge/License-MIT-orange?style=flat-square&logoColor=%23fff&labelColor=%2323B898&color=%2323B898">
 
 # Surrealism
 
@@ -6,7 +6,7 @@
 - docName：Surrealism README
 - createDate：20230506
 - updateDate：20230904
-- version：0.2.1
+- version：0.2.2
 - email：syf20020816@outlook.com
 
 ## LICEMSE
@@ -27,7 +27,7 @@ Surrealism relies on Surrealdb's official Rust standard library:surrealdb,The pu
 
 ```toml
 [dependencies]
-surrealism = {version="0.2.1"}
+surrealism = {version="0.2.2"}
 tokio = { version = "1.28.0", features = ["macros", "rt-multi-thread"] }
 ```
 
@@ -214,14 +214,14 @@ Version {
 
 ## Update Des
 
-- 0.2.2（预计发布时间：9月21日前）：
+- 0.2.2：
   
-  - 添加SelectWrapper向LiveSelectWrapper的转变
-  - 添加Field::Diff，针对LiveSelect语句的构建
-  - 添加SurrealValue对Geometries的支持,GeoJSON
-  - 添加所有内置方法Function（未实现）
-  - 补充ValueTyped类型Geometries,Decimal,Option
-  - 添加ValueConstructor的new_infer()用于通过默认值推测值类型
+  - 添加SelectWrapper向LiveSelectWrapper的转变 (Add the transition from SelectWrapper to LiveSelectWrapper)
+  - 添加Field::Diff，针对LiveSelect语句的构建 (Add Field:: Diff to build the LiveSelect statement)
+  - 添加SurrealValue对Geometries的支持,GeoJSON (Add SurrealValue support for Geometrics, GeoJSON)
+  - 添加所有内置方法Function(突然有些困惑，延迟至下个版本) (Add all built-in method functions (suddenly confused, delayed to the next version))
+  - 补充ValueTyped类型Geometries,Decimal,Option (Supplementing ValueTyped Types Geometry, Decimal, Option)
+  - 添加ValueConstructor的new_infer()用于通过默认值推测值类型 (Add ValueConstructor::new_Infer() is used to infer the value type from the default value)
   
 - 0.2.1：
 

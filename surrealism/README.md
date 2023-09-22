@@ -1,4 +1,4 @@
-<img src="https://img.shields.io/badge/surrealism-0.2.1-orange?style=flat-square&logo=rust&logoColor=%23fff&labelColor=%23DEA584&color=%23DEA584">  <img src="https://img.shields.io/badge/License-MIT-orange?style=flat-square&logoColor=%23fff&labelColor=%2323B898&color=%2323B898">
+<img src="https://img.shields.io/badge/surrealism-0.2.2-orange?style=flat-square&logo=rust&logoColor=%23fff&labelColor=%23DEA584&color=%23DEA584">  <img src="https://img.shields.io/badge/License-MIT-orange?style=flat-square&logoColor=%23fff&labelColor=%2323B898&color=%2323B898">
 
 # Surrealism
 
@@ -6,7 +6,7 @@
 - docName：Surrealism README
 - createDate：20230506
 - updateDate：20230904
-- version：0.2.1
+- version：0.2.2
 - email：syf20020816@outlook.com
 
 ## LICEMSE
@@ -27,24 +27,24 @@ Surrealism relies on Surrealdb's official Rust standard library:surrealdb,The pu
 
 ```toml
 [dependencies]
-surrealism = {version="0.2.1"}
+surrealism = {version="0.2.2"}
 tokio = { version = "1.28.0", features = ["macros", "rt-multi-thread"] }
 ```
 
 ### add configuration
 配置：
 
- -  surreal:单机本地连接Single还是分布式连接Multi
- -  username:用户名
- -  password:密码
- -  auth:连接鉴权方式(Root,NS,DB)
- -  url:连接地址
- -  port:连接端口
- -  mode:连接模式（Memory表示内存File表示存到文件中）
- -  path:存储到文件中的文件地址，使用Memory设置为""即可
- -  log:日志
- -  ns:命名空间名称 (auth = NS)⛔
- -  db:数据库名称 (auth = DB)⛔
+-  surreal:单机本地连接Single还是分布式连接Multi
+-  username:用户名
+-  password:密码
+-  auth:连接鉴权方式(Root,NS,DB)
+-  url:连接地址
+-  port:连接端口
+-  mode:连接模式（Memory表示内存File表示存到文件中）
+-  path:存储到文件中的文件地址，使用Memory设置为""即可
+-  log:日志
+-  ns:命名空间名称 (auth = NS)⛔
+-  db:数据库名称 (auth = DB)⛔
 
 可采用JSON或TOML两种配置文件方式
 
@@ -84,15 +84,15 @@ The configuration file address can be set to：
 #### Surrealism.json(JSON)
 ```json
 {
-	"surreal" : "Single"
-	"auth" : "Root"
-	"username" : "root"
-	"password" : "syf20020816"
-	"url" : "127.0.0.1"
-	"port" : 10086
-	"mode" : "Memory"
-	"path" : "E:/Rust/surreal"
-	"log" : {"level" : "Info", "print" : true,"path" : "E:/surrealism/log" }
+  "surreal" : "Single"
+  "auth" : "Root"
+  "username" : "root"
+  "password" : "syf20020816"
+  "url" : "127.0.0.1"
+  "port" : 10086
+  "mode" : "Memory"
+  "path" : "E:/Rust/surreal"
+  "log" : {"level" : "Info", "print" : true,"path" : "E:/surrealism/log" }
 }
 ```
 #### Surrealism.toml(TOML)
@@ -120,59 +120,59 @@ use surrealism::builder::select::SelectWrapperImpl;
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 struct User {
-    username: String,
-    pwd:String,
-    male: bool,
-    age: u8,
+  username: String,
+  pwd:String,
+  male: bool,
+  age: u8,
 }
 
 /// create a new user table
 /// table_name:user
 /// table_id:surrealism
 pub fn crate_user_table() -> CreateWrapper {
-    // create a user data
-    let user = User {
-        username: "Tobie".to_string(),
-        pwd: "Tobie001".to_string(),
-        male: true,
-        age: 23,
-    };
-    // create table with content
-    let user_table = SQLBuilderFactory::create()
-        .table("user")
-        .id(SurrealID::from("surrealism"))
-        .content(&user)
-        .deref_mut();
-    user_table
+  // create a user data
+  let user = User {
+    username: "Tobie".to_string(),
+    pwd: "Tobie001".to_string(),
+    male: true,
+    age: 23,
+  };
+  // create table with content
+  let user_table = SQLBuilderFactory::create()
+          .table("user")
+          .id(SurrealID::from("surrealism"))
+          .content(&user)
+          .deref_mut();
+  user_table
 }
 
 #[tokio::main]
 async fn main() -> SurrealismRes<()> {
-    // init service
-    let mut service = DefaultInitService::new().init();
-    // use ns:test and db:test
-    let _ = service.use_commit("test", "test").await?;
-    // get info from surrealdb
-    // let info = SQLBuilderFactory::info().db().build();
-    // let info_res = service.commit_sql(&info).await?;
-    // dbg!(info_res);
-    // create a table
-    // let create_stmt = crate_user_table().build();
-    // let create_res = service.commit_sql(&create_stmt).await?;
-    // dbg!(create_res);
-    // select user::surrealism table
-    let select = SQLBuilderFactory::select().table("user").id(SurrealID::from("surrealism")).column("*").build();
-    let select_res = service.commit_sql(&select).await?;
-    //parse response to any type you want
-    let res: User = parse_response(select_res);
-    // [tests\src\main.rs:55] res = User {
-    //     username: "Tobie",
-    //     pwd: "Tobie001",
-    //     male: true,
-    //     age: 23,
-    // }
-    dbg!(&res);
-    Ok(())
+  // init service
+  let mut service = DefaultInitService::new().init();
+  // use ns:test and db:test
+  let _ = service.use_commit("test", "test").await?;
+  // get info from surrealdb
+  // let info = SQLBuilderFactory::info().db().build();
+  // let info_res = service.commit_sql(&info).await?;
+  // dbg!(info_res);
+  // create a table
+  // let create_stmt = crate_user_table().build();
+  // let create_res = service.commit_sql(&create_stmt).await?;
+  // dbg!(create_res);
+  // select user::surrealism table
+  let select = SQLBuilderFactory::select().table("user").id(SurrealID::from("surrealism")).column("*").build();
+  let select_res = service.commit_sql(&select).await?;
+  //parse response to any type you want
+  let res: User = parse_response(select_res);
+  // [tests\src\main.rs:55] res = User {
+  //     username: "Tobie",
+  //     pwd: "Tobie001",
+  //     male: true,
+  //     age: 23,
+  // }
+  dbg!(&res);
+  Ok(())
 }
 ```
 
@@ -213,6 +213,15 @@ Version {
 ```
 
 ## Update Des
+
+- 0.2.2：
+
+  - 添加SelectWrapper向LiveSelectWrapper的转变 (Add the transition from SelectWrapper to LiveSelectWrapper)
+  - 添加Field::Diff，针对LiveSelect语句的构建 (Add Field:: Diff to build the LiveSelect statement)
+  - 添加SurrealValue对Geometries的支持,GeoJSON (Add SurrealValue support for Geometrics, GeoJSON)
+  - 添加所有内置方法Function(突然有些困惑，延迟至下个版本) (Add all built-in method functions (suddenly confused, delayed to the next version))
+  - 补充ValueTyped类型Geometries,Decimal,Option (Supplementing ValueTyped Types Geometry, Decimal, Option)
+  - 添加ValueConstructor的new_infer()用于通过默认值推测值类型 (Add ValueConstructor::new_Infer() is used to infer the value type from the default value)
 
 - 0.2.1：
 
