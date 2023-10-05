@@ -11,11 +11,11 @@ $component: "Header";
   justify-content: space-between;
   flex-wrap: nowrap;
   box-sizing: border-box;
-  padding: 0 17px;
+  padding: 0 16px;
   border-bottom: 2px solid $bg-color-light;
   @include buildWrap($component, "left") {
     height: 100%;
-    width: 36%;
+    width: 32%;
     display: flex;
     align-items: center;
     justify-content: start;
@@ -32,14 +32,15 @@ $component: "Header";
     width: 18px;
   }
   @include buildWrap($component, "right") {
-    width: 64%;
+    width: 68%;
     height: 100%;
     display: flex;
     align-items: center;
     justify-content: space-between;
+    
     @include build("right", "left") {
       height: 100%;
-      width: 20%;
+      width: 16%;
       display: flex;
       align-items: center;
       justify-content: flex-start;
@@ -50,10 +51,10 @@ $component: "Header";
     }
     @include build("right", "right") {
       height: 100%;
-      width: 80%;
+      width: 84%;
       display: flex;
       align-items: center;
-      justify-content: space-between;
+      justify-content: flex-end;
       .common_img2 {
         height: 18px;
         width: 18px;

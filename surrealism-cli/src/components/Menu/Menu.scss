@@ -1,0 +1,16 @@
+@use "../../styles/name.scss" as *;
+@use "../../styles/src/var.scss" as *;
+
+$component: "Menu";
+
+@include buildView($component){
+  height: 100%;
+  width: 100%;
+  .common_img{
+    height: 18px;
+    width: 18px;
+    margin-right: 26px;
+    
+  }
+  
+}
