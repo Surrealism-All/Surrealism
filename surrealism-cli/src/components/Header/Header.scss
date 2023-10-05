@@ -1,0 +1,64 @@
+@use "../../styles/name.scss" as *;
+@use "../../styles/src/var.scss" as *;
+
+$component: "Header";
+
+@include buildView($component) {
+  height: 100%;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: nowrap;
+  box-sizing: border-box;
+  padding: 0 17px;
+  border-bottom: 2px solid $bg-color-light;
+  @include buildWrap($component, "left") {
+    height: 100%;
+    width: 36%;
+    display: flex;
+    align-items: center;
+    justify-content: start;
+    flex-wrap: nowrap;
+    border-right: 2px solid $bg-color-light;
+    @include build("left", "logo") {
+      height: 32px;
+      width: 32px;
+      margin: 8px;
+    }
+  }
+  .common_img {
+    height: 18px;
+    width: 18px;
+  }
+  @include buildWrap($component, "right") {
+    width: 64%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    @include build("right", "left") {
+      height: 100%;
+      width: 20%;
+      display: flex;
+      align-items: center;
+      justify-content: flex-start;
+      .el-button {
+        padding: 8px !important;
+        margin: 0px 16px;
+      }
+    }
+    @include build("right", "right") {
+      height: 100%;
+      width: 80%;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      .common_img2 {
+        height: 18px;
+        width: 18px;
+        margin-right: 8px;
+      }
+    }
+  }
+}

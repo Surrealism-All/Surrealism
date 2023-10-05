@@ -1,0 +1,184 @@
+/**
+* ============================================
+* @author:syf20020816@outlook.com
+* @since:20230523
+* @version:0.0.1
+* @type:scss
+* @description:
+* 1. 本文件用于覆盖官方的Element-plus默认样式
+* 2. 以下注释中的$colors中的变量内容均为您可修改的内容
+* 3. 若你需要修改请进行对应
+* 4. 修改完成后请注释掉默认的样式导入：import 'element-plus/dist/index.css'
+* 5. 注释完后修改为当前文件导入即可
+* 6. 若你仅是覆盖颜色请依然导入import 'element-plus/dist/index.css'而且确保在当前scss文件前
+* ============================================
+*/
+
+/*
+$colors: () !default;
+$colors: map.deep-merge(
+  (
+    'white': #ffffff,
+    'black': #000000,
+    'primary': (
+      'base': #409eff,
+    ),
+    'success': (
+      'base': #67c23a,
+    ),
+    'warning': (
+      'base': #e6a23c,
+    ),
+    'danger': (
+      'base': #f56c6c,
+    ),
+    'error': (
+      'base': #f56c6c,
+    ),
+    'info': (
+      'base': #909399,
+    ),
+  ),
+  $colors
+);
+*/
+
+
+
+/* 只需要重写你需要的即可 */
+@forward 'element-plus/theme-chalk/src/common/var.scss' with (
+  $colors: (
+    'primary': (
+      'base': #222532,
+    ),
+  ),
+);
+
+// 如果只是按需导入，则可以忽略以下内容。
+// 如果你想导入所有样式:
+@use "element-plus/theme-chalk/src/index.scss" as *;
+@use "./src/var.scss" as *;
+
+ 
+//以下是我常用的默认样式修改
+.el-container,.el-header,.el-main,i,.el-footer{
+  padding: 0;
+  margin: 0;
+  font-weight: 700;
+  font-family: "Helvetica Neue",Helvetica,"PingFang SC","Hiragino Sans GB","Microsoft YaHei","微软雅黑",Arial,sans-serif;
+}
+
+a{
+  text-decoration: none;
+}
+
+body{
+  margin: 0;
+  padding: 0;
+}
+
+li{
+  // list-style: none;
+}
+
+.el-tabs__item:hover{
+  color: $force-color;
+}
+.el-tabs__item.is-active{
+  color: $force-color !important;
+
+}
+
+
+.el-tabs__active-bar{
+  background-color: $force-color;
+
+}
+
+.el-loading-spinner .circular {
+  display: none !important;
+}
+.el-loading-spinner {
+  // background: url('enter your loading img url') no-repeat;
+  background-size: 100px 100px;
+  background-position: center;
+  width: 300px;
+  height:300px;
+  position: absolute !important;
+  left: 50%;
+  top: 40% !important;
+  transform: translate(-50%,-50%);
+  text-align: center;
+}
+
+.el-loading-text {
+  width: 300px;
+  position: absolute;
+  bottom: 0;
+  text-align: center;
+  left: 50%;
+  transform: translate(-50%,-50%);
+  color: $force-color !important;
+  font-size: 18px !important;
+}
+
+:root {
+  font-family:Arial, Helvetica, sans-serif;
+  line-height: 1.5em;
+  font-weight: 400;
+  font-size: 2vh;
+  color-scheme: light dark;
+  padding: 0;
+  margin: 0;
+  color: rgba(255, 255, 255, 0.87);
+  // background-color: #242424;
+  background-color: $bg-color-dark;
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  -webkit-text-size-adjust: 100%;
+}
+
+
+#app { 
+  margin: 0;
+  padding:0;
+  text-align: center;
+  height: 100vh;
+  width: 100vw;
+  display: flex;
+  align-items: flex-start;
+  justify-content: flex-start;
+  overflow: hidden;
+}
+
+.iconfont{
+  font-size: 2vh !important;
+}
+
+.el-tabs__item {
+  color: $bg-color-light;
+  font-weight: 700;
+}
+.demo-tabs > .el-tabs__content {
+  padding:16px;
+ box-sizing: border-box;
+  overflow-y: scroll;
+  text-align: left;
+}
+
+.el-tabs--right .el-tabs__content,
+.el-tabs--left .el-tabs__content {
+  height: 100%;
+}
+
+.el-tree {
+  --el-tree-node-hover-bg-color:#111621 ;
+ }
+
+.common_font_color{
+  color: #8B8EA2;
+  font-weight: 700;
+  
+}

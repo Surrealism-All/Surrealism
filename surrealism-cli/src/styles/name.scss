@@ -1,0 +1,28 @@
+/**
+* ============================================
+* @author:syf20020816@outlook.com
+* @since:20230523
+* @version:0.0.1
+* @type:scss
+* @description:用于构建class，id name
+* ============================================
+*/
+
+@mixin buildView($componentName){
+  $container:$componentName+"_view";
+  ##{$container}{
+    @content;
+  }
+}
+@mixin buildWrap($componentName,$wrap){
+  $cWrap:$componentName+"-"+$wrap+"_wrap";
+  .#{$cWrap}{
+    @content;
+  }
+}
+@mixin build($componentName,$other){
+  $component:$componentName+"-"+$other;
+  .#{$component}{
+    @content;
+  }
+}
