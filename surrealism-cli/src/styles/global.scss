@@ -126,7 +126,7 @@ li{
   font-family:Arial, Helvetica, sans-serif;
   line-height: 1.5em;
   font-weight: 400;
-  font-size: 2vh;
+  font-size: 16px;
   color-scheme: light dark;
   padding: 0;
   margin: 0;
@@ -154,7 +154,7 @@ li{
 }
 
 .iconfont{
-  font-size: 2vh !important;
+  font-size: 16px !important;
 }
 
 .el-tabs__item {
@@ -186,4 +186,66 @@ li{
 .el-menu {
   border-right:none;
   font-weight: 700;
+}
+
+.el-menu-item{
+  font-size: 16px !important;
+}
+
+.el-pager li {
+  background: #222532 !important;
+  color: #8B8EA2;
+}
+.el-pagination button {
+  background: #222532 !important;
+  color: #8B8EA2;
+}
+
+.el-popper.is-light {
+  background: $primary-color !important;
+  border: none !important;
+  
+}
+.el-select-dropdown__item {
+  color: #8B8EA2;
+}
+.el-select-dropdown__item.selected {
+  color: #fff;
+  
+}
+
+.el-select-dropdown__item.hover, .el-select-dropdown__item:hover {
+  background-color:#161920 !important;
+}
+
+.el-popper.is-light .el-popper__arrow::before{
+  background: #222532 !important;
+  border: none;
+  box-shadow: none;
+}
+
+.el-table {
+   --el-table-border-color: #161920; 
+   --el-table-border: 1px solid #161920; 
+  
+   --el-table-row-hover-bg-color:#161920; 
+   --el-table-current-row-bg-color: #161920;
+   --el-table-header-bg-color: #161920; 
+  
+  --el-table-bg-color: #161920; 
+   --el-table-tr-bg-color: #161920; 
+  .cell{
+    color: #8B8EA2;
+  }
+}
+
+.el-table__header-wrapper tr td.el-table-fixed-column--left, .el-table__header-wrapper tr td.el-table-fixed-column--right, .el-table__header-wrapper tr th.el-table-fixed-column--left, .el-table__header-wrapper tr th.el-table-fixed-column--right, .el-table__body-wrapper tr td.el-table-fixed-column--left, .el-table__body-wrapper tr td.el-table-fixed-column--right, .el-table__body-wrapper tr th.el-table-fixed-column--left, .el-table__body-wrapper tr th.el-table-fixed-column--right, .el-table__footer-wrapper tr td.el-table-fixed-column--left, .el-table__footer-wrapper tr td.el-table-fixed-column--right, .el-table__footer-wrapper tr th.el-table-fixed-column--left, .el-table__footer-wrapper tr th.el-table-fixed-column--right {
+  
+   background:#161920; 
+}
+
+th{
+  .cell{
+    color: #fff !important;
+  }
 }

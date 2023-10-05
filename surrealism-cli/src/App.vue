@@ -6,9 +6,10 @@
     <div id="main_view">
       <div id="menu">
         <Menu></Menu>
-
       </div>
-      <router-view></router-view>
+      <div id="inner_view">
+        <router-view></router-view>
+      </div>
     </div>
   </div>
 </template>
@@ -36,11 +37,19 @@ import Menu from './components/Menu/Menu.vue'
   #main_view {
     height: calc(100% - 66px);
     width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: nowrap;
     #menu {
       height: 100%;
       width: 18%;
       box-sizing: border-box;
       padding-left: 16px;
+    }
+    #inner_view {
+      height: 100%;
+      width: 82%;
     }
   }
 }

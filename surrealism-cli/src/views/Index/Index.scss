@@ -1,2 +1,112 @@
-@use "../../styles/src/var.scss" as *;
+@use '../../styles/src/var.scss' as *;
+@use '../../styles/name.scss' as *;
 
+$component: 'Index';
+
+@include buildView($component) {
+  height: 100%;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: nowrap;
+  @include buildWrap($component, 'left') {
+    background-color: $bg-color-dark-weak;
+    height: 100%;
+    width: calc(14vw + 8px);
+    box-sizing: border-box;
+    border-right: 2px solid $bg-color-light;
+    border-left: 2px solid $bg-color-light;
+    .common_list {
+      height: 48px;
+      width: 100%;
+      border-bottom: 2px solid $bg-color-light;
+      display: flex;
+      align-items: center;
+      justify-content: flex-start;
+      box-sizing: border-box;
+      padding: 0 16px;
+      font-weight: 700;
+      font-size: 14px;
+    }
+    @include build('left', 'title') {
+    }
+    @include buildWrap('left', 'list') {
+      .common_img {
+        height: 18px;
+        width: 18px;
+        margin-right: 16px;
+      }
+      .list {
+        color: $icon-color;
+        cursor: pointer;
+        &:hover {
+          color: #fff;
+          background-color: $active-list-color;
+        }
+      }
+    }
+  }
+  @include buildWrap($component, 'right') {
+    width: calc(100% - 14vw - 8px);
+    height: 100%;
+
+    @include buildWrap('right', 'tools') {
+      height: 48px;
+      width: 100%;
+      box-sizing: border-box;
+      border-bottom: 2px solid $bg-color-light;
+      display: flex;
+      align-items: center;
+      justify-content: flex-start;
+      background-color: $bg-color-dark-weak;
+      @include build('tools', 'item') {
+        .common_img {
+          height: 16px;
+          width: 16px;
+          margin-right: 6px;
+        }
+        display: flex;
+        align-items: center;
+        align-content: center;
+        font-size: 12px;
+        margin: 0 12px;
+        cursor: pointer;
+        color: $icon-color;
+        font-weight: 700;
+      }
+    }
+    @include buildWrap('right','main'){
+      height: calc(100% - 96px);
+    }
+    @include buildWrap('right', 'page_tools') {
+      height: 48px;
+      width: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: flex-start;
+      box-sizing: border-box;
+      padding: 0 16px;
+      border-top: 2px solid $bg-color-light;
+      background-color: $bg-color-dark-weak;
+      .el-pagination__goto{
+        color: $icon-color;
+      }
+      .el-pagination__total{
+        color: $icon-color;
+      }
+      .el-input__wrapper{
+        background: $primary-color !important;
+        outline: $primary-color;
+        border: none;
+        box-shadow: none;
+        color: $icon-color;
+        .el-input__inner{
+          color: $icon-color;
+        }
+        
+      }
+      
+    }
+  }
+}
