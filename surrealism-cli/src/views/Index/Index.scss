@@ -13,7 +13,7 @@ $component: 'Index';
   @include buildWrap($component, 'left') {
     background-color: $bg-color-dark-weak;
     height: 100%;
-    width: calc(14vw + 8px);
+    width: calc(14vw + 7px);
     box-sizing: border-box;
     border-right: 2px solid $bg-color-light;
     border-left: 2px solid $bg-color-light;
@@ -40,6 +40,7 @@ $component: 'Index';
       .list {
         color: $icon-color;
         cursor: pointer;
+        transition: all 150ms ease-in-out;
         &:hover {
           color: #fff;
           background-color: $active-list-color;
@@ -48,7 +49,7 @@ $component: 'Index';
     }
   }
   @include buildWrap($component, 'right') {
-    width: calc(100% - 14vw - 8px);
+    width: calc(100% - 14vw - 7px);
     height: 100%;
 
     @include buildWrap('right', 'tools') {
