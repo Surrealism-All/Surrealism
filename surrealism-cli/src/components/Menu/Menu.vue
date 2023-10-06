@@ -24,10 +24,12 @@ export default {
 </script>
 
 <script lang="ts" setup>
+import { useRouter } from 'vue-router'
 import { ref, reactive } from 'vue'
 import { buildView, build, buildWrap } from '../../styles/name'
 import { indexStore } from '../../store/IndexPinia'
 
+let router = useRouter()
 let activeNum = ref('1')
 let store = indexStore()
 const getImageUrl = (image: string) => new URL(`../../assets/imgs/menu/${image}`, import.meta.url).href
@@ -35,6 +37,8 @@ const getImageUrl = (image: string) => new URL(`../../assets/imgs/menu/${image}`
 const activeMenu = (id: string, item: any) => {
   activeNum.value = id
   store.activeMenu = item
+  let targetPath = item.name.toLocaleLowerCase()
+  router.push({ path: '/' + targetPath })
 }
 
 const handleOpen = (key: string, keyPath: string[]) => {

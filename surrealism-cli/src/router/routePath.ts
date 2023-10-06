@@ -9,10 +9,19 @@
  */
 
 import Index from "../views/Index/Index.vue";
+import Home from "../views/Home/Home.vue";
 import { RouteRecordRaw } from "vue-router";
 export const routes: Array<RouteRecordRaw> = [
   {
     path: "/",
+    redirect: "/home",
+  },
+  {
+    path: "/home",
+    component: Home,
+  },
+  {
+    path: "/tables",
     component: Index,
   },
 ];

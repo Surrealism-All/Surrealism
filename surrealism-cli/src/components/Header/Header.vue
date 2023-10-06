@@ -5,7 +5,7 @@
     </div>
     <div :class="buildWrap(component,'right')">
       <div :class="build('right','left')">
-        <el-button type="primary">
+        <el-button type="primary" @click="infoVisible=true">
           <img class="common_img" src="../../assets/imgs/header/info.svg" alt="">
         </el-button>
       </div>
@@ -36,6 +36,32 @@
       </div>
     </div>
   </div>
+  <el-dialog v-model="infoVisible" width="50%">
+    <div :class="buildWrap(component,'main')">
+      <div :class="buildWrap(component,'info')">
+        <img class="logo" src="../../assets/imgs/surreal.png" alt="">
+        <div class="title1">
+          SurrealDB
+        </div>
+        <div class="title2">
+          Surrealism-Cli
+        </div>
+        <div class="infos">
+          <span>Version:0.0.1_preview - Surrealism-Cli</span>
+          <span>Develper:syf20020816@outlook.com</span>
+          <span>GitHub:https://github.com/syf20020816/Surrealism</span>
+          <span>MIT</span>
+        </div>
+      </div>
+      <div class="circle">
+        <div class="inner"></div>
+      </div>
+      <div class="circle2">
+        <div class="inner"></div>
+      </div>
+    </div>
+  </el-dialog>
+
 </template>
 
 <script  lang="ts">
@@ -48,8 +74,9 @@ export default {
 import { ref, reactive } from 'vue'
 import { buildView, build, buildWrap } from '../../styles/name'
 let component = 'Header'
+let infoVisible = ref(false)
 </script>
 
-<style lang="scss" scoped>
+<style lang="scss" >
 @import './Header.scss';
 </style>
