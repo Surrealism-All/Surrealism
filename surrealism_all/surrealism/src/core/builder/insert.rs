@@ -16,9 +16,10 @@
 
 use std::collections::{BTreeMap};
 use serde::Serialize;
-use crate::{Table, Criteria, SurrealValue, Object, SurrealID, table_impl, ParamCombine, Set, Operator, InsertStrategy};
+use crate::db::{Table, Criteria, SurrealValue, Object, SurrealID,  ParamCombine, Set, Operator, InsertStrategy};
 use super::{BaseWrapperImpl, TableImpl};
-use crate::core::db::constants::{STMT_END, INSERT_UPDATE, INSERT, BLANK, VALUES, INTO};
+use crate::db::constants::{STMT_END, INSERT_UPDATE, INSERT, BLANK, VALUES, INTO};
+use crate::table_impl;
 
 pub trait InsertWrapperImpl: BaseWrapperImpl + TableImpl {
     fn add_set<T>(&mut self, field: &str, value: T) -> &mut Self where T: Serialize;
@@ -29,8 +30,9 @@ pub trait InsertWrapperImpl: BaseWrapperImpl + TableImpl {
 /// # InsertWrapper
 /// the wrapper for INSERT statements
 /// ```rust
-/// use surrealism::{SurrealismRes, SurrealID};
+/// use surrealism::{ SurrealID};
 /// use surrealism::builder::*;
+/// use surrealism::surreal::SurrealismRes;
 /// use surrealism::builder::insert::InsertWrapperImpl;
 /// use surrealism::builder::relate::RelateWrapperImpl;
 /// use serde::{Serialize, Deserialize};

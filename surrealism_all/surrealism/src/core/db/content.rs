@@ -3,7 +3,7 @@
 //! 2. Set
 //! ## example
 //! ```rust
-//! use surrealism::{SurrealValue,ContentSet,Object};
+//! use surrealism::db::{SurrealValue,ContentSet,Object};
 //! use std::collections::HashMap;
 //!
 //!     let value1 = SurrealValue::None;
@@ -96,7 +96,7 @@ impl<'a> ContentSet<'a> {
     /// ## example
     /// ```rust
     /// use std::collections::HashMap;
-    /// use surrealism::{SurrealValue,Array,ContentSet};
+    /// use surrealism::db::{SurrealValue,Array,ContentSet};
     ///     let mut map: HashMap<&str, SurrealValue> = HashMap::new();
     ///     let _ = map.insert("name", SurrealValue::Str(String::from("Mat")));
     ///     let _ = map.insert("age", SurrealValue::Int(16));
@@ -151,14 +151,10 @@ impl<'a> ContentSet<'a> {
                 .join(" , ");
             format!("{}{}{}", LEFT_BRACE, res, RIGHT_BRACE)
         }
-        let mut res = String::new();
-        match self {
-            ContentSet::Content(content) => {
-                res = content.parse();
-            }
-            ContentSet::Set(set) => {
-                res = build_inner(set);
-            }
+
+        let res = match self {
+            ContentSet::Content(content) => content.parse(),
+            ContentSet::Set(set) => build_inner(set),
         };
 
         format!("{} {}{}", MERGE, "settings:", &res)

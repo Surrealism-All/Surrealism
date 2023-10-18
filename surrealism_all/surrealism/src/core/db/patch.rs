@@ -10,7 +10,7 @@
 
 use serde::{Serialize, Deserialize};
 use serde_json::json;
-use crate::{ParamCombine, SurrealValue};
+use crate::db::{ParamCombine, SurrealValue};
 
 const ADD: &str = "add";
 const REPLACE: &str = "replace";

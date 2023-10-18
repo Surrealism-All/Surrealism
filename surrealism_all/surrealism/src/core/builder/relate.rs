@@ -17,10 +17,10 @@
 //! ```
 
 use serde::Serialize;
-use super::{BaseWrapperImpl, TableImpl, ReturnImpl, TimeoutImpl, ParallelImpl};
-use crate::core::db::constants::{RELATE, BLANK, PARALLEL, STMT_END, LINK,DELETE,WHERE};
-use crate::core::db::{ReturnType, Table, TimeOut, SurrealID, ParamCombine, Object, SurrealValue, CreateStrategy};
-use crate::{Operator, Set, TimeUnit, timeout_impl, return_impl, parallel_impl};
+use super::{BaseWrapperImpl, ReturnImpl, TimeoutImpl, ParallelImpl};
+use crate::core::db::constants::{RELATE, BLANK, PARALLEL, STMT_END, LINK, DELETE, WHERE};
+use crate::core::db::{ReturnType, Table, TimeOut, SurrealID, ParamCombine, Object, SurrealValue, CreateStrategy, Operator, Set, TimeUnit};
+use crate::{timeout_impl, return_impl, parallel_impl};
 
 pub trait RelateWrapperImpl: BaseWrapperImpl + ReturnImpl + TimeoutImpl + ParallelImpl {
     fn table_from(&mut self, table: &str, id: SurrealID) -> &mut Self;
@@ -46,7 +46,7 @@ pub trait RelateWrapperImpl: BaseWrapperImpl + ReturnImpl + TimeoutImpl + Parall
 /// use surrealism::{SurrealismRes,SurrealID};
 /// use surrealism::builder::*;
 /// use surrealism::builder::relate::RelateWrapperImpl;
-///
+/// use surrealism::surreal::SurrealismRes;
 ///
 /// #[tokio::main]
 /// async fn main() -> SurrealismRes<()> {
@@ -174,7 +174,7 @@ impl RelateWrapperImpl for RelateWrapper {
         self
     }
     fn delete(&self) -> String {
-        format!("{} {}{}{} {} out={}",DELETE,&self.table_from.combine(),LINK,&self.table_with.combine(),WHERE,&self.table_to.combine())
+        format!("{} {}{}{} {} out={}", DELETE, &self.table_from.combine(), LINK, &self.table_with.combine(), WHERE, &self.table_to.combine())
     }
 }
 

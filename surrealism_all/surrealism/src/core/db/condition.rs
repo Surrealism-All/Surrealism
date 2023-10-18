@@ -6,14 +6,13 @@
 //! @description:
 //! ```
 use serde::{Serialize, Deserialize};
-use crate::SurrealValue;
-use super::{ParamCombine};
+use crate::db::{SurrealValue,ParamCombine};
 use super::constants::{EQ, LT, GT, GTE, LTE, LINK, NEQ, WHERE, AND, OR};
 
 /// where condition for statment
 /// ## example
 /// ```rust
-/// use surrealism::{ConditionSign,Condition,Criteria,ParamCombine,SurrealValue,CriteriaSign};
+/// use surrealism::db::{ConditionSign,Condition,Criteria,ParamCombine,SurrealValue,CriteriaSign};
 ///     // WHERE username = 'Mat' AND age != 16
 ///     let condition = Condition::new()
 ///         .push(Criteria::new("username","Mat", CriteriaSign::Eq), ConditionSign::And)

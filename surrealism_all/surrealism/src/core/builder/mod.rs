@@ -18,7 +18,7 @@ pub mod remove;
 mod macros;
 
 
-use crate::Condition;
+
 use self::insert::{InsertWrapper};
 use self::transaction::Transaction;
 use self::relate::{RelateWrapper};
@@ -29,7 +29,7 @@ use self::remove::RemoveWrapper;
 use self::define::*;
 use self::update::{UpdateWrapper};
 use self::create::{CreateWrapper};
-use crate::core::db::{ReturnType, TimeOut, SurrealID, TimeUnit};
+use crate::db::{ReturnType, TimeOut, SurrealID, TimeUnit,Condition};
 
 /// SQLBuilderFactory for Surrealism
 /// - CreateWrapper

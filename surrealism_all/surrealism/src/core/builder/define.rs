@@ -8,14 +8,15 @@
 //!
 
 use crate::core::db::constants::{NAMESPACE, DATABASE, PASSHASH, PASSWORD, DEFINE_DB, DEFINE_NS, DEFINE_LOGIN, DEFINE_SCOPE, STMT_END, ON, TYPE, SCOPE, PS256, PS384, PS512, EDDSA, ES256, ES384, ES512, HS256, HS384, HS512, RS256, RS384, RS512, VALUE, DEFINE_TOKEN, SCHEMA_FULL, SCHEMA_LESS, SIGN_IN, SIGN_UP, DROP, DEFINE_TABLE, BLANK, NONE, FULL, FOR, DEFINE_EVENT, ON_TABLE, WHEN, THEN, DEFINE_FUNCTION, RETURN, DEFINE_FIELD, FIELDS, COLUMNS, DEFINE_INDEX, UNIQUE, DEFINE_PARAM};
-use crate::{Condition, ParamCombine, SurrealValue, TimeOut, ValueConstructor};
+use crate::core::db::{Condition, ParamCombine, SurrealValue, TimeOut, ValueConstructor};
 
 /// # DefineWrapper
 /// The DEFINE statement can be used to specify authentication access and behaviour, global parameters, table configurations, table events, schema definitions, and indexes.
 /// ## example
 /// ```rust
-/// use surrealism::{Condition, ConditionSign, Criteria, CriteriaSign, SurrealismRes, SurrealValue, TimeOut, TimeUnit, ValueConstructor, ValueType};
+/// use surrealism::{Condition, ConditionSign, Criteria, CriteriaSign,  SurrealValue, TimeOut, TimeUnit, ValueConstructor, ValueType};
 /// use surrealism::builder::*;
+/// use surrealism::surreal::SurrealismRes;
 /// use surrealism::builder::define::{FieldColumn, OnType, Permissions, PwdType, Schema, TokenType};
 ///
 /// // [tests\src\main.rs:51] define1 = "DEFINE NAMESPACE abcum;"
@@ -302,7 +303,7 @@ impl<'w> DefineWrapper<'w> {
             DefineWrapper::EVENT { name, on, when, then } =>
                 format!("{} {} {} {} {} {} {} {}{}", DEFINE_EVENT, name, ON_TABLE, on, WHEN, when.build(), THEN, then, STMT_END),
             DefineWrapper::FUNCTION { name, args, query, returned } =>
-                format!("{} fn::{}({}){} {} {} {}{} {}{}", DEFINE_FUNCTION, name, args.join(" , "), "{", query, RETURN, returned, STMT_END, "}",STMT_END),
+                format!("{} fn::{}({}){} {} {} {}{} {}{}", DEFINE_FUNCTION, name, args.join(" , "), "{", query, RETURN, returned, STMT_END, "}", STMT_END),
             DefineWrapper::FIELD { name, on, value, permissions } => {
                 let mut res = format!("{} {} {} {} {}", DEFINE_FIELD, name, ON_TABLE, on, value.build());
                 if permissions.is_some() {

@@ -22,10 +22,8 @@
 //! ```
 
 use serde::Serialize;
-use crate::{
-    Condition, ReturnType, TimeOut, Patch, Object, SurrealValue, UpdateStrategy, Table, ParamCombine, Operator, Set, SurrealID, TimeUnit,
-    parallel_lifetime_impl, table_lifetime_impl, return_lifetime_impl, timeout_lifetime_impl
-};
+use crate::{parallel_lifetime_impl, table_lifetime_impl, return_lifetime_impl, timeout_lifetime_impl};
+use crate::core::db::{Condition, ReturnType, TimeOut, Patch, Object, SurrealValue, UpdateStrategy, Table, ParamCombine, Operator, Set, SurrealID, TimeUnit};
 use super::{BaseWrapperImpl, ReturnImpl, ParallelImpl, TimeoutImpl, ConditionImpl, TableImpl};
 use crate::core::db::constants::{UPDATE, BLANK, STMT_END, PARALLEL};
 
@@ -45,11 +43,11 @@ pub trait UpdateWrapperImpl<'w>: BaseWrapperImpl + ReturnImpl + ParallelImpl + T
 /// the wrapper for UPDATE
 /// ## example
 /// ```rust
-/// use surrealism::{SurrealismRes, SurrealID, TimeOut, SurrealValue, TimeUnit, ReturnType, Object, DefaultInitService, InitService, UseNSDB, SurrealismCommit, Operator, Condition, Criteria, CriteriaSign, ConditionSign, Patch};
+/// use surrealism::db::{ SurrealID, TimeOut, SurrealValue, TimeUnit, ReturnType, Object, DefaultInitService, InitService, UseNSDB, SurrealismCommit, Operator, Condition, Criteria, CriteriaSign, ConditionSign, Patch};
 /// use surrealism::builder::*;
 /// use serde::{Serialize, Deserialize};
 /// use surrealism::builder::update::UpdateWrapperImpl;
-///
+/// use surrealism::surreal::SurrealismRes;
 /// #[derive(Debug, Serialize, Deserialize)]
 /// struct Person<'a> {
 ///     name: &'a str,

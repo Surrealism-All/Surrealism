@@ -7,14 +7,14 @@
 //! ```
 use serde::{Serialize, Deserialize};
 use super::constants::{AFTER, BEFORE, NONE, DIFF, MINUTE, MILLISECOND, SECOND, HOUR, DAY, TIMEOUT, RETURN, ADD_OP, MINUS_OP, DIVIDE_OP, PLUS_OP, EQ};
-use super::{SurrealID, ParamCombine};
+use crate::db::{SurrealID, ParamCombine};
 
 /// # build Table with ID
 /// If you don't want to specify the type, you can create it directly using `new_into()`
 /// > `Table::<String>::new_into("temperature", "['London', 'New York']").build();`
 /// ## example
 /// ```rust
-/// use surrealism::{SurrealID,SurrealValue,Table,Array,Object,Range,ParamCombine};
+/// use surrealism::db::{SurrealID,SurrealValue,Table,Array,Object,Range,ParamCombine};
 ///     let id1 = SurrealID::RAND;
 ///     let id2 = SurrealID::Default;
 ///     let id3 = SurrealID::Str(String::from("surrealism"));
@@ -86,10 +86,9 @@ impl Table {
     /// after appoint table name and id , this function will return a complete String like:
     /// > user:1006
     pub fn build(&self) -> String {
-        let mut table_stmt = String::new();
-        match self.id {
-            SurrealID::Default => table_stmt = format!("{}", &self.name),
-            _ => table_stmt = format!("{}:{}", &self.name, &self.id.combine())
+        let table_stmt = match self.id {
+            SurrealID::Default => format!("{}", &self.name),
+            _ =>  format!("{}:{}", &self.name, &self.id.combine())
         };
         table_stmt
     }
@@ -130,7 +129,7 @@ impl MATH {
 /// 设置返回类型枚举
 /// ## example
 /// ```rust
-/// use surrealism::{ParamCombine, SurrealismRes, ReturnType};
+/// use surrealism::db::{ParamCombine, SurrealismRes, ReturnType};
 ///     let return_none = ReturnType::None;
 ///     let return_before = ReturnType::Before;
 ///     let return_after = ReturnType::After;
@@ -209,7 +208,7 @@ impl TimeUnit {
 /// # TimeOut for Wrapper
 /// ## example
 /// ```rust
-/// use surrealism::{TimeOut,TimeUnit,ParamCombine};
+/// use surrealism::db::{TimeOut,TimeUnit,ParamCombine};
 ///     let timeout = TimeOut::new(56_usize, TimeUnit::MINUTE);
 ///     dbg!(&timeout.timeout());
 ///     dbg!(&timeout.unit());
@@ -288,7 +287,7 @@ pub enum Geometry {
 /// - Plus : *=
 /// - Divide : /=
 /// - Eq : =
-#[derive(Debug, Clone, Serialize, Deserialize,PartialEq)]
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
 pub enum Operator {
     Add,
     Minus,

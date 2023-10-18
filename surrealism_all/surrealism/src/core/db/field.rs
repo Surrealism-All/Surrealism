@@ -6,7 +6,7 @@
 //! @description:
 //! ```
 
-use crate::ParamCombine;
+use crate::db::ParamCombine;
 use super::constants::{ALL,DIFF};
 
 #[derive(Debug, Clone)]

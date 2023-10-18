@@ -20,8 +20,8 @@
 use serde::Serialize;
 use super::{BaseWrapperImpl, TableImpl, ReturnImpl, TimeoutImpl, ParallelImpl};
 use crate::core::db::constants::{CREATE, BLANK, PARALLEL, STMT_END};
-use crate::core::db::{ReturnType, Table, TimeOut, SurrealID, ParamCombine, Object, SurrealValue, CreateStrategy};
-use crate::{Operator, Set, TimeUnit, parallel_impl, return_impl, timeout_impl, table_impl};
+use crate::core::db::{ReturnType, Table, TimeOut, SurrealID, ParamCombine, Object, SurrealValue, CreateStrategy,Set,TimeUnit,Operator};
+use crate::{parallel_impl, return_impl, timeout_impl, table_impl};
 
 pub trait CreateWrapperImpl: BaseWrapperImpl + TableImpl + ReturnImpl + TimeoutImpl + ParallelImpl {
     fn content<T>(&mut self, obj: &T) -> &mut Self where T: Serialize;
@@ -40,9 +40,10 @@ pub trait CreateWrapperImpl: BaseWrapperImpl + TableImpl + ReturnImpl + TimeoutI
 /// 6. ParallelImpl
 /// ## example
 /// ```rust
-/// use surrealism::{SurrealismRes, SurrealID, TimeOut, SurrealValue, TimeUnit, ReturnType, Object};
+/// use surrealism::db::{SurrealID, TimeOut, SurrealValue, TimeUnit, ReturnType, Object};
 /// use surrealism::builder::*;
 /// use serde::{Serialize, Deserialize};
+/// use surrealism::surreal::SurrealismRes;
 ///
 /// #[derive(Debug, Serialize, Deserialize)]
 /// struct User<'a> {

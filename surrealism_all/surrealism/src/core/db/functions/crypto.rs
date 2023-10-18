@@ -1,5 +1,5 @@
-use crate::SurrealValue;
-use crate::{crypto_impl};
+use crate::db::SurrealValue;
+// use crate::{crypto_impl};
 use super::generate_easy;
 
 /// # Crypto Functions
@@ -7,8 +7,9 @@ use super::generate_easy;
 /// > note! : you can use service crypto instead of use this directly
 /// ## example
 /// ```rust
-/// use surrealism::{SurrealismRes, UseNSDB, DefaultInitService, InitService, SurrealValue, parse_response};
-/// use surrealism::functions::{GenerateCompare, CryptoFunc};
+/// use surrealism::db::{ UseNSDB, DefaultInitService, InitService, SurrealValue, parse_response};
+/// use surrealism::db::functions::{GenerateCompare, CryptoFunc};
+/// use surrealism::surreal::{SurrealismRes,parse_response};
 ///
 /// #[tokio::main]
 /// async fn main() -> SurrealismRes<()> {

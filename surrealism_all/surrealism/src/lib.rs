@@ -27,6 +27,7 @@ pub use crate::core::row;
 pub use crate::core::surreal;
 #[cfg(feature = "builder")]
 pub use crate::core::builder;
+pub use crate::core::db;
 
 /// # Default Result
 /// 作用于tokio的默认返回，在不开启`features=["surreal"]`时它是一种更好的、更灵活的选择

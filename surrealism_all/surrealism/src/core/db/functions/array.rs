@@ -8,13 +8,14 @@
 
 
 use serde::Serialize;
-use crate::{Array, SurrealValue};
+use crate::db::{SurrealValue};
 
 /// These functions can be used when working with, and manipulating arrays of data.
 /// ## example
 /// ```rust
-/// use surrealism::{SurrealismRes, SurrealID, SurrealValue, Array};
-/// use surrealism::functions::Function;
+/// use surrealism::db::{ SurrealID, SurrealValue, Array};
+/// use surrealism::db::functions::Function;
+/// use surrealism::surreal::SurrealismRes;
 ///
 /// // [tests\src\main.rs:88] func_add = "array::add(['Java'], 'Rust')"
 /// // [tests\src\main.rs:89] func_all = "array::all([5, true])"

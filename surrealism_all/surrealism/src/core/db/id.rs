@@ -6,7 +6,7 @@ use super::{SurrealValue,Object,Array,ParamCombine};
 /// 通过SurrealID快速生成一个含有类型的ID
 /// ## example
 /// ``` rust
-/// use surrealism::{Range,SurrealID,Array,SurrealValue,Object};
+/// use surrealism::db::{Range,SurrealID,Array,SurrealValue,Object};
 ///    let id1 = SurrealID::RAND;
 ///     let id2 = SurrealID::Default;
 ///     let id3 = SurrealID::Str(String::from("surrealism"));
@@ -128,7 +128,7 @@ impl From<Range> for SurrealID {
 /// # Id type range
 /// ## example
 /// ```rust
-/// use surrealism::{Range,SurrealValue};
+/// use surrealism::db::{Range,SurrealValue};
 ///     let range1 = Range::new(SurrealValue::Int(1), SurrealValue::Int(32), true).to_str();
 ///     let range2 = Range::new_from_str("2", "23", false).to_str();
 /// ```

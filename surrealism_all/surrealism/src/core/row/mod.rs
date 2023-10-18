@@ -1,7 +1,9 @@
 //! # Row Sql
 //! ## example
 //! ```rust
-//! use surrealism::{DefaultInitService, InitService, SurrealismConnector, SurrealismRes, SurrealismCommit, UseNSDB,RowSql};
+//! //use surrealism::{DefaultInitService, InitService, SurrealismConnector, SurrealismRes, SurrealismCommit, UseNSDB,RowSql};
+//! use surrealism::row::RowSql;
+//! use surrealism::surreal::{SurrealismRes,DefaultInitService,InitService};
 //!
 //! #[tokio::main]
 //! async fn main() -> SurrealismRes<()> {
@@ -49,7 +51,7 @@ impl<'a> RowSql<'a> {
     pub fn new(stmt: &'a str) -> RowSql {
         let stmt = String::from(stmt);
         let mut params = vec![];
-        for i in 0..matches_count(&stmt) {
+        for _i in 0..matches_count(&stmt) {
             params.push(("{}", ""));
         }
         RowSql {

@@ -29,7 +29,7 @@ use crate::core::db::constants::{REMOVE_INDEX, REMOVE_PARAM, ON, ON_TABLE, REMOV
 /// 是否有必要？
 /// ## example
 /// ```rust
-/// use surrealism::{SurrealismRes};
+/// use surrealism::surreal::SurrealismRes;
 /// use surrealism::builder::*;
 /// use surrealism::builder::define::{OnType};
 ///

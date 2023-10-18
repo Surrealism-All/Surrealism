@@ -2,7 +2,7 @@ mod array;
 mod crypto;
 
 use array::ArrayFunc;
-use crate::SurrealValue;
+use crate::db::SurrealValue;
 pub use crypto::{CryptoFunc, GenerateCompare};
 
 /// # SurrealDB Functions

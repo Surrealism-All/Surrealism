@@ -5,7 +5,7 @@
 //! @version:0.0.1
 //! @description:
 //! ```
-use crate::{Object, ParamCombine, Set};
+use crate::db::{Object, ParamCombine, Set};
 use super::{Patch};
 use super::constants::{SET, CONTENT, MERGE, PATCH};
 use serde::{Serialize, Deserialize};

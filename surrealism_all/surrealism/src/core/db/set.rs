@@ -5,9 +5,8 @@
 //! @version:0.0.1
 //! @description:
 //! ```
-use crate::{ParamCombine, SurrealValue};
+use crate::db::{ParamCombine, SurrealValue, Operator};
 use serde::{Serialize, Deserialize};
-use super::{Operator};
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Set {

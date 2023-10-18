@@ -2,7 +2,8 @@
 //! ## example
 //! ```rust
 //! use std::collections::HashMap;
-//! use surrealism::{SurrealismRes, SurrealID, handle_str, Array, Object, SurrealValue};
+//! use surrealism::db::{ SurrealID, handle_str, Array, Object, SurrealValue};
+//! use surrealism::surreal::SurrealismRes;
 //! use serde::{Serialize, Deserialize};
 //!
 //! #[derive(Serialize, Deserialize)]
@@ -37,12 +38,12 @@
 //! @description:
 //! ```
 
-use std::any::{Any, TypeId};
+// use std::any::{Any, TypeId};
 use std::collections::{BTreeMap, HashMap};
 use serde::{Serialize, Deserialize};
 use serde_json::Value;
 use surrealdb::sql::{Duration, Datetime};
-use crate::{Condition, Geometries};
+use crate::db::{Condition, Geometries};
 use crate::core::db::constants::{BLANK};
 use crate::util::{remove_format_half, handle_str};
 use super::constants::{NULL, NULL_DOWN, NONE_DOWN, NONE, LEFT_BRACE, RIGHT_BRACE, COMMA, ANY, BOOL, ARRAY, DATETIME, DURATION, NUMBER, INT, FLOAT, STRING, OBJECT, GEOMETRY, RECORD, DECIMAL};
@@ -130,7 +131,7 @@ impl SurrealValue {
     ///从json-str进行推测，转换为serde::Value再转为SurrealValue
     /// ## example
     /// ```rust
-    /// use surrealism::{SurrealValue};
+    /// use surrealism::db::{SurrealValue};
     /// let v = SurrealValue::from_str("{ \"address\": \"China - Shanghai\"}");
     /// /*[tests\src\main.rs:41] v = Object(
     ///     Object(
@@ -342,7 +343,7 @@ impl From<Vec<&str>> for SurrealValue {
 /// ## example (expect HashMap<&str,SurrealValue>)
 /// ```rust
 /// use std::collections::HashMap;
-/// use surrealism::{SurrealValue};
+/// use surrealism::db::{SurrealValue};
 ///     let mut map: HashMap<&str, SurrealValue> = HashMap::new();
 ///     let _ = map.insert("name", SurrealValue::Str(String::from("Mat")));
 ///     let _ = map.insert("age", SurrealValue::Int(16));

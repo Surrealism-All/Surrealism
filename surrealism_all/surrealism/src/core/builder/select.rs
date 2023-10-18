@@ -26,7 +26,8 @@
 //! @description:
 //! ```
 
-use crate::{Condition, Table, TimeOut, Order, Field, SurrealID, TimeUnit, timeout_lifetime_impl, parallel_lifetime_impl, table_lifetime_impl, ParamCombine};
+use crate::{timeout_lifetime_impl, parallel_lifetime_impl, table_lifetime_impl};
+use crate::core::db::{Condition, Table, TimeOut, Order, Field, SurrealID, TimeUnit, ParamCombine};
 use super::{TimeoutImpl, ParallelImpl, TableImpl, ConditionImpl, BaseWrapperImpl};
 use crate::core::db::constants::{SELECT, STMT_END, BLANK, PARALLEL, ALL, GROUP_BY, ORDER_BY, SPLIT, START, LIMIT, FETCH, FROM, DIFF, LIVE_SELECT};
 
@@ -238,11 +239,11 @@ impl<'w> SelectWrapperImpl<'w> for SelectWrapper<'w> {
     }
 
     fn to_live(&mut self) -> LiveSelectWrapper<'w> {
-        LiveSelectWrapper{
+        LiveSelectWrapper {
             field: self.field.to_owned(),
             table: self.table.to_owned(),
             condition: self.condition.to_owned(),
-            fetch: self.fetch.to_owned()
+            fetch: self.fetch.to_owned(),
         }
     }
 }

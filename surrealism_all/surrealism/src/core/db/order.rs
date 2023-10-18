@@ -6,7 +6,7 @@
 //! @description:
 //! ```
 
-use crate::ParamCombine;
+use crate::db::ParamCombine;
 use super::constants::{RAND, ASC, DESC};
 
 #[derive(Debug,Clone)]
