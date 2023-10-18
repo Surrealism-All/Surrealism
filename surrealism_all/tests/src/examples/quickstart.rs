@@ -7,7 +7,7 @@ use surrealism::builder::select::SelectWrapperImpl;
 #[derive(Debug, Clone, Serialize, Deserialize)]
 struct User {
     username: String,
-    pwd:String,
+    pwd: String,
     male: bool,
     age: u8,
 }
@@ -47,7 +47,7 @@ async fn main() -> SurrealismRes<()> {
     let create_res = service.commit_sql(&create_stmt).await?;
     // dbg!(create_res);
     // select user::surrealism table
-    let select = SQLBuilderFactory::select().table("user").id(SurrealID::from("surrealism")).column("*",None).build();
+    let select = SQLBuilderFactory::select().table("user").id(SurrealID::from("surrealism")).column("*", None).build();
     let select_res = service.commit_sql(&select).await?;
     //parse response to any type you want
     let res: User = parse_response(select_res);
@@ -60,4 +60,3 @@ async fn main() -> SurrealismRes<()> {
     dbg!(&res);
     Ok(())
 }
-

@@ -12,6 +12,7 @@ import Index from "../views/Index/Index.vue";
 import Home from "../views/Home/Home.vue";
 import Logs from "../views/Logs/Logs.vue";
 import Settings from "../views/Settings/Settings.vue";
+import Logins from "../views/Logins/Logins.vue";
 import { RouteRecordRaw } from "vue-router";
 export const routes: Array<RouteRecordRaw> = [
   {
@@ -33,5 +34,9 @@ export const routes: Array<RouteRecordRaw> = [
   {
     path: "/settings",
     component: Settings,
+  },
+  {
+    path: "/logins",
+    component: Logins,
   },
 ];

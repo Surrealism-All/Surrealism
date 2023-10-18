@@ -1,11 +1,13 @@
-mod row;
+#[cfg(feature = "row")]
+pub mod row;
 pub mod builder;
 mod orm;
-mod config;
+
 pub mod db;
 mod constant;
-mod connector;
 
-pub use config::{SurrealismConfig, DefaultInitService, InitService};
-pub use connector::{UseNSDB, SurrealismCommit, SurrealismConnector};
-pub use row::RowSql;
+pub mod surreal;
+
+
+// #[cfg(feature = "row")]
+// pub use row::RowSql;

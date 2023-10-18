@@ -10,6 +10,13 @@ documentation = "https://github.com/syf20020816/Surrealism/wiki"
 keywords = ["surrealism", "surrealdb"]
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+[features]
+default = ["builder"]
+row = []
+builder = []
+surreal = ["builder"]
+full = ["row", "builder", "surreal"]
+
 
 [dependencies]
 figment = { version = "0.10.10", features = ["toml", "env", "json"] }
