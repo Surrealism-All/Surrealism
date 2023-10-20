@@ -15,10 +15,10 @@ use std::env::current_dir;
 use std::path::PathBuf;
 use figment::providers::Format;
 use except_plugin::{EasyException, easy_e, EasyExceptionBuilder, SuperBuilderImpl, ExceptionFactory, ExceptionLevel, CommonParamImpl};
-use crate::core::config::{SurrealismConfig};
+use crate::surreal::SurrealismConfig;
 use crate::error::{CONFIG_NOT_FOUND_ERROR, ErrorTypeCode};
 use super::ConfigurationService;
-use crate::core::config::logger::SurrealLogger;
+use crate::surreal::config::LogLevel;
 use crate::core::constant::{CONFIG_PATH_COMMON, CONFIG_PATH_LEVEL1, CONFIG_PATH_LEVEL2, CONFIG_NAME, CONFIG_FILE_TYPE_TOML, CONFIG_FILE_TYPE_JSON};
 
 /// - path : final target configuration path
@@ -119,14 +119,13 @@ impl ConfigurationService for DefaultConfigurationService {
 
     fn get_config_data(&mut self) -> Result<(), EasyException> {
         let parser = Figment::new();
-        let mut data = SurrealismConfig::new();
         //get file type (toml or json)
         let path = self.path.to_str().unwrap();
-        if path.ends_with(".toml") {
-            data = data.from_self(parser.merge(Toml::file(&self.path).nested()).extract::<SurrealismConfig>().unwrap());
+        let data = if path.ends_with(".toml") {
+            parser.merge(Toml::file(&self.path).nested()).extract::<SurrealismConfig>().unwrap()
         } else {
-            data = data.from_self(parser.merge(Json::file(&self.path).nested()).extract::<SurrealismConfig>().unwrap());
-        }
+            parser.merge(Json::file(&self.path).nested()).extract::<SurrealismConfig>().unwrap()
+        };
         self.data.replace(data);
         Ok(())
     }
@@ -142,12 +141,20 @@ impl ConfigurationService for DefaultConfigurationService {
         }
     }
 
-    fn get_logger(self) -> Result<SurrealLogger, EasyException> {
+    fn get_logger(&self) -> Result<LogLevel, EasyException> {
         match self.data {
             None => {
                 Err(easy_e!(ErrorTypeCode::CONFIG_NOT_FOUND_ERROR,CONFIG_NOT_FOUND_ERROR,ExceptionLevel::Error,line!(),PathBuf::from(file!())))
             }
-            Some(config_data) => Ok(config_data.get_logger())
+            Some(ref config_data) => Ok(config_data.get_logger())
+        }
+    }
+    fn get_no_banner(&self) ->Result<bool, EasyException> {
+        match self.data {
+            None => {
+                Err(easy_e!(ErrorTypeCode::CONFIG_NOT_FOUND_ERROR,CONFIG_NOT_FOUND_ERROR,ExceptionLevel::Error,line!(),PathBuf::from(file!())))
+            }
+            Some(ref config_data) => Ok(config_data.get_no_banner())
         }
     }
 }

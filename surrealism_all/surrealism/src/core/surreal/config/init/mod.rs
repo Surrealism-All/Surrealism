@@ -1,7 +1,7 @@
 mod default;
 
 pub use default::DefaultInitService;
-use crate::core::connector::SurrealismConnector;
+use crate::surreal::SurrealismConnector;
 use simple_logger::SimpleLogger;
 use except_plugin::{EasyException};
 
@@ -9,7 +9,7 @@ pub trait InitService {
     fn new() -> Self;
     fn init_banner(&self) -> ();
     /// Init log service
-    fn init_log_service(&mut self) -> ();
+    // fn init_log_service(&mut self) -> ();
     /// Init config service
     fn init_config_service(&mut self) -> Result<(), EasyException>;
     /// Init all services including:

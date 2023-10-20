@@ -7,74 +7,66 @@
 //! @description:
 //! ```
 
+use std::fmt::{Display, Formatter};
 use std::path::PathBuf;
+use std::time::Duration;
 use serde_json;
 use serde::{Deserialize, Serialize};
-use super::logger::SurrealLogger;
+use super::logger::LogLevel;
 
 /// Surrealism configuration
-/// surreal:单机本地连接Single还是分布式连接Multi
 /// username:用户名
 /// password:密码
-/// auth:连接鉴权方式(Root,NS,DB)
+/// auth:开启权限认证
 /// url:连接地址
 /// port:连接端口
-/// mode:连接模式（Memory表示内存File表示存到文件中）
-/// path:存储到文件中的文件地址，使用Memory设置为""即可
-/// log:日志
-/// ns:命名空间名称 (auth = NS)⛔
-/// db:数据库名称 (auth = DB)⛔
+/// mode:连接模式（Memory表示内存File表示存到文件中，Tikv表示tikv集群地址）
+/// path:存储到文件中的文件地址，使用Memory则无需设置
+/// log:日志级别
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub struct SurrealismConfig {
-    surreal: SurrealType,
     username: String,
     password: String,
-    auth: Option<Auth>,
-    url: String,
-    port: u16,
+    auth: Option<bool>,
+    bind: Option<String>,
+    // --tick-interval：运行节点代理tick的间隔（包括垃圾收集），默认为10秒
+    tick_interval: Option<String>,
+    strict: Option<bool>,
+    query_timeout: Option<String>,
+    transaction_timeout: Option<String>,
     mode: Option<SurrealMode>,
     path: Option<PathBuf>,
-    log: Option<SurrealLogger>,
-    ns: Option<String>,
-    db: Option<String>,
+    log: Option<LogLevel>,
+    no_banner: Option<bool>,
+    db_connection: Option<DBConnection>,
+    http_server: Option<HttpServer>,
+    capabilities: Option<Capabilities>,
 }
+
+impl From<&str> for SurrealismConfig {
+    fn from(value: &str) -> Self {
+        let obj: SurrealismConfig = serde_json::from_str(value).unwrap();
+        obj
+    }
+}
+
+
 
 impl SurrealismConfig {
     pub fn new() -> SurrealismConfig {
         SurrealismConfig::default()
     }
-    /// parse str to SurrealismConfig
-    pub fn from(s: &str) -> SurrealismConfig {
-        let obj: SurrealismConfig = serde_json::from_str(s).unwrap();
-        obj
-    }
-    pub fn from_self(&mut self, data: SurrealismConfig) -> Self {
-        Self {
-            surreal: data.surreal,
-            username: data.username,
-            password: data.password,
-            auth: data.auth,
-            url: data.url,
-            port: data.port,
-            mode: data.mode,
-            path: data.path,
-            log: data.log,
-            ns: data.ns,
-            db: data.db,
-        }
-    }
+    // pub fn from_self(&mut self, data: SurrealismConfig) -> Self {}
     /// get ref SurrealismConfig
     pub fn get_config(&self) -> &SurrealismConfig {
         &self
     }
     /// get logger service
     /// @return:SurrealLogger
-    pub fn get_logger(self) -> SurrealLogger {
+    pub fn get_logger(&self) -> LogLevel {
         match self.log {
-            None => {
-                SurrealLogger::default()
-            }
-            Some(logger) => logger
+            Some(ref logger) => LogLevel::from(logger),
+            None => LogLevel::default()
         }
     }
     pub fn get_username(&self) -> &str {
@@ -83,65 +75,112 @@ impl SurrealismConfig {
     pub fn get_password(&self) -> &str {
         &self.password
     }
-    pub fn get_username_password(&self) -> Vec<&str> {
-        vec![self.get_username(), self.get_password()]
+    pub fn get_username_password(&self) -> (&str, &str) {
+        (self.get_username(), self.get_password())
     }
-    pub fn get_url(&self) -> &str { &self.url }
-    pub fn get_port(&self) -> u16 { self.port }
+    pub fn get_no_banner(&self)->bool{
+        match self.no_banner {
+            None => false,
+            Some( banner ) => banner
+        }
+    }
+    pub fn get_bind(&self) -> &Option<String> {
+        &self.bind
+    }
 }
 
 impl Default for SurrealismConfig {
     fn default() -> Self {
         SurrealismConfig {
-            surreal: SurrealType::Single,
-            username: "".to_string(),
-            password: "".to_string(),
-            auth: Some(Auth::Default),
-            url: "".to_string(),
-            port: 9999,
-            mode: Some(SurrealMode::Default),
+            username: String::from("root"),
+            password: String::from("root"),
+            auth: Some(true),
+            bind: Some(String::from("0.0.0.0:8000")),
+            tick_interval: None,
+            strict: Some(true),
+            query_timeout: None,
+            transaction_timeout: None,
+            mode: Some(SurrealMode::default()),
             path: None,
-            log: Some(SurrealLogger::default()),
-            ns: None,
-            db: None,
+            log: Some(LogLevel::default()),
+            no_banner: None,
+            db_connection: None,
+            http_server: None,
+            capabilities: None,
         }
     }
 }
 
-/// connection type
-/// - Single : single connection
-/// - Multi : multi connection
-/// - Default : default connection == single connection
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
-enum SurrealType {
-    Single,
-    Multi,
-    Default,
+impl Display for SurrealismConfig {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        //序列化
+        write!(f, "{}", serde_json::to_string(self).unwrap())
+    }
+}
+
+#[derive(Debug, Serialize, Deserialize, Clone, PartialEq)]
+enum Capabilities {
+    AllowAll,
+    AllowScripting,
+    AllowGuests,
+    AllowFuncs,
+    AllowNet,
+    DenyAll,
+    DenyScripting,
+    DenyGuests,
+    DenyFuncs,
+    DenyNet,
+}
+#[derive(Debug, Serialize, Deserialize, Clone, PartialEq)]
+struct DBConnection {
+    kvs_ca: PathBuf,
+    kvs_crt: PathBuf,
+    kvs_key: PathBuf,
+}
+#[derive(Debug, Serialize, Deserialize, Clone, PartialEq)]
+struct HttpServer {
+    web_crt: PathBuf,
+    web_key: PathBuf,
+    client_ip: ClientIP,
+}
+
+/// --client-ip ： 指定用于检测客户端 IP 地址的方法。
+/// 该选项可以帮助SurrealDB连接客户端的 IP 地址，进行一些操作或记录日志等。
+///  这个选项可以设置不同的值来指定不同的客户端 IP 检测方法（该选项可能会随着SurrealDB的更新增加更多的远程连接支持）：
+///    1. none ： 不使用客户端 IP，即不获取客户端的 IP 地址
+///    2. socket ： 使用原始套接字获取客户端的 IP 地址
+///    3. CF-Connecting-IP ：使用云服务提供商 Cloudflare 的连接 IP 方法获取客户端 IP
+///    4. Fly-Client-IP ： 使用 Fly.io 平台的客户端 IP 方法获取客户端 IP
+///    5. True-Client-IP ： 使用 Akamai、Cloudflare 等服务商的真实客户端 IP 方法获取客户端 IP
+///    6. X-Real-IP ：使用 Nginx 的真实 IP 方法获取客户端 IP
+///    7. X-Forwarded-For ：使用来自其他代理的行业标准头部获取客户端 IP
+#[derive(Debug, Serialize, Deserialize, PartialEq,Clone)]
+enum ClientIP {
+    None,
+    Socket,
+    CFConnectingIP,
+    FlyClientIP,
+    TrueClientIP,
+    XRealIP,
+    XForwardedIP,
 }
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 enum SurrealMode {
     Memory,
     File,
-    Default,
+    Tikv,
 }
 
-
-#[derive(Debug, Serialize, Deserialize, PartialEq, Clone)]
-enum Auth {
-    Root,
-    NS,
-    DB,
-    Default,
+impl Default for SurrealMode {
+    fn default() -> Self {
+        SurrealMode::Memory
+    }
 }
+
 
 #[cfg(test)]
 mod tests {
     use super::*;
 
-    // #[test]
-    // fn config_parse() {
-    //     let conf_str = r#"SurrealismConfig { surreal: Single, username: "", password: "", auth: Some(Default), url: "", port: 9999, mode: Some(Default), path: None, log: Some(SurrealLog { level: Warn, print: false, path: "E:\\Rust\\try\\Surrealism\\surrealism_all\\tests" }), ns: None, db: None }"#;
-    //     assert_eq!(serde_json::to_string(&SurrealismConfig::default()).unwrap(), String::from(conf_str));
-    // }
 }

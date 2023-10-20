@@ -7,7 +7,9 @@
 //! ```
 
 mod msg;
+mod config_parse;
 
+pub use config_parse::ConfigParseError;
 pub use msg::*;
 use serde::{Serialize, Deserialize};
 
@@ -29,6 +31,12 @@ pub enum ErrorType {
     ConfigError = 1000,
     ConfigNotFoundError = 1001,
     ConfigParseError = 1002,
+}
+
+impl ErrorType {
+    pub fn as_u32(self)->u32{
+        self as u32
+    }
 }
 
 pub struct ErrorTypeCode;

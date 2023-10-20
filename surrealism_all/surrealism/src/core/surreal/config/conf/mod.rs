@@ -2,7 +2,7 @@ mod default;
 
 pub use default::DefaultConfigurationService;
 use except_plugin::{EasyException};
-use crate::core::config::logger::SurrealLogger;
+use crate::surreal::config::LogLevel;
 
 /// Super Configuration Service
 ///
@@ -24,7 +24,8 @@ pub trait ConfigurationService {
     /// 2. get_config_file()
     /// 3. get_config_data()
     fn init(&mut self) -> Result<(), EasyException>;
-    fn get_logger(self) -> Result<SurrealLogger, EasyException>;
+    fn get_logger(&self) -> Result<LogLevel, EasyException>;
+    fn get_no_banner(&self)->Result<bool, EasyException>;
 }
 
 pub trait DefineConfiguration {

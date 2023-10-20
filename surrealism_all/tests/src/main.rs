@@ -1,13 +1,8 @@
-use surrealism::{DefaultRes,row_sql};
-use surrealism::row::RowSql;
-
+use surrealism::surreal::{SurrealismRes,DefaultInitService,InitService};
 
 #[tokio::main]
-async fn main()->DefaultRes<()>{
-    let sql = row_sql!("SELECT {} FROM {};")
-        .bind("*")
-        .bind("user")
-        .build();
-    dbg!(sql.unwrap());
+async fn main() -> SurrealismRes<()> {
+    let mut service = DefaultInitService::new().init();
+    dbg!(service);
     Ok(())
 }
