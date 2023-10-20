@@ -73,11 +73,10 @@ impl InitService for DefaultInitService {
         //init configuration
         match self.init_config_service() {
             Ok(_) => {
+                //init logger
                 let _ = self.init_log().init().unwrap();
                 let _ = self.init_banner();
                 info!("{}",INIT_CONFIG);
-                //init logger
-                // let _ = self.init_log_service();
                 //init connection
                 let config_data = self.config_service.get_surrealism_config().unwrap();
                 let surrealism_connector = SurrealismConnector::from_config(&config_data);

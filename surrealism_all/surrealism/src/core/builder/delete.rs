@@ -25,7 +25,7 @@ pub trait DeleteWrapperImpl: BaseWrapperImpl + TableImpl + ReturnImpl + TimeoutI
 /// # DeleteWrapper
 /// ## example
 /// ```rust
-/// use surrealism::{SurrealismRes, SurrealID, ConditionSign, Condition, Criteria, CriteriaSign};
+/// use surrealism::db::{ SurrealID, ConditionSign, Condition, Criteria, CriteriaSign};
 /// use surrealism::builder::*;
 /// use surrealism::builder::delete::DeleteWrapperImpl;
 /// use surrealism::surreal::SurrealismRes;

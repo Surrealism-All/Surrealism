@@ -5,6 +5,7 @@
 //! @version:0.0.1
 //! @description:
 //! ```
+use std::fmt::{Display, Formatter};
 use serde::{Serialize, Deserialize};
 use crate::db::{SurrealValue,ParamCombine};
 use super::constants::{EQ, LT, GT, GTE, LTE, LINK, NEQ, WHERE, AND, OR};
@@ -86,6 +87,12 @@ pub enum ConditionSign {
 impl Default for ConditionSign {
     fn default() -> Self {
         ConditionSign::None
+    }
+}
+
+impl Display for ConditionSign {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        write!(f,"{}",self.to_str())
     }
 }
 
@@ -216,18 +223,18 @@ impl Criteria {
         match self.sign {
             CriteriaSign::Link => {
                 match self.right {
-                    SurrealValue::Str(ref s) => format!("{} {} {} {}", self.sign.to_str(), &self.left, LINK, s),
+                    SurrealValue::String(ref s) => format!("{} {} {} {}", self.sign.to_str(), &self.left, LINK, s),
                     _ => panic!("{}", "Link Multiple Tables need use SurrealValue::Str for right!")
                 }
             }
             // for cheat
             CriteriaSign::Cheat(ref value) => {
                 match self.right {
-                    SurrealValue::Str(ref s) => format!("{} {} {}", &self.left, value, s),
+                    SurrealValue::String(ref s) => format!("{} {} {}", &self.left, value, s),
                     _ => panic!("{}", "This Panic may not exist , if you see this panic , please connect to author or commit issue on github!")
                 }
             }
-            _ => format!("{} {} {}", &self.left, self.sign.to_str(), &self.right.to_str())
+            _ => format!("{} {} {}", &self.left, self.sign.to_str(), &self.right.to_string())
         }
     }
     /// consume self to SurrealValue
@@ -273,6 +280,12 @@ impl Default for CriteriaSign {
 impl ParamCombine for CriteriaSign {
     fn combine(&self) -> String {
         String::from(self.to_str())
+    }
+}
+
+impl Display for CriteriaSign {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        write!(f,"{}",self.to_str())
     }
 }
 

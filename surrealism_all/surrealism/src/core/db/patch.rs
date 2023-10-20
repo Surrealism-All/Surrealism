@@ -95,7 +95,7 @@ impl<'p> Patch<'p> {
         match self.op {
             PatchOp::Add | PatchOp::Replace | PatchOp::Test => {
                 // no from
-                json!({"op":self.op.to_str(),"path":self.path,"value":self.value.as_ref().unwrap().to_str()}).to_string()
+                json!({"op":self.op.to_str(),"path":self.path,"value":self.value.as_ref().unwrap().to_string()}).to_string()
             }
             PatchOp::Remove => {
                 // no value and  no from

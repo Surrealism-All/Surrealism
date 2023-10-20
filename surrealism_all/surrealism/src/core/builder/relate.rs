@@ -43,7 +43,7 @@ pub trait RelateWrapperImpl: BaseWrapperImpl + ReturnImpl + TimeoutImpl + Parall
 /// # RelateWrapper
 /// the wrapper for RELATE
 /// ```rust
-/// use surrealism::{SurrealismRes,SurrealID};
+/// use surrealism::db::{SurrealID};
 /// use surrealism::builder::*;
 /// use surrealism::builder::relate::RelateWrapperImpl;
 /// use surrealism::surreal::SurrealismRes;

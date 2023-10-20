@@ -27,6 +27,7 @@ use super::logger::LogLevel;
 pub struct SurrealismConfig {
     username: String,
     password: String,
+    local:bool,
     auth: Option<bool>,
     bind: Option<String>,
     // --tick-interval：运行节点代理tick的间隔（包括垃圾收集），默认为10秒
@@ -87,6 +88,9 @@ impl SurrealismConfig {
     pub fn get_bind(&self) -> &Option<String> {
         &self.bind
     }
+    pub fn get_local(&self)->bool{
+        self.local
+    }
 }
 
 impl Default for SurrealismConfig {
@@ -94,6 +98,7 @@ impl Default for SurrealismConfig {
         SurrealismConfig {
             username: String::from("root"),
             password: String::from("root"),
+            local:true,
             auth: Some(true),
             bind: Some(String::from("0.0.0.0:8000")),
             tick_interval: None,

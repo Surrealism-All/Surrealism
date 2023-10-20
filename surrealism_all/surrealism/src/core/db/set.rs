@@ -24,7 +24,7 @@ impl Set {
         }
     }
     pub fn build(&self) -> String {
-        format!("{} {} {}", &self.column, self.sign.to_str(), self.value.to_str())
+        format!("{} {} {}", &self.column, self.sign.to_str(), self.value.to_string())
     }
     /// get column and value
     pub fn get(&self) -> (&str, &SurrealValue) {

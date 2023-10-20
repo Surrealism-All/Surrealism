@@ -17,10 +17,11 @@ impl Function {
     /// # count function
     /// ## example
     /// ```rust
-    /// use surrealism::{SurrealismRes, UseNSDB, DefaultInitService, InitService, SurrealValue, parse_response, Criteria, CriteriaSign};
+    /// use surrealism::db::{ UseNSDB, DefaultInitService, InitService, SurrealValue, parse_response, Criteria, CriteriaSign};
     /// use surrealism::builder::select::SelectWrapperImpl;
     /// use surrealism::builder::{BaseWrapperImpl, SQLBuilderFactory, TableImpl};
-    /// use surrealism::functions::{GenerateCompare, CryptoFunc, Function};
+    /// use surrealism::db::functions::{GenerateCompare, CryptoFunc, Function};
+    /// use surrealism::surreal::SurrealismRes;
     ///
     /// // [tests\src\main.rs:12] count1 = "count(true)"
     /// // [tests\src\main.rs:13] count2 = "count()"
@@ -48,10 +49,10 @@ impl Function {
             SurrealValue::None | SurrealValue::Null => {
                 String::from("count()")
             }
-            SurrealValue::Str(_) => {
+            SurrealValue::String(_) => {
                 format!("count({})", s.inner_str().unwrap())
             }
-            _ => format!("count({})", s.to_str())
+            _ => format!("count({})", s.to_string())
         }
     }
     pub fn crypto<'a>() -> CryptoFunc<'a> {
@@ -83,5 +84,5 @@ pub enum Functions {
 
 
 pub fn generate_easy(prefix: &str, f_name: &str, value: &SurrealValue) -> String {
-    format!("{}::{}({})", prefix, f_name, value.to_str())
+    format!("{}::{}({})", prefix, f_name, value.to_string())
 }

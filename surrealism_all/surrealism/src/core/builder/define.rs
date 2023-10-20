@@ -7,6 +7,7 @@
 //! ```
 //!
 
+use std::fmt::{Display, Formatter};
 use crate::core::db::constants::{NAMESPACE, DATABASE, PASSHASH, PASSWORD, DEFINE_DB, DEFINE_NS, DEFINE_LOGIN, DEFINE_SCOPE, STMT_END, ON, TYPE, SCOPE, PS256, PS384, PS512, EDDSA, ES256, ES384, ES512, HS256, HS384, HS512, RS256, RS384, RS512, VALUE, DEFINE_TOKEN, SCHEMA_FULL, SCHEMA_LESS, SIGN_IN, SIGN_UP, DROP, DEFINE_TABLE, BLANK, NONE, FULL, FOR, DEFINE_EVENT, ON_TABLE, WHEN, THEN, DEFINE_FUNCTION, RETURN, DEFINE_FIELD, FIELDS, COLUMNS, DEFINE_INDEX, UNIQUE, DEFINE_PARAM};
 use crate::core::db::{Condition, ParamCombine, SurrealValue, TimeOut, ValueConstructor};
 
@@ -14,7 +15,7 @@ use crate::core::db::{Condition, ParamCombine, SurrealValue, TimeOut, ValueConst
 /// The DEFINE statement can be used to specify authentication access and behaviour, global parameters, table configurations, table events, schema definitions, and indexes.
 /// ## example
 /// ```rust
-/// use surrealism::{Condition, ConditionSign, Criteria, CriteriaSign,  SurrealValue, TimeOut, TimeUnit, ValueConstructor, ValueType};
+/// use surrealism::db::{Condition, ConditionSign, Criteria, CriteriaSign,  SurrealValue, TimeOut, TimeUnit, ValueConstructor, ValueType};
 /// use surrealism::builder::*;
 /// use surrealism::surreal::SurrealismRes;
 /// use surrealism::builder::define::{FieldColumn, OnType, Permissions, PwdType, Schema, TokenType};
@@ -274,9 +275,9 @@ impl<'w> DefineWrapper<'w> {
             DefineWrapper::DATABASE(db) => format!("{} {}{}", DEFINE_DB, db, STMT_END),
             DefineWrapper::LOGIN {
                 name, on, pwd
-            } => format!("{} {} {} {} {}{}", DEFINE_LOGIN, name, ON, on.to_str(), pwd.to_str(), STMT_END),
+            } => format!("{} {} {} {} {}{}", DEFINE_LOGIN, name, ON, on.to_string(), pwd.to_string(), STMT_END),
             DefineWrapper::TOKEN { name, on, token_type, value } =>
-                format!("{} {} {} {} {} {} {}{}", DEFINE_TOKEN, name, ON, on.to_str(), token_type.to_str(), VALUE, value, STMT_END),
+                format!("{} {} {} {} {} {} {}{}", DEFINE_TOKEN, name, ON, on.to_string(), token_type.to_string(), VALUE, value, STMT_END),
             DefineWrapper::SCOPE { name, session, sign_up, sign_in } =>
                 format!("{} {} {} {} ( {} ) {} ( {} ){}", DEFINE_SCOPE, name, session.combine(), SIGN_UP, sign_up, SIGN_IN, sign_in, STMT_END),
             DefineWrapper::TABLE { name, drop, schema, as_expression, permissions } => {
@@ -287,7 +288,7 @@ impl<'w> DefineWrapper<'w> {
                 }
                 if schema.is_some() {
                     res.push_str(BLANK);
-                    res.push_str(schema.as_ref().unwrap().to_str())
+                    res.push_str(schema.as_ref().unwrap().to_string().as_str())
                 }
                 if as_expression.is_some() {
                     res.push_str(BLANK);
@@ -295,7 +296,7 @@ impl<'w> DefineWrapper<'w> {
                 }
                 if permissions.is_some() {
                     res.push_str(BLANK);
-                    res.push_str(&permissions.as_ref().unwrap().to_str())
+                    res.push_str(&permissions.as_ref().unwrap().to_string())
                 }
                 res.push_str(STMT_END);
                 res
@@ -308,13 +309,13 @@ impl<'w> DefineWrapper<'w> {
                 let mut res = format!("{} {} {} {} {}", DEFINE_FIELD, name, ON_TABLE, on, value.build());
                 if permissions.is_some() {
                     res.push_str(BLANK);
-                    res.push_str(&permissions.as_ref().unwrap().to_str())
+                    res.push_str(&permissions.as_ref().unwrap().to_string())
                 }
                 res.push_str(STMT_END);
                 res
             }
             DefineWrapper::INDEX { name, on, field_column, unique } => {
-                let mut res = format!("{} {} {} {} {}", DEFINE_INDEX, name, ON_TABLE, on, field_column.to_str());
+                let mut res = format!("{} {} {} {} {}", DEFINE_INDEX, name, ON_TABLE, on, field_column.to_string());
                 if *unique {
                     res.push_str(BLANK);
                     res.push_str(UNIQUE);
@@ -322,7 +323,7 @@ impl<'w> DefineWrapper<'w> {
                 res.push_str(STMT_END);
                 res
             }
-            DefineWrapper::PARAM { name, value } => format!("{} ${} {} {}{}", DEFINE_PARAM, name, VALUE, value.to_str(), STMT_END)
+            DefineWrapper::PARAM { name, value } => format!("{} ${} {} {}{}", DEFINE_PARAM, name, VALUE, value.to_string(), STMT_END)
         }
     }
 }
@@ -334,18 +335,22 @@ pub enum OnType<'o> {
     SCOPE(&'o str),
 }
 
+impl<'o> Display for OnType<'o> {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        let res = match self {
+            OnType::DB => DATABASE.to_string(),
+            OnType::NS => NAMESPACE.to_string(),
+            OnType::SCOPE(scope) => format!("{} {}", SCOPE, scope)
+        };
+        write!(f, "{}", res)
+    }
+}
+
 impl<'o> OnType<'o> {
     pub fn is_scope(&self) -> bool {
         match self {
             OnType::SCOPE(_) => true,
             _ => false
-        }
-    }
-    pub fn to_str(&self) -> String {
-        match self {
-            OnType::DB => DATABASE.to_string(),
-            OnType::NS => NAMESPACE.to_string(),
-            OnType::SCOPE(scope) => format!("{} {}", SCOPE, scope)
         }
     }
 }
@@ -356,12 +361,13 @@ pub enum PwdType<'p> {
     Hash(&'p str),
 }
 
-impl<'p> PwdType<'p> {
-    pub fn to_str(&self) -> String {
-        match self {
+impl<'p> Display for PwdType<'p> {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        let res = match self {
             PwdType::Pwd(pwd) => format!("{} {}", PASSWORD, pwd),
             PwdType::Hash(hash) => format!("{} {}", PASSHASH, hash),
-        }
+        };
+        write!(f, "{}", res)
     }
 }
 
@@ -382,25 +388,25 @@ pub enum TokenType {
     RS512,
 }
 
-impl TokenType {
-    pub fn to_str(&self) -> String {
-        let mut res = format!("{} ", TYPE);
-        match self {
-            TokenType::EDDSA => { res.push_str(EDDSA); }
-            TokenType::ES256 => { res.push_str(ES256); }
-            TokenType::ES384 => { res.push_str(ES384); }
-            TokenType::ES512 => { res.push_str(ES512); }
-            TokenType::HS256 => { res.push_str(HS256); }
-            TokenType::HS384 => { res.push_str(HS384); }
-            TokenType::HS512 => { res.push_str(HS512); }
-            TokenType::PS256 => { res.push_str(PS256); }
-            TokenType::PS384 => { res.push_str(PS384); }
-            TokenType::PS512 => { res.push_str(PS512); }
-            TokenType::RS256 => { res.push_str(RS256); }
-            TokenType::RS384 => { res.push_str(RS384); }
-            TokenType::RS512 => { res.push_str(RS512); }
-        }
-        res
+impl Display for TokenType {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        // let mut res = format!("{} ", TYPE);
+        let res = match self {
+            TokenType::EDDSA => EDDSA,
+            TokenType::ES256 => ES256,
+            TokenType::ES384 => ES384,
+            TokenType::ES512 => ES512,
+            TokenType::HS256 => HS256,
+            TokenType::HS384 => HS384,
+            TokenType::HS512 => HS512,
+            TokenType::PS256 => PS256,
+            TokenType::PS384 => PS384,
+            TokenType::PS512 => PS512,
+            TokenType::RS256 => RS256,
+            TokenType::RS384 => RS384,
+            TokenType::RS512 => RS512,
+        };
+        write!(f, "{} {}", TYPE, res)
     }
 }
 
@@ -410,12 +416,13 @@ pub enum Schema {
     SCHEMALESS,
 }
 
-impl Schema {
-    pub fn to_str(&self) -> &str {
-        match self {
+impl Display for Schema {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        let res = match self {
             Schema::SCHEMAFULL => SCHEMA_FULL,
             Schema::SCHEMALESS => SCHEMA_LESS,
-        }
+        };
+        write!(f, "{}", res)
     }
 }
 
@@ -431,14 +438,15 @@ pub enum Permissions {
     },
 }
 
-impl Permissions {
-    pub fn to_str(&self) -> String {
-        match self {
+impl Display for Permissions {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        let res = match self {
             Permissions::NONE => String::from(NONE),
             Permissions::FULL => String::from(FULL),
             Permissions::FOR { select, create, update, delete } =>
                 format!("{} {} {} {} {} {} {} {}", FOR, select.combine(), FOR, create.combine(), FOR, update.combine(), FOR, delete.combine())
-        }
+        };
+        write!(f, "{}", res)
     }
 }
 
@@ -448,11 +456,12 @@ pub enum FieldColumn<'f> {
     COLUMNS(Vec<&'f str>),
 }
 
-impl<'f> FieldColumn<'f> {
-    pub fn to_str(&self) -> String {
-        match self {
+impl<'f> Display for FieldColumn<'f> {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        let res = match self {
             FieldColumn::FIELDS(f) => format!("{} {}", FIELDS, f.join(" , ")),
             FieldColumn::COLUMNS(c) => format!("{} {}", COLUMNS, c.join(" , ")),
-        }
+        };
+        write!(f, "{}", res)
     }
 }

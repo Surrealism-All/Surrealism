@@ -165,8 +165,8 @@ impl<'a> GenerateCompare<'a> for Argon2<'a> {
 
     fn build(&self) -> String {
         match self.compare {
-            None => format!("crypto::argon2::generate({})", &self.value.to_str()),
-            Some(hash) => format!("crypto::argon2::compare('{}', {})", hash, &self.value.to_str())
+            None => format!("crypto::argon2::generate({})", &self.value.to_string()),
+            Some(hash) => format!("crypto::argon2::compare('{}', {})", hash, &self.value.to_string())
         }
     }
 
@@ -198,8 +198,8 @@ impl<'a> GenerateCompare<'a> for Pbkdf2<'a> {
 
     fn build(&self) -> String {
         match self.compare {
-            None => format!("crypto::pbkdf2::generate({})", &self.value.to_str()),
-            Some(hash) => format!("crypto::pbkdf2::compare('{}', {})", hash, &self.value.to_str())
+            None => format!("crypto::pbkdf2::generate({})", &self.value.to_string()),
+            Some(hash) => format!("crypto::pbkdf2::compare('{}', {})", hash, &self.value.to_string())
         }
     }
 
@@ -231,8 +231,8 @@ impl<'a> GenerateCompare<'a> for BCrypt<'a> {
 
     fn build(&self) -> String {
         match self.compare {
-            None => format!("crypto::bcrypt::generate({})", &self.value.to_str()),
-            Some(hash) => format!("crypto::bcrypt::compare('{}', {})", hash, &self.value.to_str())
+            None => format!("crypto::bcrypt::generate({})", &self.value.to_string()),
+            Some(hash) => format!("crypto::bcrypt::compare('{}', {})", hash, &self.value.to_string())
         }
     }
 
@@ -264,8 +264,8 @@ impl<'a> GenerateCompare<'a> for Scrypt<'a> {
 
     fn build(&self) -> String {
         match self.compare {
-            None => format!("crypto::scrypt::generate({})", &self.value.to_str()),
-            Some(hash) => format!("crypto::scrypt::compare('{}', {})", hash, &self.value.to_str())
+            None => format!("crypto::scrypt::generate({})", &self.value.to_string()),
+            Some(hash) => format!("crypto::scrypt::compare('{}', {})", hash, &self.value.to_string())
         }
     }
 

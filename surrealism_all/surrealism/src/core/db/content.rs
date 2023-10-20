@@ -128,7 +128,7 @@ impl<'a> ContentSet<'a> {
     pub fn build(&self) -> String {
         fn build_inner(map: &HashMap<&str, SurrealValue>) -> String {
             map.iter()
-                .map(|(k, v)| format!("{} = {}", k, v.to_str()))
+                .map(|(k, v)| format!("{} = {}", k, v.to_string()))
                 .collect::<Vec<String>>()
                 .join(" , ")
         }
@@ -146,7 +146,7 @@ impl<'a> ContentSet<'a> {
     pub fn build_to_merge(&self) -> String {
         fn build_inner(map: &HashMap<&str, SurrealValue>) -> String {
             let res = map.iter()
-                .map(|(k, v)| format!("{}: {}", k, v.to_str()))
+                .map(|(k, v)| format!("{}: {}", k, v.to_string()))
                 .collect::<Vec<String>>()
                 .join(" , ");
             format!("{}{}{}", LEFT_BRACE, res, RIGHT_BRACE)

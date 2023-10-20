@@ -67,7 +67,7 @@ impl Table {
     pub fn new_into(table_name: &str, table_id: &str) -> Table {
         Table {
             name: String::from(table_name),
-            id: SurrealID::Str(String::from(table_id)),
+            id: SurrealID::String(String::from(table_id)),
         }
     }
     pub fn new_no_arg() -> Table {

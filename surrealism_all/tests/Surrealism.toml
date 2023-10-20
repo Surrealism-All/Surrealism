@@ -4,4 +4,5 @@ password = "syf20020816"
 bind = "127.0.0.1:10086"
 mode = "Memory"
 log = "Info"
-#no_banner = true
+local = true
+no_banner = true

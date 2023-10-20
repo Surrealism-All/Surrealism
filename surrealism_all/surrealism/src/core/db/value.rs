@@ -38,12 +38,12 @@
 //! @description:
 //! ```
 
-// use std::any::{Any, TypeId};
 use std::collections::{BTreeMap, HashMap};
+use std::fmt::{Display, Formatter};
 use serde::{Serialize, Deserialize};
 use serde_json::Value;
 use surrealdb::sql::{Duration, Datetime};
-use crate::db::{Condition, Geometries};
+use crate::db::{Condition, Geometries, Decimal};
 use crate::core::db::constants::{BLANK};
 use crate::util::{remove_format_half, handle_str};
 use super::constants::{NULL, NULL_DOWN, NONE_DOWN, NONE, LEFT_BRACE, RIGHT_BRACE, COMMA, ANY, BOOL, ARRAY, DATETIME, DURATION, NUMBER, INT, FLOAT, STRING, OBJECT, GEOMETRY, RECORD, DECIMAL};
@@ -67,13 +67,37 @@ pub enum SurrealValue {
     None,
     Null,
     Bool(bool),
-    Number(Number),
-    Str(String),
+    Int(i64),
+    Float(f64),
+    Decimal(Decimal),
+    Option(Option<Box<SurrealValue>>),
+    String(String),
     Object(Object),
     Array(Array),
+    Set(Array),
     Geometries(Geometries),
 }
 
+impl Display for SurrealValue {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        let res = match self {
+            SurrealValue::None => format!("'{}'", NONE),
+            SurrealValue::Null => format!("'{}'", NULL),
+            SurrealValue::Bool(b) => b.to_string(),
+            SurrealValue::Int(n) => n.to_string(),
+            SurrealValue::Float(f) => f.to_string(),
+            SurrealValue::String(s) => handle_str(serde_json::to_string(s).unwrap().as_str()),
+            SurrealValue::Object(obj) => obj.parse(),
+            SurrealValue::Array(arr) => arr.parse(),
+            SurrealValue::DateTime(time) => time.to_string(),
+            SurrealValue::Duration(duration) => duration.to_string(),
+            SurrealValue::Record(record) => format!("record({})", record),
+            SurrealValue::Geometries(geo) => geo.to_string(),
+            _ => String::new()
+        };
+        write!(f, "{}", res)
+    }
+}
 
 impl SurrealValue {
     /// get datetime , GMT 0
@@ -99,35 +123,19 @@ impl SurrealValue {
             SurrealValue::Duration(_) => ValueType::Duration,
             SurrealValue::Record(_) => ValueType::Record,
             SurrealValue::Bool(_) => ValueType::Bool,
-            SurrealValue::Number(n) => {
-                match n {
-                    Number::Int(_) => ValueType::Int,
-                    Number::Float(_) => ValueType::Float,
-                    Number::Decimal(_) => ValueType::Decimal
-                }
-            }
-            SurrealValue::Str(_) | SurrealValue::None | SurrealValue::Null => ValueType::String,
+            SurrealValue::Int(_) => ValueType::Int,
+            SurrealValue::Float(_) => ValueType::Float,
+            SurrealValue::Decimal(_) => ValueType::Decimal,
+            SurrealValue::String(_) | SurrealValue::None | SurrealValue::Null => ValueType::String,
             SurrealValue::Object(_) => ValueType::Object,
             SurrealValue::Array(_) => ValueType::Array,
-            SurrealValue::Geometries(_) => ValueType::Geometry
+            SurrealValue::Geometries(_) => ValueType::Geometry,
+            SurrealValue::Option(_) => ValueType::Any,
+            SurrealValue::Set(_) => ValueType::Array,
         }
     }
-    ///将SurrealValue转换为String
-    pub fn to_str(&self) -> String {
-        match self {
-            SurrealValue::None => format!("'{}'", NONE),
-            SurrealValue::Null => format!("'{}'", NULL),
-            SurrealValue::Bool(b) => b.to_string(),
-            SurrealValue::Number(n) => n.parse(),
-            SurrealValue::Str(s) => handle_str(serde_json::to_string(s).unwrap().as_str()),
-            SurrealValue::Object(obj) => obj.parse(),
-            SurrealValue::Array(arr) => arr.parse(),
-            SurrealValue::DateTime(time) => time.to_string(),
-            SurrealValue::Duration(duration) => duration.to_string(),
-            SurrealValue::Record(record) => format!("record({})", record),
-            SurrealValue::Geometries(geo) => geo.to_string(),
-        }
-    }
+
+
     ///从json-str进行推测，转换为serde::Value再转为SurrealValue
     /// ## example
     /// ```rust
@@ -166,27 +174,27 @@ impl SurrealValue {
             _ => false
         }
     }
-    pub fn is_int(&self) -> bool {
-        match self {
-            SurrealValue::Number(n) => n.is_int(),
-            _ => false
-        }
-    }
-    pub fn is_float(&self) -> bool {
-        match self {
-            SurrealValue::Number(n) => n.is_float(),
-            _ => false
-        }
-    }
-    pub fn is_decimal(&self) -> bool {
-        match self {
-            SurrealValue::Number(n) => n.is_decimal(),
-            _ => false
-        }
-    }
+    // pub fn is_int(&self) -> bool {
+    //     match self {
+    //         SurrealValue::Number(n) => n.is_int(),
+    //         _ => false
+    //     }
+    // }
+    // pub fn is_float(&self) -> bool {
+    //     match self {
+    //         SurrealValue::Number(n) => n.is_float(),
+    //         _ => false
+    //     }
+    // }
+    // pub fn is_decimal(&self) -> bool {
+    //     match self {
+    //         SurrealValue::Number(n) => n.is_decimal(),
+    //         _ => false
+    //     }
+    // }
     pub fn is_str(&self) -> bool {
         match self {
-            SurrealValue::Str(_) => true,
+            SurrealValue::String(_) => true,
             _ => false
         }
     }
@@ -213,8 +221,8 @@ impl SurrealValue {
     /// get str from SurrealValue::Str
     pub fn inner_str(&self) -> Option<String> {
         match self {
-            SurrealValue::Str(s) => Some(s.to_string()),
-            _ => Some(self.to_str())
+            SurrealValue::String(s) => Some(s.to_string()),
+            _ => Some(self.to_string())
         }
     }
 }
@@ -266,7 +274,7 @@ impl From<&str> for SurrealValue {
             NONE_DOWN => SurrealValue::None,
             NULL => SurrealValue::Null,
             NULL_DOWN => SurrealValue::Null,
-            _ => SurrealValue::Str(String::from(value))
+            _ => SurrealValue::String(String::from(value))
         }
     }
 }
@@ -277,45 +285,51 @@ impl From<bool> for SurrealValue {
     }
 }
 
-impl From<Number> for SurrealValue {
-    fn from(value: Number) -> Self {
-        SurrealValue::Number(value)
+// impl From<Number> for SurrealValue {
+//     fn from(value: Number) -> Self {
+//         SurrealValue::Number(value)
+//     }
+// }
+
+impl From<i64> for SurrealValue {
+    fn from(value: i64) -> Self {
+        SurrealValue::Int(value)
     }
 }
 
 impl From<i32> for SurrealValue {
     fn from(value: i32) -> Self {
-        SurrealValue::from(Number::from(value))
+        SurrealValue::from(value as i64)
     }
 }
 
 impl From<u32> for SurrealValue {
     fn from(value: u32) -> Self {
-        SurrealValue::from(value as i32)
+        SurrealValue::from(value as i64)
     }
 }
 
 impl From<usize> for SurrealValue {
     fn from(value: usize) -> Self {
-        SurrealValue::from(value as i32)
+        SurrealValue::from(value as i64)
     }
 }
 
 impl From<isize> for SurrealValue {
     fn from(value: isize) -> Self {
-        SurrealValue::from(value as i32)
+        SurrealValue::from(value as i64)
     }
 }
 
 impl From<f32> for SurrealValue {
     fn from(value: f32) -> Self {
-        SurrealValue::from(Number::from(value))
+        SurrealValue::from(value as f64)
     }
 }
 
 impl From<f64> for SurrealValue {
     fn from(value: f64) -> Self {
-        SurrealValue::from(Number::from(value))
+        SurrealValue::Float(value)
     }
 }
 
@@ -361,7 +375,7 @@ impl Object {
         let mut count: usize = 0;
         for (key, value) in &self.0 {
             count += 1;
-            res += format!("{} : {}", key, value.to_str()).as_str();
+            res += format!("{} : {}", key, value.to_string()).as_str();
             if self.0.len().ne(&count) {
                 res += COMMA
             }
@@ -428,7 +442,7 @@ impl Array {
     pub fn parse(&self) -> String {
         let mut res = vec![];
         for item in &self.0 {
-            let item_str = item.to_str();
+            let item_str = item.to_string();
             res.push(item_str);
         }
         remove_format_half(format!("{:?}", res))
@@ -555,7 +569,7 @@ impl ValueConstructor {
         let mut res = format!("TYPE {}", self.value_type.to_string());
         if self.default_value.is_some() {
             res.push_str(BLANK);
-            res.push_str(format!("VALUE $value OR {}", self.default_value.as_ref().unwrap().to_str()).as_str());
+            res.push_str(format!("VALUE $value OR {}", self.default_value.as_ref().unwrap().to_string()).as_str());
         }
         if self.assert.is_some() {
             res.push_str(BLANK);

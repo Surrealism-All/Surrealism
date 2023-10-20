@@ -9,11 +9,11 @@
 //! @description:
 //! ```
 
-use surrealdb::engine::remote::ws::{Client, Ws};
+use surrealdb::engine::remote::ws::{Client, Wss, Ws};
 use surrealdb::{Error, Response, Surreal};
 use surrealdb::opt::auth::Root;
 use futures::executor::block_on;
-use surrealdb::method::{Version};
+use surrealdb::method::{Health, Version};
 use async_trait::async_trait;
 use crate::surreal::SurrealismConfig;
 use crate::db::functions::{CryptoFunc, GenerateCompare};
@@ -27,6 +27,7 @@ pub trait UseNSDB {
 pub trait SurrealismCommit {
     async fn commit_sql(&self, sql: &str) -> Result<surrealdb::Response, surrealdb::Error>;
 }
+
 #[derive(Debug)]
 pub struct SurrealismConnector {
     client: Surreal<Client>,
@@ -47,8 +48,12 @@ impl SurrealismCommit for SurrealismConnector {
 }
 
 impl SurrealismConnector {
-    pub async fn new(url:&str) -> Result<Surreal<Client>, surrealdb::Error> {
-        let db = Surreal::new::<Ws>(url).await?;
+    pub async fn new(url: &str, local: bool) -> Result<Surreal<Client>, surrealdb::Error> {
+        let db = if local {
+            Surreal::new::<Ws>(url).await?
+        } else {
+            Surreal::new::<Wss>(url).await?
+        };
         Ok(db)
     }
     /// from Surreal<Client> return SurrealismConnector
@@ -84,9 +89,13 @@ impl SurrealismConnector {
     pub fn version(&self) -> Version<Client> {
         self.client.version()
     }
+    /// check surrealdb is healthy or not
+    pub fn is_ready(&self)->Health<Client>{
+        self.client.health()
+    }
     /// from SurrealismConfig return Result<SurrealismConnector, surrealdb::Error>
     pub fn from_config(config: &SurrealismConfig) -> Result<SurrealismConnector, surrealdb::Error> {
-        let cn = block_on(SurrealismConnector::new(config.get_bind().as_ref().unwrap()));
+        let cn = block_on(SurrealismConnector::new(config.get_bind().as_ref().unwrap(),config.get_local()));
         match cn {
             Ok(client) => {
                 Ok(SurrealismConnector {

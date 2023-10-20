@@ -7,6 +7,7 @@ mod strategy;
 mod condition;
 mod patch;
 mod set;
+mod decimal;
 mod field;
 mod order;
 mod geo;
@@ -23,6 +24,7 @@ pub use strategy::*;
 pub use order::Order;
 pub use field::Field;
 pub use geo::*;
+pub use decimal::Decimal;
 
 
 /// # param combine trait

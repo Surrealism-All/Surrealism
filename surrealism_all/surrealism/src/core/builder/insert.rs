@@ -132,9 +132,9 @@ impl BaseWrapperImpl for InsertWrapper {
                     Some(res) => value_len = res.len()
                 }
                 if 0.eq(&value_len) {
-                    let _ = tmp_data.insert(k, vec![v.to_str()]);
+                    let _ = tmp_data.insert(k, vec![v.to_string()]);
                 } else {
-                    tmp_data.get_mut(k).unwrap().push(v.to_str());
+                    tmp_data.get_mut(k).unwrap().push(v.to_string());
                 }
             }
 

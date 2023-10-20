@@ -224,11 +224,11 @@ impl ArrayFunc {
     }
     pub fn sort_asc(&self, core_value: Vec<SurrealValue>) -> String {
         let core_value = SurrealValue::from(core_value);
-        format!("array::sort({}, true)", core_value.to_str())
+        format!("array::sort({}, true)", core_value.to_string())
     }
     pub fn sort_desc(&self, core_value: Vec<SurrealValue>) -> String {
         let core_value = SurrealValue::from(core_value);
-        format!("array::sort({}, false)", core_value.to_str())
+        format!("array::sort({}, false)", core_value.to_string())
     }
     /// array::union
     /// The array::union function combines two arrays together, removing duplicate values, and returning a single array.
@@ -242,21 +242,21 @@ impl ArrayFunc {
     {
         let core_value = SurrealValue::from(core_value);
         let value = SurrealValue::from_each(value);
-        format!("array::{}({}, {}, {})", f_name, core_value.to_str(), value.to_str(), index)
+        format!("array::{}({}, {}, {})", f_name, core_value.to_string(), value.to_string(), index)
     }
     fn core_num(&self, core_value: Vec<SurrealValue>, index: usize, f_name: &str) -> String {
         let core_value = SurrealValue::from(core_value);
-        format!("array::{}({}, {})", f_name, core_value.to_str(), index)
+        format!("array::{}({}, {})", f_name, core_value.to_string(), index)
     }
     fn core_index(&self, core_value: Vec<SurrealValue>, index: usize, f_name: &str) -> String {
         let index = core_value[index].clone();
         let core_value = SurrealValue::from(core_value);
-        format!("array::{}({}, {})", f_name, core_value.to_str(), index.to_str())
+        format!("array::{}({}, {})", f_name, core_value.to_string(), index.to_string())
     }
     fn double_core(&self, core_value: Vec<SurrealValue>, value: Vec<SurrealValue>, f_name: &str) -> String {
         let core_value = SurrealValue::from(core_value);
         let value = SurrealValue::from(value);
-        format!("array::{}({}, {})", f_name, core_value.to_str(), value.to_str())
+        format!("array::{}({}, {})", f_name, core_value.to_string(), value.to_string())
     }
     fn single_core_value<T>(&self, core_value: Vec<SurrealValue>, value: T, f_name: &str) -> String
         where
@@ -264,12 +264,12 @@ impl ArrayFunc {
     {
         let core_value = SurrealValue::from(core_value);
         let value = SurrealValue::from_each(value);
-        format!("array::{}({}, {})", f_name, core_value.to_str(), value.to_str())
+        format!("array::{}({}, {})", f_name, core_value.to_string(), value.to_string())
     }
     /// core_value function
     fn single_core(&self, core_value: Vec<SurrealValue>, f_name: &str) -> String {
         let core_value = SurrealValue::from(core_value);
-        format!("array::{}({})", f_name, core_value.to_str())
+        format!("array::{}({})", f_name, core_value.to_string())
     }
     fn check_array<F>(&self, core_value: &SurrealValue, f: F) -> String where F: Fn() -> String, {
         return if core_value.is_array() {
