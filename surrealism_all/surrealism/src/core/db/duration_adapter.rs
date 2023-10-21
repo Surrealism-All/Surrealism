@@ -1,4 +1,6 @@
 use surrealdb::sql::Duration;
+use crate::core::db::SurrealValue;
+use super::AdapterToValue;
 
 pub struct DurationAdapter;
 
@@ -34,5 +36,11 @@ impl DurationAdapter {
     /// Create a duration from weeks
     pub fn from_weeks(&self,days: u64) -> Duration {
         Duration::from_weeks(days)
+    }
+}
+
+impl AdapterToValue for Duration{
+    fn to_value(self) -> SurrealValue {
+        SurrealValue::Duration(self)
     }
 }

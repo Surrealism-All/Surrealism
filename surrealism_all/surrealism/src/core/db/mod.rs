@@ -13,6 +13,7 @@ mod order;
 mod geo;
 pub mod functions;
 mod duration_adapter;
+mod datetime_adapter;
 
 pub use sql::*;
 pub use value::*;
@@ -27,6 +28,13 @@ pub use field::Field;
 pub use geo::*;
 pub use decimal::Decimal;
 pub use duration_adapter::DurationAdapter;
+pub use datetime_adapter::DatetimeAdapter;
+
+
+/// Trans Adapter to SurrealValue
+pub trait AdapterToValue{
+    fn to_value(self)->SurrealValue;
+}
 
 
 /// # param combine trait

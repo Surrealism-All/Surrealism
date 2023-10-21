@@ -40,12 +40,13 @@
 //!
 use std::collections::{BTreeMap, HashMap};
 use std::fmt::{Display, Formatter};
+use std::ops::Deref;
 use num_traits::cast::FromPrimitive;
 use std::str::FromStr;
 use serde::{Serialize, Deserialize};
 use serde_json::Value;
 use surrealdb::sql::{Duration, Datetime};
-use crate::db::{Condition, Geometries, Decimal,DurationAdapter};
+use crate::db::{Condition, Geometries, Decimal, DurationAdapter, DatetimeAdapter};
 use crate::core::db::constants::{BLANK};
 use crate::util::{remove_format_half, handle_str};
 use super::constants::{NULL, NULL_DOWN, NONE_DOWN, NONE, LEFT_BRACE, RIGHT_BRACE, COMMA, ANY, BOOL, ARRAY, DATETIME, DURATION, NUMBER, INT, FLOAT, STRING, OBJECT, GEOMETRY, RECORD, DECIMAL};
@@ -88,7 +89,7 @@ impl Display for SurrealValue {
             SurrealValue::Bool(b) => b.to_string(),
             SurrealValue::Int(n) => n.to_string(),
             SurrealValue::Float(f) => f.to_string(),
-            SurrealValue::Decimal(d)=>d.to_string(),
+            SurrealValue::Decimal(d) => d.to_string(),
             SurrealValue::String(s) => handle_str(serde_json::to_string(s).unwrap().as_str()),
             SurrealValue::Object(obj) => obj.parse(),
             SurrealValue::Array(arr) => arr.parse(),
@@ -105,8 +106,11 @@ impl Display for SurrealValue {
 impl SurrealValue {
     /// get datetime , GMT 0
     /// format just like : `2023-09-10T23:13:23.520847500Z`
-    pub fn datetime() -> Self {
-        SurrealValue::DateTime(Datetime::default())
+    /// ## example
+    /// use this way you will get SurrealValue::DateTime()
+    /// `let datetime = SurrealValue::datetime().default().to_value();`
+    pub fn datetime() -> DatetimeAdapter {
+        DatetimeAdapter
     }
     /// # build Duration (surreal::sql::Duration)
     /// 通过调用该方法获取一个DurationAdapter帮助使用者间接构建Duration!👍
@@ -129,7 +133,7 @@ impl SurrealValue {
     ///     Ok(())
     /// }
     /// ```
-    pub fn duration() -> DurationAdapter{
+    pub fn duration() -> DurationAdapter {
         DurationAdapter
     }
     /// # build None
@@ -153,7 +157,7 @@ impl SurrealValue {
     ///     Ok(())
     /// }
     /// ```
-    pub fn none()->Self{
+    pub fn none() -> Self {
         SurrealValue::None
     }
     /// # build Null
@@ -177,7 +181,7 @@ impl SurrealValue {
     ///     Ok(())
     /// }
     /// ```
-    pub fn null()->Self{SurrealValue::Null}
+    pub fn null() -> Self { SurrealValue::Null }
     /// # build Bool
     /// 布尔值可用于标记字段是否为true或false
     /// ## example
@@ -196,7 +200,7 @@ impl SurrealValue {
     ///     Ok(())
     /// }
     /// ```
-    pub fn bool(b:bool)->Self{
+    pub fn bool(b: bool) -> Self {
         SurrealValue::Bool(b)
     }
     /// # build String
@@ -219,7 +223,7 @@ impl SurrealValue {
     ///     Ok(())
     /// }
     /// ```
-    pub fn string(s:&str)->Self{
+    pub fn string(s: &str) -> Self {
         SurrealValue::String(String::from(s))
     }
     /// # build number int
@@ -312,9 +316,50 @@ impl SurrealValue {
         let res: SurrealValue = value_str.into();
         res
     }
+    /// # build Object
+    /// SurrealDB记录可以存储对象，对任何嵌套对象或值的深度没有限制。
+    /// 这意味着对象和数组可以相互存储，以便对复杂的数据场景进行建模。
+    /// 对象可以存储其中存储的任何值，并且可以在同一对象中存储不同的值类型。
+    /// ## example
+    /// ```rust
+    /// use surrealism::DefaultRes;
+    /// use surrealism::db::{SurrealValue, Object};
+    /// use serde::{Serialize, Deserialize};
+    ///
+    /// #[derive(Debug, Clone, Serialize, Deserialize)]
+    /// struct User<'a> {
+    ///     name: &'a str,
+    ///     age: u8,
+    /// }
+    ///
+    /// impl<'a> User<'a> {
+    ///     pub fn new() -> Self { User { name: "Matt", age: 16 } }
+    /// }
+    ///
+    /// // [tests\src\main.rs:20] obj1.to_string() = "{ age : 16 , name : 'Matt' }"
+    /// // [tests\src\main.rs:21] obj2.to_string() = "{ age : 16 , name : 'Matt' }"
+    /// #[tokio::main]
+    /// async fn main() -> DefaultRes<()> {
+    ///     let user = User::new();
+    ///     let obj1 = SurrealValue::object(&user);
+    ///     let obj2 = SurrealValue::from(Object::from_obj(&user));
+    ///     dbg!(obj1.to_string());
+    ///     dbg!(obj2.to_string());
+    ///     Ok(())
+    /// }
+    /// ```
+    pub fn object<T>(obj: &T) -> Self where T: Serialize {
+        Object::to_value(obj)
+    }
     pub fn is_none(&self) -> bool {
         match self {
             SurrealValue::None => true,
+            _ => false
+        }
+    }
+    pub fn is_duration(&self) -> bool {
+        match self {
+            SurrealValue::Duration(_) => true,
             _ => false
         }
     }
@@ -417,6 +462,12 @@ impl From<Value> for SurrealValue {
     }
 }
 
+impl From<Object> for SurrealValue {
+    fn from(value: Object) -> Self {
+        SurrealValue::Object(value)
+    }
+}
+
 impl From<Geometries> for SurrealValue {
     fn from(value: Geometries) -> Self {
         SurrealValue::Geometries(value)
@@ -429,7 +480,7 @@ impl From<&str> for SurrealValue {
         // 考虑转化后再次尝试转化为Int
         match value.clone().parse::<f64>() {
             Ok(f) => {
-                if f.fract()==0.0 {
+                if f.fract() == 0.0 {
                     if let Some(i) = i64::from_f64(f) {
                         return SurrealValue::Int(i);
                     }
@@ -551,12 +602,17 @@ impl Object {
     ///将可序列化struct转为Surrealism::Object
     pub fn from_obj<T: Serialize>(t: &T) -> Object {
         //序列化为String
-        let obj_str: Value = serde_json::to_value(t).unwrap();
-        let res: SurrealValue = obj_str.into();
-        match res {
+        // let obj_str: Value = serde_json::to_value(t).unwrap();
+        // let res: SurrealValue = obj_str.into();
+        match Object::to_value(t) {
             SurrealValue::Object(obj) => obj,
             _ => panic!("parse SurrealValue::Object failed"),
         }
+    }
+    pub fn to_value<T: Serialize>(t: &T) -> SurrealValue {
+        let obj_str: Value = serde_json::to_value(t).unwrap();
+        let res: SurrealValue = obj_str.into();
+        res
     }
 }
 
