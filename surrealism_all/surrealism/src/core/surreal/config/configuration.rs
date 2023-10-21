@@ -9,7 +9,6 @@
 
 use std::fmt::{Display, Formatter};
 use std::path::PathBuf;
-use std::time::Duration;
 use serde_json;
 use serde::{Deserialize, Serialize};
 use super::logger::LogLevel;

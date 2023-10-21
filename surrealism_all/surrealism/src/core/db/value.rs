@@ -37,13 +37,15 @@
 //! @version:0.0.1
 //! @description:
 //! ```
-
+//!
 use std::collections::{BTreeMap, HashMap};
 use std::fmt::{Display, Formatter};
+use num_traits::cast::FromPrimitive;
+use std::str::FromStr;
 use serde::{Serialize, Deserialize};
 use serde_json::Value;
 use surrealdb::sql::{Duration, Datetime};
-use crate::db::{Condition, Geometries, Decimal};
+use crate::db::{Condition, Geometries, Decimal,DurationAdapter};
 use crate::core::db::constants::{BLANK};
 use crate::util::{remove_format_half, handle_str};
 use super::constants::{NULL, NULL_DOWN, NONE_DOWN, NONE, LEFT_BRACE, RIGHT_BRACE, COMMA, ANY, BOOL, ARRAY, DATETIME, DURATION, NUMBER, INT, FLOAT, STRING, OBJECT, GEOMETRY, RECORD, DECIMAL};
@@ -81,11 +83,12 @@ pub enum SurrealValue {
 impl Display for SurrealValue {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
         let res = match self {
-            SurrealValue::None => format!("'{}'", NONE),
-            SurrealValue::Null => format!("'{}'", NULL),
+            SurrealValue::None => NONE.to_string(),
+            SurrealValue::Null => NULL.to_string(),
             SurrealValue::Bool(b) => b.to_string(),
             SurrealValue::Int(n) => n.to_string(),
             SurrealValue::Float(f) => f.to_string(),
+            SurrealValue::Decimal(d)=>d.to_string(),
             SurrealValue::String(s) => handle_str(serde_json::to_string(s).unwrap().as_str()),
             SurrealValue::Object(obj) => obj.parse(),
             SurrealValue::Array(arr) => arr.parse(),
@@ -105,17 +108,173 @@ impl SurrealValue {
     pub fn datetime() -> Self {
         SurrealValue::DateTime(Datetime::default())
     }
+    /// # build Duration (surreal::sql::Duration)
+    /// 通过调用该方法获取一个DurationAdapter帮助使用者间接构建Duration!👍
+    /// ## example
+    /// ```rust
+    /// use surrealism::DefaultRes;
+    /// use surrealism::db::{SurrealValue};
+    ///
+    /// // [tests\src\main.rs:11] dur_day.to_string() = "1d"
+    /// // [tests\src\main.rs:12] dur_weak.to_string() = "12w"
+    /// // [tests\src\main.rs:13] dur_min.to_string() = "20m"
+    /// #[tokio::main]
+    /// async fn main() -> DefaultRes<()> {
+    ///     let dur_day = SurrealValue::duration().from_days(1);
+    ///     let dur_weak = SurrealValue::duration().from_weeks(12);
+    ///     let dur_min  = SurrealValue::duration().from_mins(20);
+    ///     dbg!(dur_day.to_string());
+    ///     dbg!(dur_weak.to_string());
+    ///     dbg!(dur_min.to_string());
+    ///     Ok(())
+    /// }
+    /// ```
+    pub fn duration() -> DurationAdapter{
+        DurationAdapter
+    }
+    /// # build None
+    /// 值可以专门设置为NONE 在SurrealDB中从记录中删除字段
+    /// ## example
+    /// ```rust
+    /// use surrealism::DefaultRes;
+    /// use surrealism::db::{SurrealValue};
+    ///
+    /// // [tests\src\main.rs:10] none1.to_string() = "NONE"
+    /// // [tests\src\main.rs:11] none2.to_string() = "NONE"
+    /// // [tests\src\main.rs:12] none3.to_string() = "NONE"
+    /// #[tokio::main]
+    /// async fn main() -> DefaultRes<()> {
+    ///     let none1 = SurrealValue::none();
+    ///     let none2 = SurrealValue::from("None");
+    ///     let none3:SurrealValue = "NONE".into();
+    ///     dbg!(none1.to_string());
+    ///     dbg!(none2.to_string());
+    ///     dbg!(none3.to_string());
+    ///     Ok(())
+    /// }
+    /// ```
+    pub fn none()->Self{
+        SurrealValue::None
+    }
+    /// # build Null
+    /// 值可以专门设置为NULL 在SurrealDB中表示已设置但没有值的字段。
+    /// ## example
+    /// ```rust
+    /// use surrealism::DefaultRes;
+    /// use surrealism::db::{SurrealValue};
+    ///
+    /// // [tests\src\main.rs:12] null1.to_string() = "NULL"
+    /// // [tests\src\main.rs:13] null2.to_string() = "NULL"
+    /// // [tests\src\main.rs:14] null3.to_string() = "NULL"
+    /// #[tokio::main]
+    /// async fn main() -> DefaultRes<()> {
+    ///     let null1 = SurrealValue::null();
+    ///     let null2 = SurrealValue::from("Null");
+    ///     let null3:SurrealValue = "NULL".into();
+    ///     dbg!(null1.to_string());
+    ///     dbg!(null2.to_string());
+    ///     dbg!(null3.to_string());
+    ///     Ok(())
+    /// }
+    /// ```
+    pub fn null()->Self{SurrealValue::Null}
+    /// # build Bool
+    /// 布尔值可用于标记字段是否为true或false
+    /// ## example
+    /// ```rust
+    ///use surrealism::DefaultRes;
+    /// use surrealism::db::{SurrealValue};
+    ///
+    /// // [tests\src\main.rs:10] bool1.to_string() = "true"
+    /// // [tests\src\main.rs:11] bool2.to_string() = "false"
+    /// // [tests\src\main.rs:12] bool3.to_string() = "true"
+    /// #[tokio::main]
+    /// async fn main() -> DefaultRes<()> {
+    ///     let bool1 = SurrealValue::Bool(true);
+    ///     let bool2:SurrealValue = false.into();
+    ///     let bool3 = SurrealValue::bool(true);
+    ///     Ok(())
+    /// }
+    /// ```
+    pub fn bool(b:bool)->Self{
+        SurrealValue::Bool(b)
+    }
+    /// # build String
+    /// 字符串可用于存储文本值。所有文本字段都可以包含Unicode值、表情符号以及表格和多行分隔符。
+    /// 使用该方法不会涉及隐式转换，但若您希望使用一种省力的方式可以采用from方法或into方法，请注意from和into会涉及隐式转换
+    /// ## example
+    /// ```rust
+    /// use surrealism::DefaultRes;
+    /// use surrealism::db::{SurrealValue};
+    /// #[tokio::main]
+    /// async fn main() -> DefaultRes<()> {
+    ///     // 请注意使用string方法创建的只可能是字符串
+    ///     // 而是用from或from_json方法创建的可能会进行隐式转换
+    ///     let s1 = SurrealValue::string("Lorem ipsum dolor sit amet");
+    ///     let s2 = SurrealValue::from("I ❤️ SurrealDB");
+    ///     //这里则会隐式转换为Int
+    ///     let s3 =  SurrealValue::from("89");
+    ///     // 这里会隐式转换为Object
+    ///     let s4 = SurrealValue::from_json("{ \"address\": \"China - Shanghai\"}");
+    ///     Ok(())
+    /// }
+    /// ```
+    pub fn string(s:&str)->Self{
+        SurrealValue::String(String::from(s))
+    }
+    /// # build number int
+    /// ## example
+    /// ```rust
+    /// use surrealism::DefaultRes;
+    /// use surrealism::db::{SurrealValue};
+    ///
+    /// // [tests\src\main.rs:13] int_num1.to_string() = "2022"
+    /// // [tests\src\main.rs:14] int_num2.to_string() = "2023"
+    /// // [tests\src\main.rs:15] int_num3.to_string() = "2024"
+    /// // [tests\src\main.rs:16] float_num1.to_string() = "41.5"
+    /// // [tests\src\main.rs:17] float_num2.to_string() = "56.23"
+    /// // [tests\src\main.rs:18] decimal_num1.to_string() = "99.99dec"
+    /// // [tests\src\main.rs:19] decimal_num2.to_string() = "564.22dec"
+    /// #[tokio::main]
+    /// async fn main() -> DefaultRes<()> {
+    ///     let int_num1 = SurrealValue::Int(2022);
+    ///     let int_num2 = SurrealValue::int(2023);
+    ///     let int_num3:SurrealValue = 2024.into();
+    ///     let float_num1 = SurrealValue::float(41.5);
+    ///     let float_num2:SurrealValue = 56.23.into();
+    ///     let decimal_num1 = SurrealValue::decimal(99.99);
+    ///     let decimal_num2 = SurrealValue::decimal_str("564.22");
+    ///     Ok(())
+    /// }
+    ///```
+    pub fn int(num: i64) -> Self {
+        SurrealValue::Int(num)
+    }
+    /// # build number float
+    /// ## example
+    /// ```code
+    ///     let float_num1 = SurrealValue::float(41.5);
+    ///     let float_num2:SurrealValue = 56.23.into();
+    /// ```
+    pub fn float(num: f64) -> Self {
+        SurrealValue::Float(num)
+    }
+    /// # build number decimal
+    ///
+    /// recommend : decimal_str()
+    ///
+    /// 请注意decimal 无法使用into()进行推测
+    ///
+    /// decimal can not use into()
+    pub fn decimal(num: f64) -> Self {
+        SurrealValue::Decimal(Decimal::new(num.to_string().as_str()))
+    }
+    /// 更推荐创建decimal的方式
+    pub fn decimal_str(value: &str) -> Self {
+        SurrealValue::Decimal(Decimal::new(value))
+    }
     pub fn record(id: &str) -> Self {
         SurrealValue::Record(id.to_string())
-    }
-    pub fn number_int(num: i32) -> Self {
-        SurrealValue::from(num)
-    }
-    pub fn number_float(num: f32) -> Self {
-        SurrealValue::from(num)
-    }
-    pub fn number_decimal(num: f64) -> Self {
-        SurrealValue::from(num)
     }
     pub fn value_type(&self) -> ValueType {
         match self {
@@ -135,23 +294,20 @@ impl SurrealValue {
         }
     }
 
-
-    ///从json-str进行推测，转换为serde::Value再转为SurrealValue
+    /// # build from json str
+    ///从json-str进行推测，转换为serde::Value再转为SurrealValue，请注意该方法会涉及隐式转换
     /// ## example
     /// ```rust
+    /// use surrealism::DefaultRes;
     /// use surrealism::db::{SurrealValue};
-    /// let v = SurrealValue::from_str("{ \"address\": \"China - Shanghai\"}");
-    /// /*[tests\src\main.rs:41] v = Object(
-    ///     Object(
-    ///         {
-    ///             "address": Str(
-    ///                 "China - Shanghai",
-    ///             ),
-    ///         },
-    ///     ),
-    /// )*/
+    /// #[tokio::main]
+    /// async fn main() -> DefaultRes<()> {
+    ///     // 这里会隐式转换为Object
+    ///     let s = SurrealValue::from_json("{ \"address\": \"China - Shanghai\"}");
+    ///     Ok(())
+    /// }
     /// ```
-    pub fn from_str(value: &str) -> SurrealValue {
+    pub fn from_json(value: &str) -> SurrealValue {
         let value_str: Value = serde_json::from_str(value).unwrap();
         let res: SurrealValue = value_str.into();
         res
@@ -174,24 +330,24 @@ impl SurrealValue {
             _ => false
         }
     }
-    // pub fn is_int(&self) -> bool {
-    //     match self {
-    //         SurrealValue::Number(n) => n.is_int(),
-    //         _ => false
-    //     }
-    // }
-    // pub fn is_float(&self) -> bool {
-    //     match self {
-    //         SurrealValue::Number(n) => n.is_float(),
-    //         _ => false
-    //     }
-    // }
-    // pub fn is_decimal(&self) -> bool {
-    //     match self {
-    //         SurrealValue::Number(n) => n.is_decimal(),
-    //         _ => false
-    //     }
-    // }
+    pub fn is_int(&self) -> bool {
+        match self {
+            SurrealValue::Int(_) => true,
+            _ => false
+        }
+    }
+    pub fn is_float(&self) -> bool {
+        match self {
+            SurrealValue::Float(_) => true,
+            _ => false
+        }
+    }
+    pub fn is_decimal(&self) -> bool {
+        match self {
+            SurrealValue::Decimal(_) => true,
+            _ => false
+        }
+    }
     pub fn is_str(&self) -> bool {
         match self {
             SurrealValue::String(_) => true,
@@ -269,15 +425,29 @@ impl From<Geometries> for SurrealValue {
 
 impl From<&str> for SurrealValue {
     fn from(value: &str) -> Self {
-        match value {
-            NONE => SurrealValue::None,
-            NONE_DOWN => SurrealValue::None,
-            NULL => SurrealValue::Null,
-            NULL_DOWN => SurrealValue::Null,
-            _ => SurrealValue::String(String::from(value))
+        // 优先转化为Float
+        // 考虑转化后再次尝试转化为Int
+        match value.clone().parse::<f64>() {
+            Ok(f) => {
+                if f.fract()==0.0 {
+                    if let Some(i) = i64::from_f64(f) {
+                        return SurrealValue::Int(i);
+                    }
+                }
+                return SurrealValue::Float(f);
+            }
+            Err(_) => {
+                //无法转换的情况
+                match value.to_lowercase().as_str() {
+                    NONE_DOWN => SurrealValue::None,
+                    NULL_DOWN => SurrealValue::Null,
+                    _ => SurrealValue::String(String::from(value))
+                }
+            }
         }
     }
 }
+
 
 impl From<bool> for SurrealValue {
     fn from(value: bool) -> Self {
@@ -285,11 +455,6 @@ impl From<bool> for SurrealValue {
     }
 }
 
-// impl From<Number> for SurrealValue {
-//     fn from(value: Number) -> Self {
-//         SurrealValue::Number(value)
-//     }
-// }
 
 impl From<i64> for SurrealValue {
     fn from(value: i64) -> Self {

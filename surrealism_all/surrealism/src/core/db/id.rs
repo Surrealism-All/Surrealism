@@ -1,11 +1,23 @@
+//! # SurrealID
+//! 用于构建一个surrealdb的表的ID或字段的ID，实际上主要是用来创建表的ID
+//! ```txt
+//! @author:syf20020816@Outlook.com
+//! @date:2023/10/21
+//! @version:0.3.0
+//! @description:
+//! ```
+
 use std::fmt::{Display, Formatter};
 use serde::{Serialize, Deserialize};
-
 use super::constants::{UUID, ULID, RAND, EQ};
 use super::{SurrealValue, Object, Array, ParamCombine};
 
 /// # ID的枚举类型
-/// 通过SurrealID快速生成一个含有类型的ID
+/// 通过SurrealID快速生成一个含有类型的表ID或字段ID
+/// 需要注意的时实际上字段并没有相关rand,uuid,ulid方法，若需要使用这些方法可以采用外嵌包方式
+/// - 使用在表上：`table_name:table_id`
+/// - 使用在字段上 : `User{ userId : rand_id}`
+///
 /// ## example
 /// ``` rust
 /// use surrealism::DefaultRes;
@@ -125,6 +137,7 @@ impl From<f64> for SurrealID {
 impl From<&str> for SurrealID {
     fn from(value: &str) -> Self {
         match value {
+            "" => SurrealID::Default,
             RAND => SurrealID::RAND,
             UUID => SurrealID::UUID,
             ULID => SurrealID::ULID,
@@ -135,12 +148,7 @@ impl From<&str> for SurrealID {
 
 impl From<String> for SurrealID {
     fn from(value: String) -> Self {
-        match value.as_str() {
-            RAND => SurrealID::RAND,
-            UUID => SurrealID::UUID,
-            ULID => SurrealID::ULID,
-            other => SurrealID::String(String::from(other))
-        }
+        SurrealID::from(value.as_str())
     }
 }
 
@@ -162,12 +170,27 @@ impl From<Range> for SurrealID {
     }
 }
 
-/// # Id type range
+
+/// # Range
+/// 这是一种SurrealDB的ID类型，范围类型
 /// ## example
 /// ```rust
-/// use surrealism::db::{Range,SurrealValue};
-///     let range1 = Range::new(SurrealValue::Int(1), SurrealValue::Int(32), true).to_string();
-///     let range2 = Range::new_from_str("2", "23", false).to_string();
+/// use surrealism::DefaultRes;
+/// use surrealism::db::{Range};
+///
+/// //[tests\src\main.rs:10] range1.to_string() = "2..=8"
+/// // [tests\src\main.rs:11] range2.to_string() = "2.7..5.6"
+/// // [tests\src\main.rs:12] range3.to_string() = "4..89.5"
+/// #[tokio::main]
+/// async fn main() -> DefaultRes<()> {
+///     let range1 = Range::new(2.into(),8.into(),true);
+///     let range2 = Range::new(2.7.into(),5.6.into(),false);
+///     let range3  = Range::new_from_str("4","89.5",false);
+///     dbg!(range1.to_string());
+///     dbg!(range2.to_string());
+///     dbg!(range3.to_string());
+///     Ok(())
+/// }
 /// ```
 #[derive(Serialize, Deserialize, Debug, Clone, PartialEq)]
 pub struct Range {

@@ -16,7 +16,7 @@ use futures::executor::block_on;
 use surrealdb::method::{Health, Version};
 use async_trait::async_trait;
 use crate::surreal::SurrealismConfig;
-use crate::db::functions::{CryptoFunc, GenerateCompare};
+// use crate::db::functions::{CryptoFunc, GenerateCompare};
 
 #[async_trait]
 pub trait UseNSDB {

@@ -12,6 +12,7 @@ mod field;
 mod order;
 mod geo;
 pub mod functions;
+mod duration_adapter;
 
 pub use sql::*;
 pub use value::*;
@@ -25,6 +26,7 @@ pub use order::Order;
 pub use field::Field;
 pub use geo::*;
 pub use decimal::Decimal;
+pub use duration_adapter::DurationAdapter;
 
 
 /// # param combine trait

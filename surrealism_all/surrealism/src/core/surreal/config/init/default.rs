@@ -19,10 +19,10 @@ use std::process::exit;
 use log::{error, info};
 use log::LevelFilter::{Warn, Debug, Info, Trace};
 use simple_logger::SimpleLogger;
-use except_plugin::{EasyException, SuperBuilderImpl, Exception};
+use except_plugin::{EasyException, Exception};
 use futures::executor::block_on;
 use crate::core::constant::{BANNER};
-use crate::info::{INIT_CONFIG, INIT_LOGGER};
+use crate::info::{INIT_CONFIG};
 use crate::surreal::SurrealismConnector;
 use crate::{err_panic};
 use crate::surreal::config::{DefaultConfigurationService,ConfigurationService,LogLevel};
@@ -49,21 +49,6 @@ impl InitService for DefaultInitService {
         }
         info!("{}", "Welcome to use Surrealism!");
     }
-
-    // fn init_log_service(&mut self) -> () {
-    //     let config_service = self.config_service.clone();
-    //     match config_service.get_logger() {
-    //         Ok(logger) => {
-    //             self.log_service = SurrealLogger::from(logger);
-    //         }
-    //         Err(e) => {
-    //             let e_code = e.code() as i32;
-    //             err_panic!(e.description(),e_code);
-    //         }
-    //     }
-    //     // self.log_service.from()
-    //     info!("{}",INIT_LOGGER);
-    // }
 
     fn init_config_service(&mut self) -> Result<(), EasyException> {
         self.config_service.init()
