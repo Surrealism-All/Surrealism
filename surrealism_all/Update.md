@@ -53,7 +53,26 @@
     <input type="checkbox" checked disabled />  <strong>数学常数支持</strong> <br />
 </form>
 
+## Builder
 
+<form>
+    <input type="checkbox" checked disabled />  <strong>USE STMT</strong> <br />
+    <input type="checkbox" checked disabled />  <strong>CREATE STMT</strong> <br />
+    <input type="checkbox" checked disabled />  <strong>SELECT STMT</strong> <br />
+    <input type="checkbox" checked disabled />  <strong>RELATE STMT</strong> <br />
+    <input type="checkbox" checked disabled />  <strong>UPDATE STMT</strong> <br />
+    <input type="checkbox" checked disabled />  <strong>INSERT STMT</strong> <br />
+    <input type="checkbox" checked disabled />  <strong>DELETE STMT</strong> <br />
+    <input type="checkbox" checked disabled />  <strong>INFO STMT</strong> <br />
+    <input type="checkbox" checked disabled />  <strong>TRANSACTION STMT</strong> <br />
+    <input type="checkbox" checked disabled />  <strong>DEFINE STMT</strong> <br />
+    <input type="checkbox" checked disabled />  <strong>REMOVE STMT</strong> <br />
+</form>
 
+## Row
 
+<form>
+    <input type="checkbox" checked disabled />  <strong>RowSql的支持</strong> <br />
+    <input type="checkbox" checked disabled/>  <strong>row_sql!宏</strong> <br />
+</form>
 

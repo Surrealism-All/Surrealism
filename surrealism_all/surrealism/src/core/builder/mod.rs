@@ -5,6 +5,7 @@
 //! @version:0.0.1
 //! @description:
 //! ```
+pub mod s_use;
 pub mod select;
 pub mod update;
 pub mod insert;
@@ -18,7 +19,6 @@ pub mod remove;
 mod macros;
 
 
-
 use self::insert::{InsertWrapper};
 use self::transaction::Transaction;
 use self::relate::{RelateWrapper};
@@ -27,9 +27,10 @@ use self::select::{SelectWrapper};
 use self::info::InfoWrapper;
 use self::remove::RemoveWrapper;
 use self::define::*;
+use self::s_use::UseWrapper;
 use self::update::{UpdateWrapper};
 use self::create::{CreateWrapper};
-use crate::db::{ReturnType, TimeOut, SurrealID, TimeUnit,Condition};
+use crate::db::{ReturnType, TimeOut, SurrealID, TimeUnit, Condition};
 
 /// SQLBuilderFactory for Surrealism
 /// - CreateWrapper
@@ -40,6 +41,9 @@ use crate::db::{ReturnType, TimeOut, SurrealID, TimeUnit,Condition};
 pub struct SQLBuilderFactory;
 
 impl SQLBuilderFactory {
+    pub fn use_stmt<'w>() -> UseWrapper<'w> {
+        UseWrapper::new()
+    }
     pub fn create() -> CreateWrapper {
         CreateWrapper::new()
     }
