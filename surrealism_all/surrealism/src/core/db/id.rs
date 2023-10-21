@@ -80,6 +80,19 @@ pub enum SurrealID {
     Range(Range),
 }
 
+impl SurrealID {
+    pub fn default()->Self{SurrealID::Default}
+    pub fn int(num:i64)->Self{SurrealID::Int(num)}
+    pub fn float(num:f64)->Self{SurrealID::Float(num)}
+    pub fn string(s:&str)->Self{SurrealID::String(s.to_string())}
+    pub fn uuid()->Self{SurrealID::UUID}
+    pub fn ulid()->Self{SurrealID::ULID}
+    pub fn rand()->Self{SurrealID::RAND}
+    pub fn array(arr:Array)->Self{SurrealID::Array(arr)}
+    pub fn object(obj:Object)->Self{SurrealID::Object(obj)}
+    pub fn range(range:Range)->Self{SurrealID::Range(range)}
+}
+
 impl Default for SurrealID {
     fn default() -> Self {
         SurrealID::Default

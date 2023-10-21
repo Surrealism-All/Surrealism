@@ -104,10 +104,55 @@ impl Display for SurrealValue {
 }
 
 impl SurrealValue {
-    /// get datetime , GMT 0
+    /// # build Geo
+    /// SurrealDB使使用GeoJSON变得简单，支持Point、Line、Polygon、MultiPoint、MultiLine、MultiPolygon、Collection
+    ///
+    /// 在Surrealism中会进行第一道检测，但若遇到大量数据请使用后缀为unchecked方法
+    ///
+    /// SurrealQL自动检测GeoJSON对象，将其转换为单一数据类型。
+    /// ## example
+    /// ```rust
+    /// use surrealism::DefaultRes;
+    /// use surrealism::db::{Geometries, AdapterToValue, Point, SurrealValue};
+    /// #[tokio::main]
+    /// async fn main() -> DefaultRes<()> {
+    ///     let geo_point = SurrealValue::geo().point(12.0, 16.6).to_value();
+    ///     let geo_line = SurrealValue::geo()
+    ///         .line(vec![Point::new(10.0, 11.2), Point::from((11.0, 11.2))])
+    ///         .unwrap();
+    ///     let geo_polygon = SurrealValue::geo()
+    ///         .polygon(vec![Point::new(10.0, 11.2), Point::from((11.0, 11.2)), Point::new(10.0, 11.2)])
+    ///         .unwrap()
+    ///         .to_value();
+    ///     let geo_multi_points = SurrealValue::geo()
+    ///         .multi_point(vec![Point::new(10.0, 11.2), Point::from((11.0, 11.2))])
+    ///         .to_value();
+    ///     let geo_multi_line = SurrealValue::geo().multi_line(
+    ///         vec![
+    ///             vec![Point::from((10.0, 11.2)), Point::from((10.5, 11.9))],
+    ///             vec![Point::from((11.0, 12.2)), Point::from((11.5, 12.9)), Point::from((12.0, 13.0))],
+    ///         ]
+    ///     ).unwrap();
+    ///     let geo_multi_polygon = SurrealValue::geo().multi_polygon(
+    ///         vec![
+    ///             vec![Point::from((9.0, 11.2)), Point::from((10.5, 11.9)), Point::from((10.3, 13.0)), Point::from((9.0, 11.2))],
+    ///             vec![Point::from((10.0, 11.2)), Point::from((10.5, 11.9)), Point::from((10.8, 12.0)), Point::from((10.0, 11.2))],
+    ///         ]
+    ///     ).unwrap().to_value();
+    ///     let collection = SurrealValue::geo().collections(
+    ///         vec![geo_line.clone(),geo_multi_line.clone()]
+    ///     ).to_value();
+    ///     Ok(())
+    /// }
+    /// ```
+    pub fn geo()->Geometries{
+        Geometries::Default
+    }
+    /// # build Datetime , GMT 0
     /// format just like : `2023-09-10T23:13:23.520847500Z`
     /// ## example
     /// use this way you will get SurrealValue::DateTime()
+    ///
     /// `let datetime = SurrealValue::datetime().default().to_value();`
     pub fn datetime() -> DatetimeAdapter {
         DatetimeAdapter
@@ -350,6 +395,37 @@ impl SurrealValue {
     /// ```
     pub fn object<T>(obj: &T) -> Self where T: Serialize {
         Object::to_value(obj)
+    }
+    /// # build Array
+    /// SurrealDB中的记录可以存储值的数组，对数组的深度没有限制。
+    /// 数组可以存储其中存储的任何值，并且可以在同一数组中存储不同的值类型。
+    /// > 采用surrealism::db::Array;可以创建更加灵活的构建方式！
+    /// ## example
+    /// ```rust
+    /// use surrealism::DefaultRes;
+    /// use surrealism::db::{SurrealValue, Object, AdapterToValue};
+    /// use serde::{Serialize, Deserialize};
+    ///
+    /// #[derive(Debug, Clone, Serialize, Deserialize)]
+    /// struct User<'a> {
+    ///     name: &'a str,
+    ///     age: u8,
+    /// }
+    ///
+    /// #[tokio::main]
+    /// async fn main() -> DefaultRes<()> {
+    ///     let arr1 = SurrealValue::array(vec![2,3,5,6]);
+    ///     let arr2 = SurrealValue::array(
+    ///         vec![
+    ///             User{name:"John",age:1},
+    ///             User{name:"Matt",age:13},
+    ///         ]
+    ///     );
+    ///     Ok(())
+    /// }
+    /// ```
+    pub fn array<T>(arr: Vec<T>) -> Self where T: Serialize{
+        SurrealValue::Array(Array::from(SurrealValue::from_vec(arr)))
     }
     pub fn is_none(&self) -> bool {
         match self {

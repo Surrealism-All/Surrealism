@@ -1,4 +1,7 @@
+use std::fmt::{Display, Formatter};
 use serde::{Serialize, Deserialize};
+use crate::core::db::SurrealValue;
+use super::AdapterToValue;
 
 /// # Geometries
 /// - Point 	A geolocation point with latitude and longitude
@@ -10,6 +13,7 @@ use serde::{Serialize, Deserialize};
 /// - Collection 	A value which contains multiple different geometry types
 #[derive(Debug, Serialize, Deserialize, Clone, PartialEq)]
 pub enum Geometries {
+    Default,
     Point(Point),
     Line(Vec<Point>),
     Polygon(Vec<Point>),
@@ -20,11 +24,78 @@ pub enum Geometries {
 }
 
 impl Geometries {
-    pub fn to_string(&self) -> String {
+    pub fn point(&self, x: f32, y: f32) -> Self {
+        Point::new(x, y).to_geo()
+    }
+    pub fn line(&self, points: Vec<Point>) -> Result<Geometries, &'static str> {
+        //check pointer
+        if check_points(&points) {
+            return Err("first point == end point is not a line!");
+        }
+        Ok(Geometries::Line(points))
+    }
+    pub fn line_unchecked(&self, points: Vec<Point>) -> Self {
+        Geometries::Line(points)
+    }
+    pub fn polygon(&self, points: Vec<Point>) -> Result<Geometries, &'static str> {
+        if check_points(&points) {
+            return Ok(Geometries::Polygon(points));
+        }
+        Err("first point != end point is not a polygon!")
+    }
+    pub fn polygon_unchecked(&self, points: Vec<Point>) -> Self {
+        Geometries::Polygon(points)
+    }
+    pub fn multi_point(&self, points: Vec<Point>) -> Self {
+        Geometries::MultiPoint(points)
+    }
+    pub fn multi_line(&self, points_list: Vec<Vec<Point>>) -> Result<Geometries, &'static str> {
+        for points in &points_list {
+            if check_points(points) {
+                return Err(
+                    "first point == end point is not a line!"
+                );
+            }
+        }
+        Ok(Geometries::MultiLine(points_list))
+    }
+    pub fn multi_line_unchecked(&self, points_list: Vec<Vec<Point>>) -> Self {
+        Geometries::MultiLine(points_list)
+    }
+    pub fn multi_polygon(&self, points_list: Vec<Vec<Point>>) -> Result<Geometries, &'static str> {
+        for points in &points_list {
+            if check_points(points) == false {
+                return Err(
+                    "first point != end point is not a polygon!"
+                );
+            }
+        }
+        Ok(Geometries::MultiPolygon(points_list))
+    }
+    pub fn multi_polygon_unchecked(&self, points_list: Vec<Vec<Point>>) -> Self {
+        Geometries::MultiPolygon(points_list)
+    }
+    pub fn collections(&self, collections: Vec<Geometries>) -> Self {
+        Geometries::Collection(collections)
+    }
+}
+
+impl AdapterToValue for Geometries {
+    fn to_value(self) -> SurrealValue {
+        SurrealValue::Geometries(self)
+    }
+}
+
+
+impl Display for Geometries {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
         let mut json_type = "";
         let mut json = String::new();
         let mut json_data = "coordinates";
         match self {
+            Geometries::Default => {
+                panic!("Geometries::Default is not supported!");
+            }
             Geometries::Point(point) => {
                 json_type = "\"Point\"";
                 json = point.parse();
@@ -60,7 +131,7 @@ impl Geometries {
                 json = format!("[{}]", collection.iter().map(|geo| geo.to_string()).collect::<Vec<String>>().join(", "));
             }
         }
-        format!("{} type:{}, {}:{} {}", "{", json_type, json_data, json, "}")
+        write!(f, "{} type:{}, {}:{} {}", "{", json_type, json_data, json, "}")
     }
 }
 
@@ -85,6 +156,15 @@ impl Point {
     pub fn parse(&self) -> String {
         format!("[{}, {}]", self.x, self.y)
     }
+    pub fn to_geo(self) -> Geometries {
+        Geometries::Point(self)
+    }
+}
+
+impl Display for Point {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        write!(f, "[{}, {}]", self.x, self.y)
+    }
 }
 
 impl From<(f32, f32)> for Point {
@@ -103,4 +183,13 @@ impl From<[f32; 2]> for Point {
             y: value[1],
         }
     }
+}
+
+/// Check whether points have same point
+fn check_points(points: &Vec<Point>) -> bool {
+    return if &points[0] == &points[points.len() - 1] {
+        true
+    } else {
+        false
+    };
 }
