@@ -8,7 +8,7 @@
 use std::fmt::{Display, Formatter};
 use serde::{Serialize, Deserialize};
 use crate::db::{SurrealValue,ParamCombine};
-use super::constants::{EQ, LT, GT, GTE, LTE, LINK, NEQ, WHERE, AND, OR};
+use super::constants::{EQ, LT, GT, GTE, LTE, LINK, NEQ, WHERE, AND, OR,CONTAINS};
 
 /// where condition for statment
 /// ## example
@@ -268,6 +268,7 @@ pub enum CriteriaSign {
     Lte,
     Gte,
     Link,
+    Contains,
     Cheat(String),
 }
 
@@ -299,7 +300,8 @@ impl CriteriaSign {
             CriteriaSign::Lte => LTE,
             CriteriaSign::Gte => GTE,
             CriteriaSign::Link => LINK,
-            CriteriaSign::Cheat(value) => value.as_str()
+            CriteriaSign::Cheat(value) => value.as_str(),
+            CriteriaSign::Contains => CONTAINS
         }
     }
 }
@@ -314,6 +316,7 @@ impl From<&str> for CriteriaSign {
             GTE => CriteriaSign::Gte,
             NEQ => CriteriaSign::Neq,
             LINK => CriteriaSign::Link,
+            CONTAINS => CriteriaSign::Contains,
             _ => CriteriaSign::Cheat(String::from(value))
         }
     }

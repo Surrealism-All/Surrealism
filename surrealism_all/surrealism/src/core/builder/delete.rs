@@ -25,20 +25,29 @@ pub trait DeleteWrapperImpl: BaseWrapperImpl + TableImpl + ReturnImpl + TimeoutI
 /// # DeleteWrapper
 /// ## example
 /// ```rust
-/// use surrealism::db::{ SurrealID, ConditionSign, Condition, Criteria, CriteriaSign};
-/// use surrealism::builder::*;
-/// use surrealism::builder::delete::DeleteWrapperImpl;
-/// use surrealism::surreal::SurrealismRes;
+/// use surrealism::builder::s_use::UseWrapperImpl;
+/// use surrealism::DefaultRes;
+/// use surrealism::builder::{BaseWrapperImpl, ConditionImpl, SQLBuilderFactory, TableImpl};
+/// use surrealism::db::{Condition, ConditionSign, Criteria, CriteriaSign, Operator, SurrealID};
+/// use surrealism::builder::insert::InsertWrapperImpl;
 ///
+/// // [tests\src\main.rs:23] delete1 = "DELETE person:100;"
+/// // [tests\src\main.rs:24] delete2 = "DELETE city:USA WHERE name CONTAINS 'Los Angeles';"
 /// #[tokio::main]
-/// async fn main() -> SurrealismRes<()> {
-///     // DELETE city:USA WHERE name = 'Los Angeles';
-///     let mut delete1 = SQLBuilderFactory::delete()
+/// async fn main() -> DefaultRes<()> {
+///     let delete1 = SQLBuilderFactory::delete()
+///         .table("person")
+///         .id(100.into())
+///         .build();
+///     let mut delete2 = SQLBuilderFactory::delete()
 ///         .table("city")
 ///         .id(SurrealID::from("USA"))
-///         .where_condition(Condition::new().push(Criteria::new("name","Los Angeles",CriteriaSign::Eq),ConditionSign::None).deref_mut())
-///         .deref_mut();
-///     dbg!(delete1.build());
+///         .where_condition(
+///             Condition::new().push(
+///                 Criteria::new("name", "Los Angeles", CriteriaSign::Contains), ConditionSign::None,
+///             ).deref_mut()
+///         )
+///         .build();
 ///     Ok(())
 /// }
 /// ```

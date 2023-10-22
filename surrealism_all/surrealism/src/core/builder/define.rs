@@ -8,7 +8,7 @@
 //!
 
 use std::fmt::{Display, Formatter};
-use crate::core::db::constants::{NAMESPACE, DATABASE, PASSHASH, PASSWORD, DEFINE_DB, DEFINE_NS, DEFINE_LOGIN, DEFINE_SCOPE, STMT_END, ON, TYPE, SCOPE, PS256, PS384, PS512, EDDSA, ES256, ES384, ES512, HS256, HS384, HS512, RS256, RS384, RS512, VALUE, DEFINE_TOKEN, SCHEMA_FULL, SCHEMA_LESS, SIGN_IN, SIGN_UP, DROP, DEFINE_TABLE, BLANK, NONE, FULL, FOR, DEFINE_EVENT, ON_TABLE, WHEN, THEN, DEFINE_FUNCTION, RETURN, DEFINE_FIELD, FIELDS, COLUMNS, DEFINE_INDEX, UNIQUE, DEFINE_PARAM};
+use crate::core::db::constants::{NAMESPACE, DATABASE, PASSHASH, PASSWORD, ROOT, TABLE, DEFINE_DB, DEFINE_NS, DEFINE_LOGIN, DEFINE_SCOPE, STMT_END, ON, TYPE, SCOPE, PS256, PS384, PS512, EDDSA, ES256, ES384, ES512, HS256, HS384, HS512, RS256, RS384, RS512, VALUE, DEFINE_TOKEN, SCHEMA_FULL, SCHEMA_LESS, SIGN_IN, SIGN_UP, DROP, DEFINE_TABLE, BLANK, NONE, FULL, FOR, DEFINE_EVENT, ON_TABLE, WHEN, THEN, DEFINE_FUNCTION, RETURN, DEFINE_FIELD, FIELDS, COLUMNS, DEFINE_INDEX, UNIQUE, DEFINE_PARAM};
 use crate::core::db::{Condition, ParamCombine, SurrealValue, TimeOut, ValueConstructor};
 
 /// # DefineWrapper
@@ -332,6 +332,8 @@ impl<'w> DefineWrapper<'w> {
 pub enum OnType<'o> {
     DB,
     NS,
+    ROOT,
+    TABLE(&'o str),
     SCOPE(&'o str),
 }
 
@@ -340,6 +342,8 @@ impl<'o> Display for OnType<'o> {
         let res = match self {
             OnType::DB => DATABASE.to_string(),
             OnType::NS => NAMESPACE.to_string(),
+            OnType::ROOT => ROOT.to_string(),
+            OnType::TABLE(table) => format!("{} {}", TABLE, table),
             OnType::SCOPE(scope) => format!("{} {}", SCOPE, scope)
         };
         write!(f, "{}", res)
@@ -350,6 +354,30 @@ impl<'o> OnType<'o> {
     pub fn is_scope(&self) -> bool {
         match self {
             OnType::SCOPE(_) => true,
+            _ => false
+        }
+    }
+    pub fn is_ns(&self) -> bool {
+        match self {
+            OnType::NS => true,
+            _ => false
+        }
+    }
+    pub fn is_db(&self) -> bool {
+        match self {
+            OnType::DB => true,
+            _ => false
+        }
+    }
+    pub fn is_root(&self) -> bool {
+        match self {
+            OnType::ROOT => true,
+            _ => false
+        }
+    }
+    pub fn is_table(&self) -> bool {
+        match self {
+            OnType::TABLE(_) => true,
             _ => false
         }
     }

@@ -3,6 +3,7 @@
 //! REMOVE [
 //! NAMESPACE @name
 //! | DATABASE @name
+//! | USER @name ON [ ROOT | NAMESPACE | DATABASE ]
 //! | LOGIN @name ON [ NAMESPACE | DATABASE ]
 //! | TOKEN @name ON [ NAMESPACE | DATABASE ]
 //! | SCOPE @name
@@ -22,7 +23,7 @@
 //! ```
 
 use crate::core::builder::define::OnType;
-use crate::core::db::constants::{REMOVE_INDEX, REMOVE_PARAM, ON, ON_TABLE, REMOVE_DB, REMOVE_EVENT, REMOVE_FIELD, REMOVE_FN, REMOVE_LOGIN, REMOVE_NS, REMOVE_SCOPE, REMOVE_TABLE, REMOVE_TOKEN, STMT_END};
+use crate::core::db::constants::{REMOVE_USER,REMOVE_INDEX, REMOVE_PARAM, ON, ON_TABLE, REMOVE_DB, REMOVE_EVENT, REMOVE_FIELD, REMOVE_FN, REMOVE_LOGIN, REMOVE_NS, REMOVE_SCOPE, REMOVE_TABLE, REMOVE_TOKEN, STMT_END};
 
 /// # RemoveWrapper
 /// 考虑是否可以将其和DefineWrapper产生关联进行合并？
@@ -44,6 +45,7 @@ use crate::core::db::constants::{REMOVE_INDEX, REMOVE_PARAM, ON, ON_TABLE, REMOV
 /// // [tests\src\main.rs:26] remove9 = "REMOVE FIELD tags ON TABLE article;"
 /// // [tests\src\main.rs:27] remove10 = "REMOVE INDEX authors ON TABLE article;"
 /// // [tests\src\main.rs:28] remove11 = "REMOVE PARAM $author;"
+/// // [tests\src\main.rs:33] remove12 = "REMOVE USER Matt ON ROOT;"
 /// #[tokio::main]
 /// async fn main() -> SurrealismRes<()> {
 ///     let remove1 = SQLBuilderFactory::remove().ns("surrealdb").build();
@@ -57,6 +59,7 @@ use crate::core::db::constants::{REMOVE_INDEX, REMOVE_PARAM, ON, ON_TABLE, REMOV
 ///     let remove9 = SQLBuilderFactory::remove().field("tags", "article").build();
 ///     let remove10 = SQLBuilderFactory::remove().index("authors", "article").build();
 ///     let remove11 = SQLBuilderFactory::remove().param("author").build();
+///     let remove12 = SQLBuilderFactory::remove().user("Matt",OnType::ROOT).build();
 ///     Ok(())
 /// }
 /// ```
@@ -64,6 +67,10 @@ use crate::core::db::constants::{REMOVE_INDEX, REMOVE_PARAM, ON, ON_TABLE, REMOV
 pub enum RemoveWrapper<'w> {
     NONE,
     NAMESPACE(&'w str),
+    USER{
+        name: &'w str,
+        on: OnType<'w>,
+    },
     DATABASE(&'w str),
     LOGIN {
         name: &'w str,
@@ -102,23 +109,47 @@ impl<'w> RemoveWrapper<'w> {
     pub fn db(&self, db: &'w str) -> Self {
         RemoveWrapper::DATABASE(db)
     }
+    pub fn user(&self,name: &'w str, on: OnType<'w>)->Self{
+        if on.is_scope() {
+            panic!("cannot remove scope");
+        }else if on.is_table() {
+            panic!("cannot remove table");
+        }else{
+            RemoveWrapper::USER {
+                name,
+                on
+            }
+        }
+
+    }
     pub fn login(&self, name: &'w str, on: OnType<'w>) -> Self {
         if on.is_scope() {
             panic!("cannot remove scope");
-        }
-        RemoveWrapper::LOGIN {
-            name,
-            on: OnType::DB,
+        }else if on.is_table() {
+            panic!("cannot remove table");
+        }else if on.is_root() {
+            panic!("cannot remove root");
+        }else{
+            RemoveWrapper::LOGIN {
+                name,
+                on,
+            }
         }
     }
     pub fn token(&self, name: &'w str, on: OnType<'w>) -> Self {
         if on.is_scope() {
             panic!("cannot remove scope");
+        }else if on.is_table() {
+            panic!("cannot remove table");
+        }else if on.is_root() {
+            panic!("cannot remove root");
+        }else{
+            RemoveWrapper::TOKEN {
+                name,
+                on,
+            }
         }
-        RemoveWrapper::TOKEN {
-            name,
-            on,
-        }
+
     }
     pub fn scope(&self, scope: &'w str) -> Self {
         RemoveWrapper::SCOPE(scope)
@@ -155,6 +186,7 @@ impl<'w> RemoveWrapper<'w> {
             RemoveWrapper::NONE => panic!("can not remove none from Surrealdb"),
             RemoveWrapper::NAMESPACE(ns) => format!("{} {}{}", REMOVE_NS, ns, STMT_END),
             RemoveWrapper::DATABASE(db) => format!("{} {}{}", REMOVE_DB, db, STMT_END),
+            RemoveWrapper::USER {name,on}=>format!("{} {} {} {}{}",REMOVE_USER,name,ON,on.to_string(),STMT_END),
             RemoveWrapper::LOGIN { name, on } => format!("{} {} {} {}{}", REMOVE_LOGIN, name, ON, on.to_string(), STMT_END),
             RemoveWrapper::TOKEN { name, on } => format!("{} {} {} {}{}", REMOVE_TOKEN, name, ON, on.to_string(), STMT_END),
             RemoveWrapper::SCOPE(scope) => format!("{} {}{}", REMOVE_SCOPE, scope, STMT_END),

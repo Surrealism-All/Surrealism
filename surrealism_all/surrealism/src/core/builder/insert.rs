@@ -16,7 +16,7 @@
 
 use std::collections::{BTreeMap};
 use serde::Serialize;
-use crate::db::{Table, Criteria, SurrealValue, Object, SurrealID,  ParamCombine, Set, Operator, InsertStrategy};
+use crate::db::{Table, Criteria, SurrealValue, Object, SurrealID, ParamCombine, Set, Operator, InsertStrategy};
 use super::{BaseWrapperImpl, TableImpl};
 use crate::db::constants::{STMT_END, INSERT_UPDATE, INSERT, BLANK, VALUES, INTO};
 use crate::table_impl;
@@ -25,6 +25,8 @@ pub trait InsertWrapperImpl: BaseWrapperImpl + TableImpl {
     fn add_set<T>(&mut self, field: &str, value: T) -> &mut Self where T: Serialize;
     fn add_content<T>(&mut self, obj: &T) -> &mut Self where T: Serialize;
     fn add_stmt(&mut self, stmt: &str) -> &mut Self;
+    fn upsert(&mut self, column: &str, value: SurrealValue, sign: Operator) -> &mut Self;
+    fn upsert_set(&mut self, set: Set) -> &mut Self;
 }
 
 /// # InsertWrapper
@@ -91,7 +93,8 @@ pub trait InsertWrapperImpl: BaseWrapperImpl + TableImpl {
 pub struct InsertWrapper {
     table: Table,
     values: Option<InsertStrategy>,
-    update: Option<Criteria>,
+    // ON DUPLICATE KEY UPDATE 子句
+    upsert: Option<Vec<Set>>,
 }
 
 impl BaseWrapperImpl for InsertWrapper {
@@ -99,7 +102,7 @@ impl BaseWrapperImpl for InsertWrapper {
         InsertWrapper {
             table: Table::default(),
             values: None,
-            update: None,
+            upsert: None,
         }
     }
 
@@ -107,7 +110,7 @@ impl BaseWrapperImpl for InsertWrapper {
         InsertWrapper {
             table: self.table.clone(),
             values: self.values.clone(),
-            update: self.update.clone(),
+            upsert: self.upsert.clone(),
         }
     }
 
@@ -174,9 +177,11 @@ impl BaseWrapperImpl for InsertWrapper {
                 // InsertStrategy::Stmt(s) => res.push_str(s.as_str())
             }
         }
-        if self.update.is_some() {
+        if self.upsert.is_some() {
             res.push_str(BLANK);
-            res.push_str(format!("{} {}", INSERT_UPDATE, &self.update.as_ref().unwrap().combine()).as_str());
+            let uop = self.upsert.as_ref().unwrap().iter().map(|set| set.combine()).collect::<Vec<String>>().join(" , ");
+            dbg!(&uop);
+            res.push_str(format!("{} {}", INSERT_UPDATE, uop).as_str());
         }
         res.push_str(STMT_END);
         res
@@ -215,6 +220,49 @@ impl InsertWrapperImpl for InsertWrapper {
             }
         };
         self
+    }
+    fn upsert_set(&mut self, set: Set) -> &mut Self {
+        // none 时将进行初始化
+        match self.upsert {
+            None => {
+                self.upsert = Some(Vec::new());
+                let _ = self.upsert_set(set);
+            }
+            Some(ref mut s_list) => {
+                // not none -> add
+                s_list.push(set);
+            }
+        }
+        self
+    }
+    /// # add upsert
+    /// This function will add ON DUPLICATE KEY UPDATE statement
+    /// ## example
+    /// ```rust
+    /// use surrealism::builder::s_use::UseWrapperImpl;
+    /// use surrealism::DefaultRes;
+    /// use surrealism::builder::{BaseWrapperImpl, SQLBuilderFactory, TableImpl};
+    /// use surrealism::db::Operator;
+    /// use surrealism::builder::insert::InsertWrapperImpl;
+    ///
+    /// #[tokio::main]
+    /// async fn main() -> DefaultRes<()> {
+    ///     let insert1 = SQLBuilderFactory::insert()
+    ///         .table("company")
+    ///         .add_set("name","SurrealDB")
+    ///         .add_set("founded","2023-10-20")
+    ///         .build();
+    ///     let insert2 =  SQLBuilderFactory::insert()
+    ///         .table("product")
+    ///         .add_set("name","Salesforce")
+    ///         .add_set("url","salesforce.com")
+    ///         .upsert("tags","crm".into(),Operator::Add)
+    ///         .build();
+    ///     Ok(())
+    /// }
+    /// ```
+    fn upsert(&mut self, column: &str, value: SurrealValue, sign: Operator) -> &mut Self {
+        self.upsert_set(Set::new(column, value, sign))
     }
 }
 
