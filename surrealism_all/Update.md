@@ -67,6 +67,7 @@
     <input type="checkbox" checked disabled />  <strong>TRANSACTION STMT</strong> <br />
     <input type="checkbox" checked disabled />  <strong>DEFINE STMT</strong> <br />
     <input type="checkbox" checked disabled />  <strong>REMOVE STMT</strong> <br />
+    <input type="checkbox" checked disabled />  <strong>SLEEP STMT</strong> <br />
 </form>
 
 ### Use
@@ -118,6 +119,29 @@
     <input type="checkbox" checked disabled />  <strong>FIELD</strong> <br />
     <input type="checkbox" checked disabled />  <strong>INDEX</strong> <br />
     <input type="checkbox" checked disabled />  <strong>PARAM</strong> <br />
+</form>
+
+### Info
+
+<form>
+    <input type="checkbox" checked disabled />  <strong>KV</strong> <br />
+    <input type="checkbox" checked disabled />  <strong>NS</strong> <br />
+    <input type="checkbox" checked disabled />  <strong>DB</strong> <br />
+    <input type="checkbox" checked disabled />  <strong>SCOPE</strong> <br />
+    <input type="checkbox" checked disabled />  <strong>TABLE</strong> <br />
+</form>
+
+### Show
+
+<form>
+    <input type="checkbox" checked disabled />  <strong>SINCE</strong> <br />
+    <input type="checkbox" checked disabled />  <strong>LIMIT</strong> <br />
+</form>
+
+### Sleep
+
+<form>
+    <input type="checkbox" checked disabled />  <strong>Duration</strong> <br />
 </form>
 
 ## Row

@@ -5,6 +5,7 @@
 //! @version:0.0.1
 //! @description:
 //! ```
+use std::fmt::{Display, Formatter};
 use serde::{Serialize, Deserialize};
 use super::constants::{AFTER, BEFORE, NONE, DIFF, MINUTE, MILLISECOND, SECOND, HOUR, DAY, TIMEOUT, RETURN, ADD_OP, MINUS_OP, DIVIDE_OP, PLUS_OP, EQ};
 use crate::db::{SurrealID, ParamCombine};
@@ -18,8 +19,8 @@ use crate::db::{SurrealID, ParamCombine};
 ///     let id1 = SurrealID::RAND;
 ///     let id2 = SurrealID::Default;
 ///     let id3 = SurrealID::Str(String::from("surrealism"));
-///     let id4 = SurrealID::Int(56_i32);
-///     let id5 = SurrealID::Float(45.5454647_f32);
+///     let id4 = SurrealID::Int(56_i64);
+///     let id5 = SurrealID::Float(45.5454647_f64);
 ///     let id6 = SurrealID::Array(Array::from(vec![SurrealValue::Str(String::from("John")), SurrealValue::Str(String::from("Mat"))]));
 ///     let user = User {
 ///         name: "Mat",
@@ -88,7 +89,7 @@ impl Table {
     pub fn build(&self) -> String {
         let table_stmt = match self.id {
             SurrealID::Default => format!("{}", &self.name),
-            _ =>  format!("{}:{}", &self.name, &self.id.combine())
+            _ => format!("{}:{}", &self.name, &self.id.combine())
         };
         table_stmt
     }
@@ -97,6 +98,12 @@ impl Table {
 impl ParamCombine for Table {
     fn combine(&self) -> String {
         self.build()
+    }
+}
+
+impl Display for Table {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{}", self.build())
     }
 }
 

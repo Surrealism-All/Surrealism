@@ -16,6 +16,7 @@ pub mod info;
 pub mod transaction;
 pub mod define;
 pub mod remove;
+pub mod show;
 mod macros;
 
 
@@ -30,7 +31,8 @@ use self::define::*;
 use self::s_use::UseWrapper;
 use self::update::{UpdateWrapper};
 use self::create::{CreateWrapper};
-use crate::db::{ReturnType, TimeOut, SurrealID, TimeUnit, Condition};
+use self::show::ShowWrapper;
+use crate::db::{ReturnType, TimeOut, SurrealID, TimeUnit, Condition, SurrealValue};
 
 /// SQLBuilderFactory for Surrealism
 /// - CreateWrapper
@@ -69,6 +71,30 @@ impl SQLBuilderFactory {
     }
     pub fn remove<'w>() -> RemoveWrapper<'w> {
         RemoveWrapper::new()
+    }
+    pub fn show()->ShowWrapper{ShowWrapper::new()}
+    /// # make sleep statement
+    /// ## example
+    /// ```rust
+    /// use std::ops::DerefMut;
+    /// use surrealism::builder::{SQLBuilderFactory};
+    /// use surrealism::db::{AdapterToValue, SurrealValue};
+    /// use surrealism::DefaultRes;
+    ///
+    /// // [tests\src\main.rs:10] sleep = "SLEEP 2d"
+    /// #[tokio::main]
+    /// async fn main() -> DefaultRes<()> {
+    ///     let sleep = SQLBuilderFactory::sleep(SurrealValue::duration().from_days(2).to_value());
+    ///     dbg!(sleep);
+    ///     Ok(())
+    /// }
+    /// ```
+    pub fn sleep(duration:SurrealValue)->String{
+        return if duration.is_duration(){
+           format!("SLEEP {}",duration.to_string())
+        }else{
+            panic!("SLEEP should use Duration")
+        }
     }
 }
 
