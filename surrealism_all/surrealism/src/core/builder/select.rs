@@ -46,11 +46,11 @@ pub trait SelectWrapperImpl<'w>: TableImpl + ParallelImpl + ConditionImpl + Time
 /// # SelectWrapper
 /// ## example
 /// ```rust
-/// use surrealism::{SurrealismRes, SurrealID, SurrealValue, Condition, Criteria, CriteriaSign, ConditionSign, TimeUnit, Order};
+/// use surrealism::db::{ SurrealID, SurrealValue, Condition, Criteria, CriteriaSign, ConditionSign, TimeUnit, Order};
 /// use surrealism::builder::*;
 /// use surrealism::builder::select::SelectWrapperImpl;
 /// use surrealism::functions::Function;
-///
+/// use surrealism::surreal::SurrealismRes;
 ///
 /// // [tests\src\main.rs:22] select1 = "SELECT name FROM SurrealDB:great GROUP BY id;"
 /// // [tests\src\main.rs:30] select2 = "SELECT name FROM SurrealDB:great WHERE name != 'Mat' TIMEOUT 5m;"
@@ -144,6 +144,9 @@ impl<'w> BaseWrapperImpl for SelectWrapper<'w> {
     }
 
     fn build(&mut self) -> String {
+        format!("{};", self.build_as_child())
+    }
+    fn build_as_child(&mut self) -> String {
         let mut res = format!("{} {} {} {}", SELECT, &self.field.combine(), FROM, &self.table.combine());
         if self.condition.is_some() {
             res.push_str(BLANK);
@@ -182,7 +185,6 @@ impl<'w> BaseWrapperImpl for SelectWrapper<'w> {
             res.push_str(BLANK);
             res.push_str(PARALLEL);
         }
-        res.push_str(STMT_END);
         res
     }
 }
@@ -271,10 +273,11 @@ table_lifetime_impl!(SelectWrapper);
 /// ```
 /// ## example
 /// ```rust
-/// use surrealism::{SurrealismRes, SurrealID, SurrealValue, Condition, Criteria, CriteriaSign, ConditionSign, TimeUnit, Order};
+/// use surrealism::db::{ SurrealID, SurrealValue, Condition, Criteria, CriteriaSign, ConditionSign, TimeUnit, Order};
 /// use surrealism::builder::*;
 /// use surrealism::builder::select::SelectWrapperImpl;
 /// use surrealism::functions::Function;
+/// use surrealism::surreal::SurrealismRes;
 ///
 ///
 /// // [tests\src\main.rs:18] live_select1 = "LIVE SELECT * FROM person;"
@@ -334,6 +337,10 @@ impl<'w> BaseWrapperImpl for LiveSelectWrapper<'w> {
     }
 
     fn build(&mut self) -> String {
+        format!("{}{}", self.build_as_child(), STMT_END)
+    }
+
+    fn build_as_child(&mut self) -> String {
         let mut res = format!("{} {} {} {}", LIVE_SELECT, &self.field.combine(), FROM, &self.table.combine());
         if self.condition.is_some() {
             res.push_str(BLANK);
@@ -343,7 +350,6 @@ impl<'w> BaseWrapperImpl for LiveSelectWrapper<'w> {
             res.push_str(format!(" {} ", FETCH).as_str());
             res.push_str(&self.fetch.as_ref().unwrap().join(" , "))
         }
-        res.push_str(STMT_END);
         res
     }
 }

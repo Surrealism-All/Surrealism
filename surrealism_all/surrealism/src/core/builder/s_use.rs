@@ -40,6 +40,10 @@ impl<'a> BaseWrapperImpl for UseWrapper<'a> {
     }
 
     fn build(&mut self) -> String {
+        format!("{};", self.build_as_child())
+    }
+
+    fn build_as_child(&mut self) -> String {
         self.to_string()
     }
 }
@@ -55,7 +59,6 @@ impl<'a> Display for UseWrapper<'a> {
             let _ = res.push_str(" DB ");
             let _ = res.push_str(db);
         }
-        let _ = res.push(';');
         write!(f, "{}", res)
     }
 }

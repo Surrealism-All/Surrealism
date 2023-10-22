@@ -21,6 +21,7 @@
 //! @description:
 //! ```
 
+use std::fmt::{Display, Formatter};
 use serde::Serialize;
 use crate::{parallel_lifetime_impl, table_lifetime_impl, return_lifetime_impl, timeout_lifetime_impl};
 use crate::core::db::{Condition, ReturnType, TimeOut, Patch, Object, SurrealValue, UpdateStrategy, Table, ParamCombine, Operator, Set, SurrealID, TimeUnit};
@@ -158,6 +159,16 @@ impl<'w> BaseWrapperImpl for UpdateWrapper<'w> {
     }
 
     fn build(&mut self) -> String {
+        format!("{}{}", self.to_string(), STMT_END)
+    }
+
+    fn build_as_child(&mut self) -> String {
+        self.to_string()
+    }
+}
+
+impl<'w> Display for UpdateWrapper<'w> {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
         let mut res = format!("{} {}", UPDATE, &self.table.combine());
         if self.strategy.is_some() {
             res.push_str(BLANK);
@@ -179,8 +190,8 @@ impl<'w> BaseWrapperImpl for UpdateWrapper<'w> {
             res.push_str(BLANK);
             res.push_str(PARALLEL);
         }
-        res.push_str(STMT_END);
-        res
+
+        write!(f, "{}", res)
     }
 }
 

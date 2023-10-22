@@ -109,6 +109,7 @@ pub trait BaseWrapperImpl {
     ///
     /// wrapper will build to String(Complete Statement)
     fn build(&mut self) -> String;
+    fn build_as_child(&mut self)->String;
 }
 
 /// wrapper param need table:Table

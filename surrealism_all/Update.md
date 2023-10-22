@@ -121,6 +121,24 @@
     <input type="checkbox" checked disabled />  <strong>PARAM</strong> <br />
 </form>
 
+### Define
+
+<form>
+    <input type="checkbox" checked disabled />  <strong>NAMESPACE</strong> <br />
+    <input type="checkbox" checked disabled />  <strong>DATABASE</strong> <br />
+    <input type="checkbox" checked disabled />  <strong>USER</strong> <br />
+    <input type="checkbox" checked disabled />  <strong>LOGIN</strong> <br />
+    <input type="checkbox" checked disabled />  <strong>TOKEN</strong> <br />
+    <input type="checkbox" checked disabled />  <strong>SCOPE</strong> <br />
+    <input type="checkbox" checked disabled />  <strong>TABLE</strong> <br />
+    <input type="checkbox" checked disabled />  <strong>EVENT</strong> <br />
+    <input type="checkbox" checked disabled />  <strong>FUNCTION</strong> <br />
+    <input type="checkbox" checked disabled />  <strong>FIELD</strong> <br />
+    <input type="checkbox" checked disabled />  <strong>INDEX</strong> <br />
+    <input type="checkbox" checked disabled />  <strong>PARAM</strong> <br />
+    <input type="checkbox" disabled />  <strong>ANALYZER</strong> <br />
+</form>
+
 ### Info
 
 <form>
@@ -144,10 +162,21 @@
     <input type="checkbox" checked disabled />  <strong>Duration</strong> <br />
 </form>
 
+## Assert
+
+<form>
+    <input type="checkbox"  disabled />  <strong>ASSERT</strong> <br />
+    <input type="checkbox" checked disabled />  <strong>WHERE</strong> <br />
+    <input type="checkbox" checked disabled />  <strong>Condition</strong> <br />
+    <input type="checkbox" checked disabled />  <strong>Criteria</strong> <br />
+</form>
+
 ## Row
 
 <form>
     <input type="checkbox" checked disabled />  <strong>RowSql的支持</strong> <br />
     <input type="checkbox" checked disabled/>  <strong>row_sql!宏</strong> <br />
 </form>
+
+
 

@@ -20,7 +20,7 @@
 use serde::Serialize;
 use super::{BaseWrapperImpl, TableImpl, ReturnImpl, TimeoutImpl, ParallelImpl};
 use crate::core::db::constants::{CREATE, BLANK, PARALLEL, STMT_END};
-use crate::core::db::{ReturnType, Table, TimeOut, SurrealID, ParamCombine, Object, SurrealValue, CreateStrategy,Set,TimeUnit,Operator};
+use crate::core::db::{ReturnType, Table, TimeOut, SurrealID, ParamCombine, Object, SurrealValue, CreateStrategy, Set, TimeUnit, Operator};
 use crate::{parallel_impl, return_impl, timeout_impl, table_impl};
 
 pub trait CreateWrapperImpl: BaseWrapperImpl + TableImpl + ReturnImpl + TimeoutImpl + ParallelImpl {
@@ -113,6 +113,9 @@ impl BaseWrapperImpl for CreateWrapper {
     }
 
     fn build(&mut self) -> String {
+        format!("{}{}", self.build_as_child(), STMT_END)
+    }
+    fn build_as_child(&mut self) -> String {
         let mut res = format!("{} {}", CREATE, &self.table.combine());
         if self.content.is_some() {
             res.push_str(BLANK);
@@ -130,7 +133,6 @@ impl BaseWrapperImpl for CreateWrapper {
             res.push_str(BLANK);
             res.push_str(PARALLEL);
         }
-        res.push_str(STMT_END);
         res
     }
 }

@@ -1,6 +1,6 @@
 use std::fmt::{Display, Formatter};
 use crate::builder::{BaseWrapperImpl, TableImpl};
-use crate::db::{SurrealValue, Table,SurrealID};
+use crate::db::{SurrealValue, Table, SurrealID};
 use crate::db::constants::{SHOW, LIMIT, SINCE, TABLE, BLANK};
 use crate::table_impl;
 
@@ -53,6 +53,10 @@ impl BaseWrapperImpl for ShowWrapper {
     }
 
     fn build(&mut self) -> String {
+        format!("{};", self.build_as_child())
+    }
+
+    fn build_as_child(&mut self) -> String {
         self.to_string()
     }
 }
@@ -61,11 +65,11 @@ impl Display for ShowWrapper {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
         let mut res = format!("{} {} {}", SHOW, TABLE, self.table.to_string());
         if self.since.is_some() {
-            res.push_str(format!("{}{}{}",BLANK,SINCE,BLANK).as_str());
+            res.push_str(format!("{}{}{}", BLANK, SINCE, BLANK).as_str());
             res.push_str(self.since.as_ref().unwrap().to_string().as_str());
         }
         if self.limit.is_some() {
-            res.push_str(format!("{}{}{}",BLANK,LIMIT,BLANK).as_str());
+            res.push_str(format!("{}{}{}", BLANK, LIMIT, BLANK).as_str());
             res.push_str(self.limit.as_ref().unwrap().to_string().as_str());
         }
         write!(f, "{}", res)

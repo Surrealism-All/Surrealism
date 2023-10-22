@@ -98,6 +98,10 @@ impl BaseWrapperImpl for RelateWrapper {
     }
 
     fn build(&mut self) -> String {
+        format!("{}{}", self.build_as_child(), STMT_END)
+    }
+
+    fn build_as_child(&mut self) -> String {
         let mut res = format!("{} {}{}{}{}{}", RELATE, &self.table_from.combine(), LINK, &self.table_with.combine(), LINK, &self.table_to.combine());
         if self.content.is_some() {
             res.push_str(BLANK);
@@ -115,7 +119,6 @@ impl BaseWrapperImpl for RelateWrapper {
             res.push_str(BLANK);
             res.push_str(PARALLEL);
         }
-        res.push_str(STMT_END);
         res
     }
 }

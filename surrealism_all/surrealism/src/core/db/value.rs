@@ -48,8 +48,9 @@ use serde_json::Value;
 use surrealdb::sql::{Duration, Datetime};
 use crate::db::{Condition, Geometries, Decimal, DurationAdapter, DatetimeAdapter};
 use crate::core::db::constants::{BLANK};
+use crate::db::constants::SET_DOWN;
 use crate::util::{remove_format_half, handle_str};
-use super::constants::{NULL, NULL_DOWN, NONE_DOWN, NONE, LEFT_BRACE, RIGHT_BRACE, COMMA, ANY, BOOL, ARRAY, DATETIME, DURATION, NUMBER, INT, FLOAT, STRING, OBJECT, GEOMETRY, RECORD, DECIMAL};
+use super::constants::{OWNER, EDITOR, VIEWER, NULL, NULL_DOWN, NONE_DOWN, NONE, LEFT_BRACE, RIGHT_BRACE, COMMA, ANY, BOOL, ARRAY, DATETIME, DURATION, NUMBER, INT, FLOAT, STRING, OBJECT, GEOMETRY, RECORD, DECIMAL};
 
 /// SurrealDB对应的值类型
 /// Geometry类型当前版本不支持，预计版本 > 0.2.1
@@ -93,6 +94,7 @@ impl Display for SurrealValue {
             SurrealValue::String(s) => handle_str(serde_json::to_string(s).unwrap().as_str()),
             SurrealValue::Object(obj) => obj.parse(),
             SurrealValue::Array(arr) => arr.parse(),
+            SurrealValue::Set(set) => set.parse(),
             SurrealValue::DateTime(time) => time.to_string(),
             SurrealValue::Duration(duration) => duration.to_string(),
             SurrealValue::Record(record) => format!("record({})", record),
@@ -145,7 +147,7 @@ impl SurrealValue {
     ///     Ok(())
     /// }
     /// ```
-    pub fn geo()->Geometries{
+    pub fn geo() -> Geometries {
         Geometries::Default
     }
     /// # build Datetime , GMT 0
@@ -339,7 +341,7 @@ impl SurrealValue {
             SurrealValue::Array(_) => ValueType::Array,
             SurrealValue::Geometries(_) => ValueType::Geometry,
             SurrealValue::Option(_) => ValueType::Any,
-            SurrealValue::Set(_) => ValueType::Array,
+            SurrealValue::Set(_) => ValueType::Set,
         }
     }
 
@@ -424,7 +426,7 @@ impl SurrealValue {
     ///     Ok(())
     /// }
     /// ```
-    pub fn array<T>(arr: Vec<T>) -> Self where T: Serialize{
+    pub fn array<T>(arr: Vec<T>) -> Self where T: Serialize {
         SurrealValue::Array(Array::from(SurrealValue::from_vec(arr)))
     }
     pub fn is_none(&self) -> bool {
@@ -787,6 +789,7 @@ pub enum ValueType {
     Any,
     Bool,
     Array,
+    Set,
     DateTime,
     Duration,
     Decimal,
@@ -801,6 +804,9 @@ pub enum ValueType {
 }
 
 impl ValueType {
+    pub fn option(value_type: ValueType) -> Self {
+        ValueType::Option(Box::new(value_type))
+    }
     pub fn to_string(&self) -> String {
         let res = match self {
             ValueType::Any => ANY,
@@ -819,6 +825,7 @@ impl ValueType {
             ValueType::Option(v) => {
                 return format!("option<{}>", v.to_string());
             }
+            ValueType::Set => SET_DOWN
         };
         res.to_string()
     }
@@ -828,13 +835,15 @@ impl ValueType {
 /// 生成有模式的表
 #[derive(Debug, Clone)]
 pub struct ValueConstructor {
+    flexible: bool,
     value_type: ValueType,
     default_value: Option<SurrealValue>,
+    value: Option<SurrealValue>,
     assert: Option<Condition>,
 }
 
 impl ValueConstructor {
-    pub fn new(value_type: ValueType, default_value: Option<SurrealValue>, assert: Option<Condition>) -> Self {
+    pub fn new(value_type: ValueType, default_value: Option<SurrealValue>, value: Option<SurrealValue>, assert: Option<Condition>, flexible: bool) -> Self {
         //try to confirm value type == value's type
         if default_value.is_some() {
             if default_value.as_ref().unwrap().value_type().ne(&value_type) {
@@ -842,8 +851,10 @@ impl ValueConstructor {
             }
         }
         ValueConstructor {
+            flexible,
             value_type,
             default_value,
+            value,
             assert,
         }
     }
@@ -857,16 +868,23 @@ impl ValueConstructor {
     pub fn new_infer(default_value: Option<SurrealValue>, assert: Option<Condition>) -> Self {
         if default_value.is_some() {
             //guess type
-            Self::new(default_value.as_ref().unwrap().value_type(), default_value, assert)
+            Self::new(default_value.as_ref().unwrap().value_type(), default_value, None, assert, false)
         } else {
             panic!("if you wanna use None | Null to specify value , you should use new function!")
         }
     }
     pub fn build(&self) -> String {
-        let mut res = format!("TYPE {}", self.value_type.to_string());
+        let mut res = if self.flexible {
+            String::from("FLEXIBLE ")
+        } else { String::new() };
+        res.push_str(format!("TYPE {}", self.value_type.to_string()).as_str());
         if self.default_value.is_some() {
             res.push_str(BLANK);
-            res.push_str(format!("VALUE $value OR {}", self.default_value.as_ref().unwrap().to_string()).as_str());
+            res.push_str(format!("DEFAULT {}", self.default_value.as_ref().unwrap().to_string()).as_str());
+        }
+        if self.value.is_some() {
+            res.push_str(BLANK);
+            res.push_str(format!("VALUE {}", self.value.as_ref().unwrap().to_string()).as_str());
         }
         if self.assert.is_some() {
             res.push_str(BLANK);
@@ -927,5 +945,28 @@ impl From<f32> for Number {
 impl From<f64> for Number {
     fn from(value: f64) -> Self {
         Number::Decimal(value)
+    }
+}
+
+///# 角色
+///目前，只有内置角色OWNER、EDITOR 和VIEWER 都是可用的。
+///作用 	描述
+/// OWNER 	可以查看和编辑用户级别或以下的任何资源，包括用户和令牌（IAM）资源。它还为支持`PERMISSIONS`子句的子资源（表、字段等）赠款完全权限。
+/// EDITOR 	可以查看和编辑用户级别或更低级别的任何资源，但不能查看和编辑用户或令牌（IAM）资源它还为支持`PERMISSIONS`子句的子资源（表、字段等）赠款完全权限。
+/// VIEWER 	授予赠款以查看用户级别或更低级别的任何资源，但不能进行编辑。它还为支持`PERMISSIONS`子句的子资源（表、字段等）赠款查看权限。
+#[derive(Debug, Clone)]
+pub enum Role {
+    OWNER,
+    EDITOR,
+    VIEWER,
+}
+
+impl Display for Role {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{}", match self {
+            Role::OWNER => OWNER,
+            Role::EDITOR => EDITOR,
+            Role::VIEWER => VIEWER,
+        })
     }
 }

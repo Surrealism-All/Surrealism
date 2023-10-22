@@ -115,6 +115,10 @@ impl BaseWrapperImpl for InsertWrapper {
     }
 
     fn build(&mut self) -> String {
+        format!("{}{}", self.build_as_child(), STMT_END)
+    }
+
+    fn build_as_child(&mut self) -> String {
         /// try to build self.values(InsertStrategy) to String
         /// ## example
         /// ``` code
@@ -183,7 +187,6 @@ impl BaseWrapperImpl for InsertWrapper {
             dbg!(&uop);
             res.push_str(format!("{} {}", INSERT_UPDATE, uop).as_str());
         }
-        res.push_str(STMT_END);
         res
     }
 }

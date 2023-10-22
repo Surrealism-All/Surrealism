@@ -45,7 +45,8 @@ sql_const!(
     (REMOVE_FIELD,"REMOVE FIELD") (REMOVE_INDEX,"REMOVE INDEX") (REMOVE_PARAM,"REMOVE PARAM") (RELATE,"RELATE") (LIVE_SELECT,"LIVE SELECT")
     (ANY,"any") (BOOL,"bool") (ARRAY,"array") (DATETIME,"datetime") (DURATION,"duration") (FLOAT,"float") (INT,"int") (NUMBER,"number")
     (STRING,"string") (RECORD,"record()") (GEOMETRY,"geometry") (OBJECT,"object") (DECIMAL,"decimal") (CONTAINS,"CONTAINS") (ROOT,"ROOT")
-    (REMOVE_USER,"REMOVE USER") (SHOW,"SHOW CHANGES FOR") (SINCE,"SINCE")
+    (REMOVE_USER,"REMOVE USER") (SHOW,"SHOW CHANGES FOR") (SINCE,"SINCE") (OWNER,"OWNER") (EDITOR,"EDITOR") (VIEWER,"VIEWER") (DEFINE_USER,"DEFINE USER")
+    (ROLES,"ROLES") (SET_DOWN,"set")
 );
 
 pub const FALSE: bool = false;

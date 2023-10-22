@@ -8,8 +8,9 @@
 //!
 
 use std::fmt::{Display, Formatter};
-use crate::core::db::constants::{NAMESPACE, DATABASE, PASSHASH, PASSWORD, ROOT, TABLE, DEFINE_DB, DEFINE_NS, DEFINE_LOGIN, DEFINE_SCOPE, STMT_END, ON, TYPE, SCOPE, PS256, PS384, PS512, EDDSA, ES256, ES384, ES512, HS256, HS384, HS512, RS256, RS384, RS512, VALUE, DEFINE_TOKEN, SCHEMA_FULL, SCHEMA_LESS, SIGN_IN, SIGN_UP, DROP, DEFINE_TABLE, BLANK, NONE, FULL, FOR, DEFINE_EVENT, ON_TABLE, WHEN, THEN, DEFINE_FUNCTION, RETURN, DEFINE_FIELD, FIELDS, COLUMNS, DEFINE_INDEX, UNIQUE, DEFINE_PARAM};
-use crate::core::db::{Condition, ParamCombine, SurrealValue, TimeOut, ValueConstructor};
+use crate::db::constants::{ROLES, DEFINE_USER, NAMESPACE, DATABASE, PASSHASH, PASSWORD, ROOT, TABLE, DEFINE_DB, DEFINE_NS, DEFINE_LOGIN, DEFINE_SCOPE, STMT_END, ON, TYPE, SCOPE, PS256, PS384, PS512, EDDSA, ES256, ES384, ES512, HS256, HS384, HS512, RS256, RS384, RS512, VALUE, DEFINE_TOKEN, SCHEMA_FULL, SCHEMA_LESS, SIGN_IN, SIGN_UP, DROP, DEFINE_TABLE, BLANK, NONE, FULL, FOR, DEFINE_EVENT, ON_TABLE, WHEN, THEN, DEFINE_FUNCTION, RETURN, DEFINE_FIELD, FIELDS, COLUMNS, DEFINE_INDEX, UNIQUE, DEFINE_PARAM};
+use crate::core::db::{Condition, ParamCombine, SurrealValue, TimeOut, ValueConstructor, Role};
+
 
 /// # DefineWrapper
 /// The DEFINE statement can be used to specify authentication access and behaviour, global parameters, table configurations, table events, schema definitions, and indexes.
@@ -64,19 +65,6 @@ use crate::core::db::{Condition, ParamCombine, SurrealValue, TimeOut, ValueConst
 ///
 ///     let define10 = SQLBuilderFactory::define()
 ///         .function("greet", vec!["$name:string"], "", r#""Hello, " + $name + "!""#).build();
-///
-///     let define11 = SQLBuilderFactory::define()
-///         .field("email", "user", ValueConstructor::new(ValueType::String, None, None), None).build();
-///     let define12 = SQLBuilderFactory::define()
-///         .field("countrycode", "user",
-///                ValueConstructor::new(ValueType::String,
-///                                      Some(SurrealValue::from("GBR")),
-///                                      Some(Condition::new()
-///                                          .push(Criteria::new_field("NONE", CriteriaSign::Neq), ConditionSign::And)
-///                                          .push(Criteria::new_field("/[A-Z]{3}/", CriteriaSign::Eq), ConditionSign::None).deref_mut())),
-///                None)
-///         .build();
-///
 ///     let define13 = SQLBuilderFactory::define().index("userEmailIndex", "user", FieldColumn::COLUMNS(vec!["email"]), true).build();
 ///     let define14 = SQLBuilderFactory::define().param("endpointBase", SurrealValue::from("https://dummyjson.com")).build();
 ///
@@ -146,11 +134,27 @@ pub enum DefineWrapper<'w> {
         name: &'w str,
         value: SurrealValue,
     },
+    USER {
+        username: &'w str,
+        on: OnType<'w>,
+        password: PwdType<'w>,
+        role: Role,
+    },
 }
 
 impl<'w> DefineWrapper<'w> {
     pub fn new() -> Self {
         DefineWrapper::NONE
+    }
+    pub fn user(&self, username: &'w str, password: PwdType<'w>, on: OnType<'w>, role: Role) -> Self {
+        if on.is_scope() { panic!("OnType::SCOPE can not be used in Define User") }
+        if on.is_table() { panic!("OnType::TABLE can not be used in Define User") }
+        DefineWrapper::USER {
+            username,
+            on,
+            password,
+            role,
+        }
     }
     /// SurrealDB有一个多租户模型，它允许您将数据库的范围限定到一个名称空间。数据库的数量没有限制 可以在名称空间中，也没有对允许的名称空间的数量的限制。只有root用户有权 创建命名空间。
     /// - 您必须作为root用户进行身份验证，才能使用`DEFINE NAMESPACE`声明。
@@ -273,6 +277,8 @@ impl<'w> DefineWrapper<'w> {
             DefineWrapper::NONE => panic!("DEFINE NONE is not allowed!"),
             DefineWrapper::NAMESPACE(ns) => format!("{} {}{}", DEFINE_NS, ns, STMT_END),
             DefineWrapper::DATABASE(db) => format!("{} {}{}", DEFINE_DB, db, STMT_END),
+            DefineWrapper::USER { username, on, password, role }
+            => format!("{} {} {} {} {} {} {}{}", DEFINE_USER, username, ON, on.to_string(), password.to_string(), ROLES, role.to_string(), STMT_END),
             DefineWrapper::LOGIN {
                 name, on, pwd
             } => format!("{} {} {} {} {}{}", DEFINE_LOGIN, name, ON, on.to_string(), pwd.to_string(), STMT_END),
@@ -291,7 +297,7 @@ impl<'w> DefineWrapper<'w> {
                     res.push_str(schema.as_ref().unwrap().to_string().as_str())
                 }
                 if as_expression.is_some() {
-                    res.push_str(BLANK);
+                    res.push_str(" AS ");
                     res.push_str(as_expression.as_ref().unwrap())
                 }
                 if permissions.is_some() {
