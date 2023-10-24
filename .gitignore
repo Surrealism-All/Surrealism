@@ -1,12 +1,5 @@
-/surrealism_all/target
-/surrealism_all/surrealism/target
-/surrealism_all/tests/target
-/surrealism-cli/node_modules
-/surrealism-cli/dist
-/surrealism-cli/src-tauri/target
 /target
 /Cargo.lock
 .idea
 /tests/target
 /tests/Cargo.lock
-.vscode

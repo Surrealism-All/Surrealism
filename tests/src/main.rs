@@ -1,9 +1,9 @@
-use surrealism::db::{DefaultInitService, InitService, SurrealID, SurrealismCommit, SurrealismConnector, SurrealismRes, Table, UseNSDB};
+use surrealism::db::{SurrealID, Table};
 use surrealism::builder::{BaseWrapperImpl, SQLBuilderFactory, TableImpl};
 use surrealism::builder::create::{CreateWrapper, CreateWrapperImpl};
 use serde::{Serialize, Deserialize};
 use surrealism::builder::select::SelectWrapperImpl;
-use surrealism::surreal::{parse_response, SurrealismRes};
+use surrealism::surreal::{parse_response, SurrealismRes,DefaultInitService,UseNSDB,InitService,SurrealismCommit};
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 struct User {
@@ -33,22 +33,24 @@ pub fn crate_user_table() -> CreateWrapper {
     user_table
 }
 
+//strict!
 #[tokio::main]
 async fn main() -> SurrealismRes<()> {
     // init service
     let mut service = DefaultInitService::new().init();
+    // you have already define test namespace and test database!
     // use ns:test and db:test
     let _ = service.use_commit("test", "test").await?;
     // get info from surrealdb
     // let info = SQLBuilderFactory::info().db().build();
     // let info_res = service.commit_sql(&info).await?;
     // dbg!(info_res);
-    // create a table
+    // create a table (you should define user table first!)
     let create_stmt = crate_user_table().build();
     let create_res = service.commit_sql(&create_stmt).await?;
     // dbg!(create_res);
     // select user::surrealism table
-    let select = SQLBuilderFactory::select().table("user").id(SurrealID::from("surrealism")).column("*", None).build();
+    let select = SQLBuilderFactory::select().table("user").id("surrealism".into()).column("*", None).build();
     let select_res = service.commit_sql(&select).await?;
     //parse response to any type you want
     let res: User = parse_response(select_res);
