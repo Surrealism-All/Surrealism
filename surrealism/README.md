@@ -245,269 +245,269 @@ full = ["row", "builder", "surreal"]
 
 ### Configuration配置文件
 
-<ul>
-    <li><input type="checkbox" checked disabled />  <strong>Surrealism.json支持</strong> </li>
-    <li><input type="checkbox" checked disabled />  <strong>Surrealism.toml支持</strong> </li>
-    <li><input type="checkbox" />  <strong>自定义构建支持(SurrealismConfig)</strong> </li>
-</ul>
+
+- [x]  <strong>Surrealism.json支持</strong> 
+- [x]  <strong>Surrealism.toml支持</strong> 
+- [ ]   <strong>自定义构建支持(SurrealismConfig)</strong> 
+
 
 
 ### Init 初始化服务
 
-<ul>
-    <li><input type="checkbox" checked disabled />  <strong>DefaultInitService 默认初始化服务的支持</strong> </li>
-    <li><input type="checkbox" />  <strong>自定义初始化服务的支持</strong> </li>
-</ul>
+
+- [x]  <strong>DefaultInitService 默认初始化服务的支持</strong> 
+- [ ]   <strong>自定义初始化服务的支持</strong> 
+
 
 
 ### ID 表ID
 
-<ul>
-    <li><li><input type="checkbox" checked disabled />  <strong>SurrealID::Default的支持</strong> </li></li>
-    <li><input type="checkbox" checked disabled/>  <strong>SurrealID::Int的支持</strong> </li>
-    <li><input type="checkbox" checked disabled/>  <strong>SurrealID::Float的支持</strong> </li>
-    <li><input type="checkbox" checked disabled/>  <strong>SurrealID::String的支持</strong> </li>
-    <li><input type="checkbox" checked disabled/>  <strong>SurrealID::Array的支持</strong> </li>
-    <li><input type="checkbox" checked disabled/>  <strong>SurrealID::UUID的支持</strong> </li>
-    <li><input type="checkbox" checked disabled/>  <strong>SurrealID::ULID的支持</strong> </li>
-    <li><input type="checkbox" checked disabled/>  <strong>SurrealID::RAND的支持</strong> </li>
-    <li><input type="checkbox" checked disabled/>  <strong>SurrealID::Range的支持</strong> </li>
-</ul>
+
+    <li><li><input type="checkbox" checked disabled />  <strong>SurrealID::Default的支持</strong> 
+    <li><input type="checkbox" checked disabled/>  <strong>SurrealID::Int的支持</strong> 
+    <li><input type="checkbox" checked disabled/>  <strong>SurrealID::Float的支持</strong> 
+    <li><input type="checkbox" checked disabled/>  <strong>SurrealID::String的支持</strong> 
+    <li><input type="checkbox" checked disabled/>  <strong>SurrealID::Array的支持</strong> 
+    <li><input type="checkbox" checked disabled/>  <strong>SurrealID::UUID的支持</strong> 
+    <li><input type="checkbox" checked disabled/>  <strong>SurrealID::ULID的支持</strong> 
+    <li><input type="checkbox" checked disabled/>  <strong>SurrealID::RAND的支持</strong> 
+    <li><input type="checkbox" checked disabled/>  <strong>SurrealID::Range的支持</strong> 
+
 
 
 
 ### Value 数据类型
 
-<ul>
-    <li><input type="checkbox" checked disabled />  <strong>SurrealValue::None的支持</strong> </li>
-    <li><input type="checkbox" checked disabled />  <strong>SurrealValue::Null的支持</strong> </li>
-    <li><input type="checkbox" checked disabled />  <strong>SurrealValue::Int的支持</strong> </li>
-    <li><input type="checkbox" checked disabled />  <strong>SurrealValue::Float的支持</strong> </li>
-    <li><input type="checkbox" checked disabled />  <strong>SurrealValue::Decimal的支持</strong> </li>
-    <li><input type="checkbox" checked disabled />  <strong>SurrealValue::String的支持</strong> </li>
-    <li><input type="checkbox" checked disabled />  <strong>SurrealValue::Object的支持</strong> </li>
-    <li><input type="checkbox" checked disabled />  <strong>SurrealValue::Datetime的支持(DatetimeAdapter)</strong> </li>
-    <li><input type="checkbox" checked disabled />  <strong>SurrealValue::Duration的支持(DurationAdapter)</strong> </li>
-    <li><input type="checkbox" checked disabled />  <strong>SurrealValue::Array的支持</strong> </li>
-    <li><input type="checkbox" />  <strong>SurrealValue::Set的支持</strong> </li>
-    <li><input type="checkbox" />  <strong>SurrealValue::Option的支持</strong> </li>
-    <li><input type="checkbox" checked disabled />  <strong>SurrealValue::Geo的支持</strong> </li>
-    <li><input type="checkbox" />  <strong>SurrealValue::Record的支持</strong> </li>
-    <li><input type="checkbox" />  <strong>SurrealValue::Future的支持</strong> </li>
-    <li><input type="checkbox" checked disabled />  <strong>数学常数构建</strong> </li>
-    <li><input type="checkbox" checked disabled />  <strong>数学常数支持</strong> </li>
-</ul>
+
+- [x]  <strong>SurrealValue::None的支持</strong> 
+- [x]  <strong>SurrealValue::Null的支持</strong> 
+- [x]  <strong>SurrealValue::Int的支持</strong> 
+- [x]  <strong>SurrealValue::Float的支持</strong> 
+- [x]  <strong>SurrealValue::Decimal的支持</strong> 
+- [x]  <strong>SurrealValue::String的支持</strong> 
+- [x]  <strong>SurrealValue::Object的支持</strong> 
+- [x]  <strong>SurrealValue::Datetime的支持(DatetimeAdapter)</strong> 
+- [x]  <strong>SurrealValue::Duration的支持(DurationAdapter)</strong> 
+- [x]  <strong>SurrealValue::Array的支持</strong> 
+- [ ]   <strong>SurrealValue::Set的支持</strong> 
+- [ ]   <strong>SurrealValue::Option的支持</strong> 
+- [x]  <strong>SurrealValue::Geo的支持</strong> 
+- [ ]   <strong>SurrealValue::Record的支持</strong> 
+- [ ]   <strong>SurrealValue::Future的支持</strong> 
+- [x]  <strong>数学常数构建</strong> 
+- [x]  <strong>数学常数支持</strong> 
+
 
 
 ## Builder
 
-<ul>
-    <li><input type="checkbox" checked disabled />  <strong>USE STMT</strong> </li>
-    <li><input type="checkbox" checked disabled />  <strong>CREATE STMT</strong> </li>
-    <li><input type="checkbox" checked disabled />  <strong>SELECT STMT</strong> </li>
-    <li><input type="checkbox" checked disabled />  <strong>LIVE SELECT STMT</strong> </li>
-    <li><input type="checkbox" checked disabled />  <strong>RELATE STMT</strong> </li>
-    <li><input type="checkbox" checked disabled />  <strong>UPDATE STMT</strong> </li>
-    <li><input type="checkbox" checked disabled />  <strong>INSERT STMT</strong> </li>
-    <li><input type="checkbox" checked disabled />  <strong>DELETE STMT</strong> </li>
-    <li><input type="checkbox" checked disabled />  <strong>INFO STMT</strong> </li>
-    <li><input type="checkbox" checked disabled />  <strong>TRANSACTION STMT</strong> </li>
-    <li><input type="checkbox" checked disabled />  <strong>DEFINE STMT</strong> </li>
-    <li><input type="checkbox" checked disabled />  <strong>REMOVE STMT</strong> </li>
-    <li><input type="checkbox" checked disabled />  <strong>SLEEP STMT</strong> </li>
-    <li><input type="checkbox" disabled />  <strong>LET STMT</strong> </li>
-    <li><input type="checkbox" disabled />  <strong>BEGIN STMT</strong> </li>
-    <li><input type="checkbox" disabled />  <strong>CANCEL STMT</strong> </li>
-    <li><input type="checkbox" disabled />  <strong>COMMIT STMT</strong> </li>
-    <li><input type="checkbox" disabled />  <strong>IF ELSE STMT</strong> </li>
-    <li><input type="checkbox" disabled />  <strong>FOR STMT</strong> </li>
-    <li><input type="checkbox" disabled />  <strong>BREAK STMT</strong> </li>
-    <li><input type="checkbox" disabled />  <strong>CONTINUE STMT</strong> </li>
-    <li><input type="checkbox" disabled />  <strong>KILL STMT</strong> </li>
-    <li><input type="checkbox" disabled />  <strong>THROW STMT</strong> </li>
-</ul>
+
+- [x]  <strong>USE STMT</strong> 
+- [x]  <strong>CREATE STMT</strong> 
+- [x]  <strong>SELECT STMT</strong> 
+- [x]  <strong>LIVE SELECT STMT</strong> 
+- [x]  <strong>RELATE STMT</strong> 
+- [x]  <strong>UPDATE STMT</strong> 
+- [x]  <strong>INSERT STMT</strong> 
+- [x]  <strong>DELETE STMT</strong> 
+- [x]  <strong>INFO STMT</strong> 
+- [x]  <strong>TRANSACTION STMT</strong> 
+- [x]  <strong>DEFINE STMT</strong> 
+- [x]  <strong>REMOVE STMT</strong> 
+- [x]  <strong>SLEEP STMT</strong> 
+- [ ] <strong>LET STMT</strong> 
+- [ ] <strong>BEGIN STMT</strong> 
+- [ ] <strong>CANCEL STMT</strong> 
+- [ ] <strong>COMMIT STMT</strong> 
+- [ ] <strong>IF ELSE STMT</strong> 
+- [ ] <strong>FOR STMT</strong> 
+- [ ] <strong>BREAK STMT</strong> 
+- [ ] <strong>CONTINUE STMT</strong> 
+- [ ] <strong>KILL STMT</strong> 
+- [ ] <strong>THROW STMT</strong> 
+
 
 
 ### Use
 
-<ul>
-    <li><input type="checkbox" checked disabled />  <strong>USE NS STMT</strong> </li>
-    <li><input type="checkbox" checked disabled />  <strong>USE DB STMT</strong> </li>
-</ul>
+
+- [x]  <strong>USE NS STMT</strong> 
+- [x]  <strong>USE DB STMT</strong> 
+
 
 
 ### Create
 
-<ul>
-    <li><input type="checkbox" checked disabled />  <strong>CREATE CONTENT STMT</strong> </li>
-    <li><input type="checkbox" checked disabled />  <strong>CREATE SET STMT</strong> </li>
-    <li><input type="checkbox" checked disabled />  <strong>RETURN STMT</strong> </li>
-    <li><input type="checkbox" checked disabled />  <strong>TIMEOUT STMT</strong> </li>
-    <li><input type="checkbox" checked disabled />  <strong>PARALLEL STMT</strong> </li>
-</ul>
+
+- [x]  <strong>CREATE CONTENT STMT</strong> 
+- [x]  <strong>CREATE SET STMT</strong> 
+- [x]  <strong>RETURN STMT</strong> 
+- [x]  <strong>TIMEOUT STMT</strong> 
+- [x]  <strong>PARALLEL STMT</strong> 
+
 
 
 ### Insert
 
-<ul>
-    <li><input type="checkbox" checked disabled />  <strong>INSERT INTO STMT</strong> </li>
-    <li><input type="checkbox" checked disabled />  <strong>ON DUPLICATE KEY UPDATE STMT</strong> </li>
-</ul>
+
+- [x]  <strong>INSERT INTO STMT</strong> 
+- [x]  <strong>ON DUPLICATE KEY UPDATE STMT</strong> 
+
 
 ### Select
 
-<ul>
-    <li><input type="checkbox" checked disabled />  <strong>FIELD</strong> </li>
-    <li><input type="checkbox" checked disabled />  <strong>OMIT</strong> </li>
-    <li><input type="checkbox" checked disabled />  <strong>WITH INDEX|NOINDEX</strong> </li>
-    <li><input type="checkbox" checked disabled />  <strong>FROM</strong> </li>
-    <li><input type="checkbox" checked disabled />  <strong>WHERE</strong> </li>
-    <li><input type="checkbox" checked disabled />  <strong>SPLIT</strong> </li>
-    <li><input type="checkbox" checked disabled />  <strong>GROUP</strong> </li>
-    <li><input type="checkbox" checked disabled />  <strong>ORDER</strong> </li>
-    <li><input type="checkbox" checked disabled />  <strong>LIMIT</strong> </li>
-    <li><input type="checkbox" checked disabled />  <strong>START</strong> </li>
-    <li><input type="checkbox" checked disabled />  <strong>FETCH</strong> </li>
-    <li><input type="checkbox" checked disabled />  <strong>TIMEOUT</strong> </li>
-    <li><input type="checkbox" checked disabled />  <strong>PARALLEL</strong> </li>
-    <li><input type="checkbox" checked disabled />  <strong>EXPLAIN [FULL]</strong> </li>
-</ul>
+
+- [x]  <strong>FIELD</strong> 
+- [x]  <strong>OMIT</strong> 
+- [x]  <strong>WITH INDEX|NOINDEX</strong> 
+- [x]  <strong>FROM</strong> 
+- [x]  <strong>WHERE</strong> 
+- [x]  <strong>SPLIT</strong> 
+- [x]  <strong>GROUP</strong> 
+- [x]  <strong>ORDER</strong> 
+- [x]  <strong>LIMIT</strong> 
+- [x]  <strong>START</strong> 
+- [x]  <strong>FETCH</strong> 
+- [x]  <strong>TIMEOUT</strong> 
+- [x]  <strong>PARALLEL</strong> 
+- [x]  <strong>EXPLAIN [FULL]</strong> 
+
 
 ### Live Select
 
-<ul>
-    <li><input type="checkbox" checked disabled />  <strong>FIELD</strong> </li>
-    <li><input type="checkbox" checked disabled />  <strong>FROM</strong> </li>
-    <li><input type="checkbox" checked disabled />  <strong>WHERE</strong> </li>
-    <li><input type="checkbox" checked disabled />  <strong>FETCH</strong> </li>
-</ul>
+
+- [x]  <strong>FIELD</strong> 
+- [x]  <strong>FROM</strong> 
+- [x]  <strong>WHERE</strong> 
+- [x]  <strong>FETCH</strong> 
+
 
 ### Delete
 
-<ul>
-    <li><input type="checkbox" checked disabled />  <strong>DELETE WHERE</strong> </li>
-    <li><input type="checkbox" checked disabled />  <strong>RETURN</strong> </li>
-    <li><input type="checkbox" checked disabled />  <strong>TIMEOUT</strong> </li>
-    <li><input type="checkbox" checked disabled />  <strong>PARALLEL</strong> </li>
-    <li><input type="checkbox" disabled />  <strong>DELETE WITH RELETE</strong> </li>
-</ul>
+
+- [x]  <strong>DELETE WHERE</strong> 
+- [x]  <strong>RETURN</strong> 
+- [x]  <strong>TIMEOUT</strong> 
+- [x]  <strong>PARALLEL</strong> 
+- [ ] <strong>DELETE WITH RELETE</strong> 
+
 
 
 ### Remove
 
-<ul>
-    <li><input type="checkbox" checked disabled />  <strong>NAMESPACE</strong> </li>
-    <li><input type="checkbox" checked disabled />  <strong>DATABASE</strong> </li>
-    <li><input type="checkbox" checked disabled />  <strong>USER</strong> </li>
-    <li><input type="checkbox" checked disabled />  <strong>LOGIN</strong> </li>
-    <li><input type="checkbox" checked disabled />  <strong>TOKEN</strong> </li>
-    <li><input type="checkbox" checked disabled />  <strong>SCOPE</strong> </li>
-    <li><input type="checkbox" checked disabled />  <strong>TABLE</strong> </li>
-    <li><input type="checkbox" checked disabled />  <strong>EVENT</strong> </li>
-    <li><input type="checkbox" checked disabled />  <strong>FUNCTION</strong> </li>
-    <li><input type="checkbox" checked disabled />  <strong>FIELD</strong> </li>
-    <li><input type="checkbox" checked disabled />  <strong>INDEX</strong> </li>
-    <li><input type="checkbox" checked disabled />  <strong>PARAM</strong> </li>
-</ul>
+
+- [x]  <strong>NAMESPACE</strong> 
+- [x]  <strong>DATABASE</strong> 
+- [x]  <strong>USER</strong> 
+- [x]  <strong>LOGIN</strong> 
+- [x]  <strong>TOKEN</strong> 
+- [x]  <strong>SCOPE</strong> 
+- [x]  <strong>TABLE</strong> 
+- [x]  <strong>EVENT</strong> 
+- [x]  <strong>FUNCTION</strong> 
+- [x]  <strong>FIELD</strong> 
+- [x]  <strong>INDEX</strong> 
+- [x]  <strong>PARAM</strong> 
+
 
 ### Update
 
-<ul>
-    <li><input type="checkbox" checked disabled />  <strong>CONTENT</strong> </li>
-    <li><input type="checkbox" checked disabled />  <strong>MERGE</strong> </li>
-    <li><input type="checkbox" checked disabled />  <strong>PATCH</strong> </li>
-    <li><input type="checkbox" checked disabled />  <strong>SET</strong> </li>
-    <li><input type="checkbox" checked disabled />  <strong>WHERE</strong> </li>
-    <li><input type="checkbox" checked disabled />  <strong>RETURN</strong> </li>
-    <li><input type="checkbox" checked disabled />  <strong>TIMEOUT</strong> </li>
-    <li><input type="checkbox" checked disabled />  <strong>PARALLEL</strong> </li>
-</ul>
+
+- [x]  <strong>CONTENT</strong> 
+- [x]  <strong>MERGE</strong> 
+- [x]  <strong>PATCH</strong> 
+- [x]  <strong>SET</strong> 
+- [x]  <strong>WHERE</strong> 
+- [x]  <strong>RETURN</strong> 
+- [x]  <strong>TIMEOUT</strong> 
+- [x]  <strong>PARALLEL</strong> 
+
 
 ### Define
 
-<ul>
-    <li><input type="checkbox" checked disabled />  <strong>NAMESPACE</strong> </li>
-    <li><input type="checkbox" checked disabled />  <strong>DATABASE</strong> </li>
-    <li><input type="checkbox" checked disabled />  <strong>USER</strong> </li>
-    <li><input type="checkbox" checked disabled />  <strong>LOGIN</strong> </li>
-    <li><input type="checkbox" checked disabled />  <strong>TOKEN</strong> </li>
-    <li><input type="checkbox" checked disabled />  <strong>SCOPE</strong> </li>
-    <li><input type="checkbox" checked disabled />  <strong>TABLE</strong> </li>
-    <li><input type="checkbox" checked disabled />  <strong>EVENT</strong> </li>
-    <li><input type="checkbox" checked disabled />  <strong>FUNCTION</strong> </li>
-    <li><input type="checkbox" checked disabled />  <strong>FIELD</strong> </li>
-    <li><input type="checkbox" checked disabled />  <strong>INDEX</strong> </li>
-    <li><input type="checkbox" checked disabled />  <strong>PARAM</strong> </li>
-    <li><input type="checkbox" disabled />  <strong>ANALYZER</strong> </li>
-</ul>
+
+- [x]  <strong>NAMESPACE</strong> 
+- [x]  <strong>DATABASE</strong> 
+- [x]  <strong>USER</strong> 
+- [x]  <strong>LOGIN</strong> 
+- [x]  <strong>TOKEN</strong> 
+- [x]  <strong>SCOPE</strong> 
+- [x]  <strong>TABLE</strong> 
+- [x]  <strong>EVENT</strong> 
+- [x]  <strong>FUNCTION</strong> 
+- [x]  <strong>FIELD</strong> 
+- [x]  <strong>INDEX</strong> 
+- [x]  <strong>PARAM</strong> 
+- [ ] <strong>ANALYZER</strong> 
+
 
 
 ### Info
 
-<ul>
-    <li><input type="checkbox" checked disabled />  <strong>KV</strong> </li>
-    <li><input type="checkbox" checked disabled />  <strong>NS</strong> </li>
-    <li><input type="checkbox" checked disabled />  <strong>DB</strong> </li>
-    <li><input type="checkbox" checked disabled />  <strong>SCOPE</strong> </li>
-    <li><input type="checkbox" checked disabled />  <strong>TABLE</strong> </li>
-</ul>
+
+- [x]  <strong>KV</strong> 
+- [x]  <strong>NS</strong> 
+- [x]  <strong>DB</strong> 
+- [x]  <strong>SCOPE</strong> 
+- [x]  <strong>TABLE</strong> 
+
 
 
 ### Show
 
-<ul>
-    <li><input type="checkbox" checked disabled />  <strong>SINCE</strong> </li>
-    <li><input type="checkbox" checked disabled />  <strong>LIMIT</strong> </li>
-</ul>
+
+- [x]  <strong>SINCE</strong> 
+- [x]  <strong>LIMIT</strong> 
+
 
 
 ### Sleep
 
-<ul>
-    <li><input type="checkbox" checked disabled />  <strong>Duration</strong> </li>
-</ul>
+
+- [x]  <strong>Duration</strong> 
+
 
 
 ## Assert
 
-<ul>
-    <li><input type="checkbox"  disabled />  <strong>ASSERT</strong> </li>
-    <li><input type="checkbox" checked disabled />  <strong>WHERE</strong> </li>
-    <li><input type="checkbox" checked disabled />  <strong>Condition</strong> </li>
-    <li><input type="checkbox" checked disabled />  <strong>Criteria</strong> </li>
-</ul>
+
+    <li><input type="checkbox"  disabled />  <strong>ASSERT</strong> 
+- [x]  <strong>WHERE</strong> 
+- [x]  <strong>Condition</strong> 
+- [x]  <strong>Criteria</strong> 
+
 
 
 ## Functions
 
-<ul>
-    <li><input type="checkbox" checked disabled />  <strong>Array</strong> </li>
-    <li><input type="checkbox" checked disabled />  <strong>Count</strong> </li>
-    <li><input type="checkbox" checked disabled />  <strong>Crypto</strong> </li>
-    <li><input type="checkbox" disabled />  <strong>Duration</strong> </li>
-    <li><input type="checkbox" disabled />  <strong>Geo</strong> </li>
-    <li><input type="checkbox" disabled />  <strong>HTTP</strong> </li>
-    <li><input type="checkbox" disabled />  <strong>Math</strong> </li>
-    <li><input type="checkbox" disabled />  <strong>Meta</strong> </li>
-    <li><input type="checkbox" disabled />  <strong>Parse</strong> </li>
-    <li><input type="checkbox" disabled />  <strong>Rand</strong> </li>
-    <li><input type="checkbox" disabled />  <strong>Search</strong> </li>
-    <li><input type="checkbox" disabled />  <strong>Session</strong> </li>
-    <li><input type="checkbox" disabled />  <strong>Sleep</strong> </li>
-    <li><input type="checkbox" disabled />  <strong>String</strong> </li>
-    <li><input type="checkbox" disabled />  <strong>Time</strong> </li>
-    <li><input type="checkbox" disabled />  <strong>Type</strong> </li>
-    <li><input type="checkbox" disabled />  <strong>Scripting</strong> </li>
-    <li><input type="checkbox" disabled />  <strong>Vector</strong> </li>
-</ul>
+
+- [x]  <strong>Array</strong> 
+- [x]  <strong>Count</strong> 
+- [x]  <strong>Crypto</strong> 
+- [ ] <strong>Duration</strong> 
+- [ ] <strong>Geo</strong> 
+- [ ] <strong>HTTP</strong> 
+- [ ] <strong>Math</strong> 
+- [ ] <strong>Meta</strong> 
+- [ ] <strong>Parse</strong> 
+- [ ] <strong>Rand</strong> 
+- [ ] <strong>Search</strong> 
+- [ ] <strong>Session</strong> 
+- [ ] <strong>Sleep</strong> 
+- [ ] <strong>String</strong> 
+- [ ] <strong>Time</strong> 
+- [ ] <strong>Type</strong> 
+- [ ] <strong>Scripting</strong> 
+- [ ] <strong>Vector</strong> 
+
 
 
 ## Row
 
-<ul>
-    <li><input type="checkbox" checked disabled />  <strong>RowSql的支持</strong> </li>
-    <li><input type="checkbox" checked disabled/>  <strong>row_sql!宏</strong> </li>
-</ul>
+
+- [x]  <strong>RowSql的支持</strong> 
+    <li><input type="checkbox" checked disabled/>  <strong>row_sql!宏</strong> 
+
 
 ## Operators
 
