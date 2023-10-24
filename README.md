@@ -262,16 +262,15 @@ full = ["row", "builder", "surreal"]
 
 ### ID 表ID
 
-
--[x] <strong>SurrealID::Default的支持</strong> 
--[x]   <strong>SurrealID::Int的支持</strong> 
--[x]  <strong>SurrealID::Float的支持</strong> 
--[x]  <strong>SurrealID::String的支持</strong> 
--[x]  <strong>SurrealID::Array的支持</strong> 
--[x]  <strong>SurrealID::UUID的支持</strong> 
--[x]  <strong>SurrealID::ULID的支持</strong> 
--[x]  <strong>SurrealID::RAND的支持</strong> 
--[x]  <strong>SurrealID::Range的支持</strong> 
+- [x] <strong>SurrealID::Default的支持</strong> 
+- [x] <strong>SurrealID::Int的支持</strong> 
+- [x] <strong>SurrealID::Float的支持</strong> 
+- [x] <strong>SurrealID::String的支持</strong> 
+- [x]  <strong>SurrealID::Array的支持</strong> 
+- [x]  <strong>SurrealID::UUID的支持</strong> 
+- [x]  <strong>SurrealID::ULID的支持</strong> 
+- [x]  <strong>SurrealID::RAND的支持</strong> 
+- [x]  <strong>SurrealID::Range的支持</strong> 
 
 
 
