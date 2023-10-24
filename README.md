@@ -91,19 +91,15 @@ The configuration file address can be set to：
 - ./configs/Surrealism.toml
 - ./templates/Surrealism.toml
 
-> ❗note：当前SurrealDB仍处于开发阶段，对应连接鉴权方式：NS和DB并为支持，所以使用Surrealism进行配置时请以Root方式进行鉴权连接，不要设置ns和db！
->
-> ❗note：Currently, SurrealDB is still in the development stage, and the corresponding connection authentication methods are supported: NS and DB. Therefore, when using Surrealsm for configuration, please use Root mode for authentication connections and do not set ns and db!
-
 #### Surrealism.json(JSON)
 ```json
 {
-	"username" : "root"
-	"password" : "syf20020816"
-	"bind" : "127.0.0.1:10086"
-	"mode" : "Memory"
+	"username" : "root",
+	"password" : "syf20020816",
+	"bind" : "127.0.0.1:10086",
+	"mode" : "Memory",
 	"log" : "Info",
-    "local": true
+    "local": true,
 }
 ```
 #### Surrealism.toml(TOML)
