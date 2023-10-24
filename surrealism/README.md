@@ -263,15 +263,15 @@ full = ["row", "builder", "surreal"]
 ### ID 表ID
 
 
-    <li><li><input type="checkbox" checked disabled />  <strong>SurrealID::Default的支持</strong> 
-    <li><input type="checkbox" checked disabled/>  <strong>SurrealID::Int的支持</strong> 
-    <li><input type="checkbox" checked disabled/>  <strong>SurrealID::Float的支持</strong> 
-    <li><input type="checkbox" checked disabled/>  <strong>SurrealID::String的支持</strong> 
-    <li><input type="checkbox" checked disabled/>  <strong>SurrealID::Array的支持</strong> 
-    <li><input type="checkbox" checked disabled/>  <strong>SurrealID::UUID的支持</strong> 
-    <li><input type="checkbox" checked disabled/>  <strong>SurrealID::ULID的支持</strong> 
-    <li><input type="checkbox" checked disabled/>  <strong>SurrealID::RAND的支持</strong> 
-    <li><input type="checkbox" checked disabled/>  <strong>SurrealID::Range的支持</strong> 
+-[x] <strong>SurrealID::Default的支持</strong> 
+-[x]   <strong>SurrealID::Int的支持</strong> 
+-[x]  <strong>SurrealID::Float的支持</strong> 
+-[x]  <strong>SurrealID::String的支持</strong> 
+-[x]  <strong>SurrealID::Array的支持</strong> 
+-[x]  <strong>SurrealID::UUID的支持</strong> 
+-[x]  <strong>SurrealID::ULID的支持</strong> 
+-[x]  <strong>SurrealID::RAND的支持</strong> 
+-[x]  <strong>SurrealID::Range的支持</strong> 
 
 
 
@@ -471,7 +471,7 @@ full = ["row", "builder", "surreal"]
 ## Assert
 
 
-    <li><input type="checkbox"  disabled />  <strong>ASSERT</strong> 
+- [ ] <strong>ASSERT</strong> 
 - [x]  <strong>WHERE</strong> 
 - [x]  <strong>Condition</strong> 
 - [x]  <strong>Criteria</strong> 
@@ -506,7 +506,7 @@ full = ["row", "builder", "surreal"]
 
 
 - [x]  <strong>RowSql的支持</strong> 
-    <li><input type="checkbox" checked disabled/>  <strong>row_sql!宏</strong> 
+- [x]  <strong>row_sql!宏</strong> 
 
 
 ## Operators
