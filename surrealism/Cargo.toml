@@ -7,7 +7,7 @@ authors = ["syf20020816@outlook.com"]
 license = "MIT"
 repository = "https://github.com/Surrealism-All/Surrealism"
 documentation = "https://github.com/Surrealism-All/Surrealism/wiki"
-keywords = ["surrealism", "surrealdb","sql builder","sqlbuilder","sql","nosql"]
+keywords = ["surrealism", "surrealdb","sql builder","sqlbuilder","sql"]
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 [features]
