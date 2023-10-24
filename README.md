@@ -15,7 +15,7 @@ MIT
 
 ## Surrealism Introduction
 
-<img src="https://github.com/syf20020816/Surrealism/blob/main/logo.png" />
+<img src="https://github.com/Surrealism-All/Surrealism/blob/0.3.0/README/imgs/logo.png" />
 
 Surrealism依托于Surrealdb提供的Rust官方标准库:surrealdb,目的是构建一种更加统一，简单的方式对Surrealdb数据库进行各类操作
 
@@ -121,11 +121,11 @@ local = true
 
 #### open surrealdb
 
-![image-20231024165545355](E:\Rust\try\Surrealism\surrealism_all\README\imgs\image-20231024165545355.png)
+![image-20231024165545355](https://github.com/Surrealism-All/Surrealism/blob/0.3.0/README/imgs/image-20231024165545355.png)
 
 #### define ns,db,table first
 
-![image-20231024165607517](E:\Rust\try\Surrealism\surrealism_all\README\imgs\image-20231024165607517.png)
+![image-20231024165607517](https://github.com/Surrealism-All/Surrealism/blob/0.3.0/README/imgs/image-20231024165607517.png)
 
 ### main.rs
 
