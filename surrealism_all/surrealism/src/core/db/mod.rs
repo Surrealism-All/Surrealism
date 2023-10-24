@@ -14,6 +14,7 @@ mod geo;
 pub mod functions;
 mod duration_adapter;
 mod datetime_adapter;
+mod with;
 
 pub use sql::*;
 pub use value::*;
@@ -29,6 +30,7 @@ pub use geo::*;
 pub use decimal::Decimal;
 pub use duration_adapter::DurationAdapter;
 pub use datetime_adapter::DatetimeAdapter;
+pub use with::With;
 
 
 /// Trans Adapter to SurrealValue

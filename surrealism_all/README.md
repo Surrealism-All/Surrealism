@@ -1,12 +1,12 @@
-<img src="https://img.shields.io/badge/surrealism-0.2.2-orange?style=flat-square&logo=rust&logoColor=%23fff&labelColor=%23DEA584&color=%23DEA584">  <img src="https://img.shields.io/badge/License-MIT-orange?style=flat-square&logoColor=%23fff&labelColor=%2323B898&color=%2323B898">
+<img src="https://img.shields.io/badge/surrealism-0.3.0-orange?style=flat-square&logo=rust&logoColor=%23fff&labelColor=%23DEA584&color=%23DEA584">  <img src="https://img.shields.io/badge/License-MIT-orange?style=flat-square&logoColor=%23fff&labelColor=%2323B898&color=%2323B898">
 
 # Surrealism
 
 - author：syf20020816@outlook.com
 - docName：Surrealism README
 - createDate：20230506
-- updateDate：20230904
-- version：0.2.2
+- updateDate：20231024
+- version：0.3.0
 - email：syf20020816@outlook.com
 
 ## LICEMSE
@@ -27,24 +27,31 @@ Surrealism relies on Surrealdb's official Rust standard library:surrealdb,The pu
 
 ```toml
 [dependencies]
-surrealism = {version="0.2.2"}
+surrealism = {version="0.3.0"}
 tokio = { version = "1.28.0", features = ["macros", "rt-multi-thread"] }
 ```
 
 ### add configuration
 配置：
 
- -  surreal:单机本地连接Single还是分布式连接Multi
- -  username:用户名
- -  password:密码
- -  auth:连接鉴权方式(Root,NS,DB)
- -  url:连接地址
- -  port:连接端口
- -  mode:连接模式（Memory表示内存File表示存到文件中）
- -  path:存储到文件中的文件地址，使用Memory设置为""即可
- -  log:日志
- -  ns:命名空间名称 (auth = NS)⛔
- -  db:数据库名称 (auth = DB)⛔
+```
+username:用户名
+password:密码
+local:本机连接(本机使用ws,远程使用wss)
+bind: 连接地址,
+auth:开启权限认证
+tick_interval:运行节点代理tick的间隔（包括垃圾收集），默认为10秒
+strict:严格模式
+mode:连接模式（Memory表示内存File表示存到文件中，Tikv表示tikv集群地址）
+path:存储到文件中的文件地址，使用Memory则无需设置
+log:日志级别
+query_timeout:设置查询超时时间
+transaction_timeout: 事务超时时间
+no_banner: 打印Banner
+db_connection: 数据库连接行为
+http_server: 服务器行为
+capabilities: 能力
+```
 
 可采用JSON或TOML两种配置文件方式
 
@@ -57,17 +64,24 @@ tokio = { version = "1.28.0", features = ["macros", "rt-multi-thread"] }
 
 configuration：
 
-- surreal: Single machine local connection or distributed connection Multi
-- username: username
-- password: Password
-- auth: Connection authentication method (Root, NS, DB)
-- url: Connection address
-- port: Connection port
-- mode: Connection mode (Memory represents memory, File represents saving to a file)
-- path: The file address stored in the file can be set to '' using 'Memory'
-- log: log
-- ns: namespace name (auth=NS) ⛔
-- db: Database name (auth=DB) ⛔
+```
+username: db username
+password: db password
+local: Local connection (using ws locally, using wss remotely)
+bind: Connection address,
+auth:Enable permission authentication
+tick_interval:The interval between running node agent tickets (including garbage collection), which defaults to 10 seconds
+strict:strict mode
+mode:Connection mode (Memory represents memory, File represents storage to file, Tikv represents Tikv cluster address)
+path:The file address stored in the file, which does not need to be set when using Memory
+log:log level
+query_timeout:Set query timeout time
+transaction_timeout: Transaction timeout time
+no_banner: Print Banner
+db_connection: database connection behavior
+http_server: server behavior
+capabilities: db Capabilities
+```
 
 Two configuration file methods can be used: JSON or TOML
 
@@ -84,29 +98,23 @@ The configuration file address can be set to：
 #### Surrealism.json(JSON)
 ```json
 {
-	"surreal" : "Single"
-	"auth" : "Root"
 	"username" : "root"
 	"password" : "syf20020816"
-	"url" : "127.0.0.1"
-	"port" : 10086
+	"bind" : "127.0.0.1:10086"
 	"mode" : "Memory"
-	"path" : "E:/Rust/surreal"
-	"log" : {"level" : "Info", "print" : true,"path" : "E:/surrealism/log" }
+	"log" : "Info",
+    "local": true
 }
 ```
 #### Surrealism.toml(TOML)
 ```toml
 [default]
-surreal = "Single"
-auth = "Root"
 username = "root"
 password = "syf20020816"
-url = "127.0.0.1"
-port = 10086
+bind = "127.0.0.1:10086"
 mode = "Memory"
-path = "E:/Rust/surreal"
-log = { level = "Info", print = true, path = "E:/surrealism/log" }
+log = "Info"
+local = true
 ```
 
 ### main.rs
@@ -212,7 +220,336 @@ Version {
 }
 ```
 
+# Surrealism ALL Supports
+
+## Features
+
+```toml
+default = ["builder"]
+row = []
+builder = []
+surreal = ["builder"]
+full = ["row", "builder", "surreal"]
+```
+
+### Configuration配置文件
+
+<form>
+    <input type="checkbox" checked disabled />  <strong>Surrealism.json支持</strong> <br />
+    <input type="checkbox" checked disabled />  <strong>Surrealism.toml支持</strong> <br />
+    <input type="checkbox" />  <strong>自定义构建支持(SurrealismConfig)</strong> <br />
+</form>
+
+
+### Init 初始化服务
+
+<form>
+    <input type="checkbox" checked disabled />  <strong>DefaultInitService 默认初始化服务的支持</strong> <br />
+    <input type="checkbox" />  <strong>自定义初始化服务的支持</strong> <br />
+</form>
+
+
+### ID 表ID
+
+<form>
+    <input type="checkbox" checked disabled />  <strong>SurrealID::Default的支持</strong> <br />
+    <input type="checkbox" checked disabled/>  <strong>SurrealID::Int的支持</strong> <br />
+    <input type="checkbox" checked disabled/>  <strong>SurrealID::Float的支持</strong> <br />
+    <input type="checkbox" checked disabled/>  <strong>SurrealID::String的支持</strong> <br />
+    <input type="checkbox" checked disabled/>  <strong>SurrealID::Array的支持</strong> <br />
+    <input type="checkbox" checked disabled/>  <strong>SurrealID::UUID的支持</strong> <br />
+    <input type="checkbox" checked disabled/>  <strong>SurrealID::ULID的支持</strong> <br />
+    <input type="checkbox" checked disabled/>  <strong>SurrealID::RAND的支持</strong> <br />
+    <input type="checkbox" checked disabled/>  <strong>SurrealID::Range的支持</strong> <br />
+</form>
+
+
+### Value 数据类型
+
+<form>
+    <input type="checkbox" checked disabled />  <strong>SurrealValue::None的支持</strong> <br />
+    <input type="checkbox" checked disabled />  <strong>SurrealValue::Null的支持</strong> <br />
+    <input type="checkbox" checked disabled />  <strong>SurrealValue::Int的支持</strong> <br />
+    <input type="checkbox" checked disabled />  <strong>SurrealValue::Float的支持</strong> <br />
+    <input type="checkbox" checked disabled />  <strong>SurrealValue::Decimal的支持</strong> <br />
+    <input type="checkbox" checked disabled />  <strong>SurrealValue::String的支持</strong> <br />
+    <input type="checkbox" checked disabled />  <strong>SurrealValue::Object的支持</strong> <br />
+    <input type="checkbox" checked disabled />  <strong>SurrealValue::Datetime的支持(DatetimeAdapter)</strong> <br />
+    <input type="checkbox" checked disabled />  <strong>SurrealValue::Duration的支持(DurationAdapter)</strong> <br />
+    <input type="checkbox" checked disabled />  <strong>SurrealValue::Array的支持</strong> <br />
+    <input type="checkbox" />  <strong>SurrealValue::Set的支持</strong> <br />
+    <input type="checkbox" />  <strong>SurrealValue::Option的支持</strong> <br />
+    <input type="checkbox" checked disabled />  <strong>SurrealValue::Geo的支持</strong> <br />
+    <input type="checkbox" />  <strong>SurrealValue::Record的支持</strong> <br />
+    <input type="checkbox" />  <strong>SurrealValue::Future的支持</strong> <br />
+    <input type="checkbox" checked disabled />  <strong>数学常数构建</strong> <br />
+    <input type="checkbox" checked disabled />  <strong>数学常数支持</strong> <br />
+</form>
+
+
+## Builder
+
+<form>
+    <input type="checkbox" checked disabled />  <strong>USE STMT</strong> <br />
+    <input type="checkbox" checked disabled />  <strong>CREATE STMT</strong> <br />
+    <input type="checkbox" checked disabled />  <strong>SELECT STMT</strong> <br />
+    <input type="checkbox" checked disabled />  <strong>LIVE SELECT STMT</strong> <br />
+    <input type="checkbox" checked disabled />  <strong>RELATE STMT</strong> <br />
+    <input type="checkbox" checked disabled />  <strong>UPDATE STMT</strong> <br />
+    <input type="checkbox" checked disabled />  <strong>INSERT STMT</strong> <br />
+    <input type="checkbox" checked disabled />  <strong>DELETE STMT</strong> <br />
+    <input type="checkbox" checked disabled />  <strong>INFO STMT</strong> <br />
+    <input type="checkbox" checked disabled />  <strong>TRANSACTION STMT</strong> <br />
+    <input type="checkbox" checked disabled />  <strong>DEFINE STMT</strong> <br />
+    <input type="checkbox" checked disabled />  <strong>REMOVE STMT</strong> <br />
+    <input type="checkbox" checked disabled />  <strong>SLEEP STMT</strong> <br />
+    <input type="checkbox" disabled />  <strong>LET STMT</strong> <br />
+    <input type="checkbox" disabled />  <strong>BEGIN STMT</strong> <br />
+    <input type="checkbox" disabled />  <strong>CANCEL STMT</strong> <br />
+    <input type="checkbox" disabled />  <strong>COMMIT STMT</strong> <br />
+    <input type="checkbox" disabled />  <strong>IF ELSE STMT</strong> <br />
+    <input type="checkbox" disabled />  <strong>FOR STMT</strong> <br />
+    <input type="checkbox" disabled />  <strong>BREAK STMT</strong> <br />
+    <input type="checkbox" disabled />  <strong>CONTINUE STMT</strong> <br />
+    <input type="checkbox" disabled />  <strong>KILL STMT</strong> <br />
+    <input type="checkbox" disabled />  <strong>THROW STMT</strong> <br />
+</form>
+
+
+### Use
+
+<form>
+    <input type="checkbox" checked disabled />  <strong>USE NS STMT</strong> <br />
+    <input type="checkbox" checked disabled />  <strong>USE DB STMT</strong> <br />
+</form>
+
+
+### Create
+
+<form>
+    <input type="checkbox" checked disabled />  <strong>CREATE CONTENT STMT</strong> <br />
+    <input type="checkbox" checked disabled />  <strong>CREATE SET STMT</strong> <br />
+    <input type="checkbox" checked disabled />  <strong>RETURN STMT</strong> <br />
+    <input type="checkbox" checked disabled />  <strong>TIMEOUT STMT</strong> <br />
+    <input type="checkbox" checked disabled />  <strong>PARALLEL STMT</strong> <br />
+</form>
+
+
+### Insert
+
+<form>
+    <input type="checkbox" checked disabled />  <strong>INSERT INTO STMT</strong> <br />
+    <input type="checkbox" checked disabled />  <strong>ON DUPLICATE KEY UPDATE STMT</strong> <br />
+</form>
+
+### Select
+
+<form>
+    <input type="checkbox" checked disabled />  <strong>FIELD</strong> <br />
+    <input type="checkbox" checked disabled />  <strong>OMIT</strong> <br />
+    <input type="checkbox" checked disabled />  <strong>WITH INDEX|NOINDEX</strong> <br />
+    <input type="checkbox" checked disabled />  <strong>FROM</strong> <br />
+    <input type="checkbox" checked disabled />  <strong>WHERE</strong> <br />
+    <input type="checkbox" checked disabled />  <strong>SPLIT</strong> <br />
+    <input type="checkbox" checked disabled />  <strong>GROUP</strong> <br />
+    <input type="checkbox" checked disabled />  <strong>ORDER</strong> <br />
+    <input type="checkbox" checked disabled />  <strong>LIMIT</strong> <br />
+    <input type="checkbox" checked disabled />  <strong>START</strong> <br />
+    <input type="checkbox" checked disabled />  <strong>FETCH</strong> <br />
+    <input type="checkbox" checked disabled />  <strong>TIMEOUT</strong> <br />
+    <input type="checkbox" checked disabled />  <strong>PARALLEL</strong> <br />
+    <input type="checkbox" checked disabled />  <strong>EXPLAIN [FULL]</strong> <br />
+</form>
+
+### Live Select
+
+<form>
+    <input type="checkbox" checked disabled />  <strong>FIELD</strong> <br />
+    <input type="checkbox" checked disabled />  <strong>FROM</strong> <br />
+    <input type="checkbox" checked disabled />  <strong>WHERE</strong> <br />
+    <input type="checkbox" checked disabled />  <strong>FETCH</strong> <br />
+</form>
+
+### Delete
+
+<form>
+    <input type="checkbox" checked disabled />  <strong>DELETE WHERE</strong> <br />
+    <input type="checkbox" checked disabled />  <strong>RETURN</strong> <br />
+    <input type="checkbox" checked disabled />  <strong>TIMEOUT</strong> <br />
+    <input type="checkbox" checked disabled />  <strong>PARALLEL</strong> <br />
+    <input type="checkbox" disabled />  <strong>DELETE WITH RELETE</strong> <br />
+</form>
+
+
+### Remove
+
+<form>
+    <input type="checkbox" checked disabled />  <strong>NAMESPACE</strong> <br />
+    <input type="checkbox" checked disabled />  <strong>DATABASE</strong> <br />
+    <input type="checkbox" checked disabled />  <strong>USER</strong> <br />
+    <input type="checkbox" checked disabled />  <strong>LOGIN</strong> <br />
+    <input type="checkbox" checked disabled />  <strong>TOKEN</strong> <br />
+    <input type="checkbox" checked disabled />  <strong>SCOPE</strong> <br />
+    <input type="checkbox" checked disabled />  <strong>TABLE</strong> <br />
+    <input type="checkbox" checked disabled />  <strong>EVENT</strong> <br />
+    <input type="checkbox" checked disabled />  <strong>FUNCTION</strong> <br />
+    <input type="checkbox" checked disabled />  <strong>FIELD</strong> <br />
+    <input type="checkbox" checked disabled />  <strong>INDEX</strong> <br />
+    <input type="checkbox" checked disabled />  <strong>PARAM</strong> <br />
+</form>
+
+### Update
+
+<form>
+    <input type="checkbox" checked disabled />  <strong>CONTENT</strong> <br />
+    <input type="checkbox" checked disabled />  <strong>MERGE</strong> <br />
+    <input type="checkbox" checked disabled />  <strong>PATCH</strong> <br />
+    <input type="checkbox" checked disabled />  <strong>SET</strong> <br />
+    <input type="checkbox" checked disabled />  <strong>WHERE</strong> <br />
+    <input type="checkbox" checked disabled />  <strong>RETURN</strong> <br />
+    <input type="checkbox" checked disabled />  <strong>TIMEOUT</strong> <br />
+    <input type="checkbox" checked disabled />  <strong>PARALLEL</strong> <br />
+</form>
+
+### Define
+
+<form>
+    <input type="checkbox" checked disabled />  <strong>NAMESPACE</strong> <br />
+    <input type="checkbox" checked disabled />  <strong>DATABASE</strong> <br />
+    <input type="checkbox" checked disabled />  <strong>USER</strong> <br />
+    <input type="checkbox" checked disabled />  <strong>LOGIN</strong> <br />
+    <input type="checkbox" checked disabled />  <strong>TOKEN</strong> <br />
+    <input type="checkbox" checked disabled />  <strong>SCOPE</strong> <br />
+    <input type="checkbox" checked disabled />  <strong>TABLE</strong> <br />
+    <input type="checkbox" checked disabled />  <strong>EVENT</strong> <br />
+    <input type="checkbox" checked disabled />  <strong>FUNCTION</strong> <br />
+    <input type="checkbox" checked disabled />  <strong>FIELD</strong> <br />
+    <input type="checkbox" checked disabled />  <strong>INDEX</strong> <br />
+    <input type="checkbox" checked disabled />  <strong>PARAM</strong> <br />
+    <input type="checkbox" disabled />  <strong>ANALYZER</strong> <br />
+</form>
+
+
+### Info
+
+<form>
+    <input type="checkbox" checked disabled />  <strong>KV</strong> <br />
+    <input type="checkbox" checked disabled />  <strong>NS</strong> <br />
+    <input type="checkbox" checked disabled />  <strong>DB</strong> <br />
+    <input type="checkbox" checked disabled />  <strong>SCOPE</strong> <br />
+    <input type="checkbox" checked disabled />  <strong>TABLE</strong> <br />
+</form>
+
+
+### Show
+
+<form>
+    <input type="checkbox" checked disabled />  <strong>SINCE</strong> <br />
+    <input type="checkbox" checked disabled />  <strong>LIMIT</strong> <br />
+</form>
+
+
+### Sleep
+
+<form>
+    <input type="checkbox" checked disabled />  <strong>Duration</strong> <br />
+</form>
+
+
+## Assert
+
+<form>
+    <input type="checkbox"  disabled />  <strong>ASSERT</strong> <br />
+    <input type="checkbox" checked disabled />  <strong>WHERE</strong> <br />
+    <input type="checkbox" checked disabled />  <strong>Condition</strong> <br />
+    <input type="checkbox" checked disabled />  <strong>Criteria</strong> <br />
+</form>
+
+
+## Functions
+
+<form>
+    <input type="checkbox" checked disabled />  <strong>Array</strong> <br />
+    <input type="checkbox" checked disabled />  <strong>Count</strong> <br />
+    <input type="checkbox" checked disabled />  <strong>Crypto</strong> <br />
+    <input type="checkbox" disabled />  <strong>Duration</strong> <br />
+    <input type="checkbox" disabled />  <strong>Geo</strong> <br />
+    <input type="checkbox" disabled />  <strong>HTTP</strong> <br />
+    <input type="checkbox" disabled />  <strong>Math</strong> <br />
+    <input type="checkbox" disabled />  <strong>Meta</strong> <br />
+    <input type="checkbox" disabled />  <strong>Parse</strong> <br />
+    <input type="checkbox" disabled />  <strong>Rand</strong> <br />
+    <input type="checkbox" disabled />  <strong>Search</strong> <br />
+    <input type="checkbox" disabled />  <strong>Session</strong> <br />
+    <input type="checkbox" disabled />  <strong>Sleep</strong> <br />
+    <input type="checkbox" disabled />  <strong>String</strong> <br />
+    <input type="checkbox" disabled />  <strong>Time</strong> <br />
+    <input type="checkbox" disabled />  <strong>Type</strong> <br />
+    <input type="checkbox" disabled />  <strong>Scripting</strong> <br />
+    <input type="checkbox" disabled />  <strong>Vector</strong> <br />
+</form>
+
+
+## Row
+
+<form>
+    <input type="checkbox" checked disabled />  <strong>RowSql的支持</strong> <br />
+    <input type="checkbox" checked disabled/>  <strong>row_sql!宏</strong> <br />
+</form>
+
+## Operators
+
+| Operator     | Description                                                  | Finish |
+| ------------ | ------------------------------------------------------------ | ------ |
+| && or AND    | Checks whether both of two values are truthy                 | ✅      |
+| \|\| or OR   | Checks whether either of two values is truthy                | ✅      |
+| ??           | Check whether either of two values are truthy and not `NULL` | ⛔      |
+| ?:           | Check whether either of two values are truthy                | ⛔      |
+| = or IS      | Check whether two values are equal                           | ✅      |
+| != or IS NOT | Check whether two values are not equal                       | ✅      |
+| ==           | Check whether two values are exactly equal                   | ✅      |
+| ?=           | Check whether any value in a set is equal to a value         | ⛔      |
+| *=           | Check whether all values in a set are equal to a value       | ⛔      |
+| ~            | Compare two values for equality using fuzzy matching         | ⛔      |
+| !~           | Compare two values for inequality using fuzzy matching       | ⛔      |
+| ?~           | Check whether any value in a set is equal to a value using fuzzy matching | ⛔      |
+| *~           | Check whether all values in a set are equal to a value using fuzzy matching | ⛔      |
+| <            | Check whether a value is less than another value             | ✅      |
+| <=           | Check whether a value is less than or equal to another value | ✅      |
+| >            | Check whether a value is greater than another value          | ✅      |
+| >=           | Check whether a value is greater than or equal to another value | ✅      |
+| +            | Add two values together                                      | ✅      |
+| -            | Subtract a value from another value                          | ✅      |
+| * or ×       | Multiply two values together                                 | ⛔      |
+| / or ÷       | Divide a value by another value                              | ⛔      |
+| **           | Raises a base value by another value                         | ⛔      |
+| IN           | Checks whether a value is contained within another value     | ⛔      |
+| NOT IN       | Checks whether a value is not contained within another value | ⛔      |
+| CONTAINS     | Checks whether a value contains another value                | ✅      |
+| CONTAINSNOT  | Checks whether a value does not contain another value        | ⛔      |
+| CONTAINSALL  | Checks whether a value contains all other values             | ⛔      |
+| CONTAINSANY  | Checks whether a value contains any other value              | ⛔      |
+| CONTAINSNONE | Checks whether a value contains none of the following values | ⛔      |
+| INSIDE       | Checks whether a value is contained within another value     | ⛔      |
+| NOTINSIDE    | Checks whether a value is not contained within another value | ⛔      |
+| ALLINSIDE    | Checks whether all values are contained within other values  | ⛔      |
+| ANYINSIDE    | Checks whether any value is contained within other values    | ⛔      |
+| NONEINSIDE   | Checks whether no value is contained within other values     | ⛔      |
+| OUTSIDE      | Checks whether a geometry type is outside of another geometry type | ⛔      |
+| INTERSECTS   | Checks whether a geometry type intersects another geometry type | ⛔      |
+| @@           | Checks whether the terms are found in a full-text indexed field | ⛔      |
+
+
+
 ## Update Des
+
+- 0.3.0：
+  - 重构init Service 和 config Service（Refactoring init service and config service）
+  - 优化SurrealValue（Optimize SurrealValue）
+  - 优化Field（Optimize Field）
+  - 增加With（Add With）
+  - 增加ShowWrapper（Add ShowWrapper）
+  - 优化SurrealDB 0.1.0版本更新的基础语句语法（Optimize the basic statement syntax for SurrealDB version 0.1.0 update）
 
 - 0.2.2：
   

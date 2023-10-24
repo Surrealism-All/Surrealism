@@ -44,11 +44,12 @@ pub trait UpdateWrapperImpl<'w>: BaseWrapperImpl + ReturnImpl + ParallelImpl + T
 /// the wrapper for UPDATE
 /// ## example
 /// ```rust
-/// use surrealism::db::{ SurrealID, TimeOut, SurrealValue, TimeUnit, ReturnType, Object, DefaultInitService, InitService, UseNSDB, SurrealismCommit, Operator, Condition, Criteria, CriteriaSign, ConditionSign, Patch};
+/// use surrealism::db::{ SurrealID, TimeOut, SurrealValue, TimeUnit, ReturnType, Object,  Operator, Condition, Criteria, CriteriaSign, ConditionSign, Patch};
 /// use surrealism::builder::*;
 /// use serde::{Serialize, Deserialize};
 /// use surrealism::builder::update::UpdateWrapperImpl;
-/// use surrealism::surreal::SurrealismRes;
+/// use surrealism::DefaultRes;
+///
 /// #[derive(Debug, Serialize, Deserialize)]
 /// struct Person<'a> {
 ///     name: &'a str,
@@ -56,14 +57,14 @@ pub trait UpdateWrapperImpl<'w>: BaseWrapperImpl + ReturnImpl + ParallelImpl + T
 ///     skills: Vec<&'a str>,
 /// }
 ///
-/// // [tests\src\main.rs:23] update1.build() = "UPDATE person:100 SET name = 'Tobie' , company = 'SurrealDB' , skills = ['Rust', 'Go', 'JS'];"
-/// // [tests\src\main.rs:35] update2.build() = "UPDATE city SET population = 954100 , interests -= 'Java' WHERE name = 'London';"
-/// // [tests\src\main.rs:46] update3.build() = "UPDATE person:rand() CONTENT { company : 'SurrealDB' , name : 'Tobie' , skills : ['Rust', 'Go', 'JS'] };"
-/// // [tests\src\main.rs:53] update4.build() = "UPDATE person:tobie MERGE settings:{ company : 'SurrealDB' , name : 'Tobie' , skills : ['Rust', 'Go', 'JS'] };"
-/// // [tests\src\main.rs:60] update5.build() = "UPDATE person:tobie PATCH [ {\"op\":\"add\",\"path\":\"Engineering\",\"value\":\"true\"} ];"
-/// // [tests\src\main.rs:72] update6.build() = "UPDATE person:rand() SET important = true WHERE -> knows -> person -> (knows WHERE influencer = true) TIMEOUT 5s;"
+/// // [tests\src\main.rs:30] update1.build() = "UPDATE person:100 SET name = 'Tobie' , company = 'SurrealDB' , skills = ['Rust', 'Go', 'JS'];"
+/// // [tests\src\main.rs:42] update2.build() = "UPDATE city SET population = 954100 , interests -= 'Java' WHERE name = 'London';"
+/// // [tests\src\main.rs:53] update3.build() = "UPDATE person CONTENT { company : 'SurrealDB' , name : 'Tobie' , skills : ['Rust', 'Go', 'JS'] };"
+/// // [tests\src\main.rs:60] update4.build() = "UPDATE person:tobie MERGE settings:{ company : 'SurrealDB' , name : 'Tobie' , skills : ['Rust', 'Go', 'JS'] };"
+/// // [tests\src\main.rs:67] update5.build() = "UPDATE person:tobie PATCH [ {\"op\":\"add\",\"path\":\"Engineering\",\"value\":\"true\"} ];"
+/// // [tests\src\main.rs:79] update6.build() = "UPDATE person SET important = true WHERE -> knows -> person -> (knows WHERE influencer = true) TIMEOUT 5s;"
 /// #[tokio::main]
-/// async fn main() -> SurrealismRes<()> {
+/// async fn main() -> DefaultRes<()> {
 ///     let mut update1 = SQLBuilderFactory::update()
 ///         .table("person")
 ///         .id(SurrealID::Int(100))
@@ -99,7 +100,7 @@ pub trait UpdateWrapperImpl<'w>: BaseWrapperImpl + ReturnImpl + ParallelImpl + T
 ///
 ///     let mut update4 = SQLBuilderFactory::update()
 ///         .table("person")
-///         .id(SurrealID::Str("tobie".to_string()))
+///         .id("tobie".into())
 ///         .merge(&person)
 ///         .deref_mut();
 ///     dbg!(update4.build());

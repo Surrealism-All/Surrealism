@@ -16,12 +16,20 @@ use super::logger::LogLevel;
 /// Surrealism configuration
 /// username:用户名
 /// password:密码
+/// local:本机连接(本机使用ws,远程使用wss)
+/// bind: 连接地址,
 /// auth:开启权限认证
-/// url:连接地址
-/// port:连接端口
+/// tick_interval:运行节点代理tick的间隔（包括垃圾收集），默认为10秒
+/// strict:严格模式
 /// mode:连接模式（Memory表示内存File表示存到文件中，Tikv表示tikv集群地址）
 /// path:存储到文件中的文件地址，使用Memory则无需设置
 /// log:日志级别
+/// query_timeout:设置查询超时时间
+/// transaction_timeout: 事务超时时间
+/// no_banner: 打印Banner
+/// db_connection: 数据库连接行为
+/// http_server: 服务器行为
+/// capabilities: 能力
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub struct SurrealismConfig {
     username: String,

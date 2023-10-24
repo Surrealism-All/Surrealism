@@ -7,8 +7,8 @@
     "withGlobalTauri": false
   },
   "package": {
-    "productName": "surrealism-cli",
-    "version": "0.0.0"
+    "productName": "surrealism-mg",
+    "version": "0.0.1"
   },
   "tauri": {
     "allowlist": {
@@ -34,7 +34,7 @@
       {
         "fullscreen": false,
         "resizable": true,
-        "title": "surrealism-cli",
+        "title": "surrealism-mg",
         "width": 1200,
         "height": 720
       }

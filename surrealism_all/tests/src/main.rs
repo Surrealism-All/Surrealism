@@ -1,20 +1,63 @@
-use std::ops::DerefMut;
+use surrealism::db::{DefaultInitService, InitService, SurrealID, SurrealismCommit, SurrealismConnector, SurrealismRes, Table, UseNSDB};
 use surrealism::builder::{BaseWrapperImpl, SQLBuilderFactory, TableImpl};
-use surrealism::builder::define::{FieldColumn, OnType, Permissions, PwdType, Schema, TokenType};
+use surrealism::builder::create::{CreateWrapper, CreateWrapperImpl};
+use serde::{Serialize, Deserialize};
 use surrealism::builder::select::SelectWrapperImpl;
-use surrealism::db::{AdapterToValue, Condition, ConditionSign, Criteria, CriteriaSign, Role, SurrealValue, TimeOut, TimeUnit, ValueConstructor, ValueType};
-use surrealism::db::functions::Function;
-use surrealism::DefaultRes;
+use surrealism::surreal::{parse_response, SurrealismRes};
 
-// [tests\src\main.rs:19] define1 = "DEFINE FIELD metadata ON TABLE user FLEXIBLE TYPE object;"
+#[derive(Debug, Clone, Serialize, Deserialize)]
+struct User {
+    username: String,
+    pwd: String,
+    male: bool,
+    age: u8,
+}
+
+/// create a new user table
+/// table_name:user
+/// table_id:surrealism
+pub fn crate_user_table() -> CreateWrapper {
+    // create a user data
+    let user = User {
+        username: "Tobie".to_string(),
+        pwd: "Tobie001".to_string(),
+        male: true,
+        age: 23,
+    };
+    // create table with content
+    let user_table = SQLBuilderFactory::create()
+        .table("user")
+        .id("surrealism".into())
+        .content(&user)
+        .deref_mut();
+    user_table
+}
+
 #[tokio::main]
-async fn main() -> DefaultRes<()> {
-    let define1 = SQLBuilderFactory::define().field(
-        "metadata","user",ValueConstructor::new(
-            ValueType::Object,None,None,None,true
-        ),None
-    ).build();
-    dbg!(define1);
-
+async fn main() -> SurrealismRes<()> {
+    // init service
+    let mut service = DefaultInitService::new().init();
+    // use ns:test and db:test
+    let _ = service.use_commit("test", "test").await?;
+    // get info from surrealdb
+    // let info = SQLBuilderFactory::info().db().build();
+    // let info_res = service.commit_sql(&info).await?;
+    // dbg!(info_res);
+    // create a table
+    let create_stmt = crate_user_table().build();
+    let create_res = service.commit_sql(&create_stmt).await?;
+    // dbg!(create_res);
+    // select user::surrealism table
+    let select = SQLBuilderFactory::select().table("user").id(SurrealID::from("surrealism")).column("*", None).build();
+    let select_res = service.commit_sql(&select).await?;
+    //parse response to any type you want
+    let res: User = parse_response(select_res);
+    // [tests\src\main.rs:55] res = User {
+    //     username: "Tobie",
+    //     pwd: "Tobie001",
+    //     male: true,
+    //     age: 23,
+    // }
+    dbg!(&res);
     Ok(())
 }
