@@ -6,11 +6,19 @@ mod field;
 mod user;
 mod token;
 mod event;
+mod index;
+mod param;
+mod function;
+mod analyzer;
 
 pub use ns::DefineNS;
 pub use db::DefineDB;
 pub use table::DefineTable;
-pub use event::
+pub use event::DefineEvent;
+pub use scope::DefineScope;
+pub use user::DefineUser;
+pub use token::DefineToken;
+pub use field::DefineField;
 
 //! # Define Wrapper
 //! ```txt
@@ -26,42 +34,6 @@ use crate::db::constants::{ROLES, DEFINE_USER, NAMESPACE, DATABASE, PASSHASH, PA
 use crate::core::db::{Condition, ParamCombine, SurrealValue, TimeOut, ValueConstructor, Role, TimeUnit};
 
 
-
-/// DEFINE TOKEN @name ON [ NAMESPACE | DATABASE | SCOPE @scope ] TYPE @type VALUE @value
-TOKEN {
-
-},
-/// DEFINE EVENT @name ON [ TABLE ] @table WHEN @expression THEN @expression
-EVENT {
-name: & 'w str,
-on: & 'w str,
-when: Condition,
-then: & 'w str,
-},
-FUNCTION {
-name: & 'w str,
-args: Vec< & 'w str>,
-query: & 'w str,
-returned: & 'w str,
-},
-FIELD {
-name: & 'w str,
-on: & 'w str,
-value: ValueConstructor,
-permissions: Option<Permissions>,
-},
-/// DEFINE INDEX @name ON [ TABLE ] @table [ FIELDS | COLUMNS ] @fields [ UNIQUE ]
-INDEX {
-name: & 'w str,
-on: & 'w str,
-field_column: FieldColumn<'w >,
-unique: bool,
-},
-/// DEFINE PARAM $@name VALUE @value;
-PARAM {
-name: & 'w str,
-value: SurrealValue,
-},
 /// # DefineWrapper
 /// The DEFINE statement can be used to specify authentication access and behaviour, global parameters, table configurations, table events, schema definitions, and indexes.
 /// ## example
