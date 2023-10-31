@@ -9,6 +9,7 @@ use std::fmt::{Display, Formatter};
 use serde::{Serialize, Deserialize};
 use super::constants::{AFTER, BEFORE, NONE, DIFF, MINUTE, MILLISECOND, SECOND, HOUR, DAY, TIMEOUT, RETURN, ADD_OP, MINUS_OP, DIVIDE_OP, PLUS_OP, EQ};
 use crate::db::{SurrealID, ParamCombine};
+use crate::db::constants::{MICROSECOND, NANOSECOND, YEAR};
 
 /// # build Table with ID
 /// If you don't want to specify the type, you can create it directly using `new_into()`
@@ -176,19 +177,35 @@ impl ParamCombine for ReturnType {
 }
 
 ///在SurrealDB数据库中，Timeout子句可以用于设置查询的超时时间。它接受一个时间间隔作为参数，并支持以下单位：
-///
-///     ms：毫秒
-///     s：秒
-///     m：分钟
-///     h：小时
-///     d：天
+/// - ns：纳秒
+/// - us | µs ：微秒
+/// - ms：毫秒
+/// - s：秒
+/// - m：分钟
+/// - h：小时
+/// - d：天
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
 pub enum TimeUnit {
+    NANOSECOND,
+    MICROSECOND,
     MILLISECOND,
     SECOND,
     MINUTE,
     HOUR,
     DAY,
+    Year,
+}
+
+impl Default for TimeUnit {
+    fn default() -> Self {
+        TimeUnit::MILLISECOND
+    }
+}
+
+impl Display for TimeUnit {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{}", self.to_str())
+    }
 }
 
 impl TimeUnit {
@@ -198,7 +215,10 @@ impl TimeUnit {
             TimeUnit::SECOND => SECOND,
             TimeUnit::MINUTE => MINUTE,
             TimeUnit::HOUR => HOUR,
-            TimeUnit::DAY => DAY
+            TimeUnit::DAY => DAY,
+            TimeUnit::NANOSECOND => NANOSECOND,
+            TimeUnit::MICROSECOND => MICROSECOND,
+            TimeUnit::Year => YEAR
         }
     }
     pub fn get_unit(&self) -> &str {
@@ -207,7 +227,10 @@ impl TimeUnit {
             TimeUnit::SECOND => "s",
             TimeUnit::MINUTE => "m",
             TimeUnit::HOUR => "h",
-            TimeUnit::DAY => "d"
+            TimeUnit::DAY => "d",
+            TimeUnit::NANOSECOND => "ns",
+            TimeUnit::MICROSECOND => "us",
+            TimeUnit::Year => "y"
         }
     }
 }
@@ -226,6 +249,15 @@ impl TimeUnit {
 pub struct TimeOut {
     timeout: Option<usize>,
     unit: TimeUnit,
+}
+
+impl Default for TimeOut {
+    fn default() -> Self {
+        TimeOut {
+            timeout: None,
+            unit: TimeUnit::MILLISECOND,
+        }
+    }
 }
 
 impl TimeOut {
@@ -259,7 +291,13 @@ impl TimeOut {
 
 impl ParamCombine for TimeOut {
     fn combine(&self) -> String {
-        format!("{} {}{}", TIMEOUT, &self.timeout().unwrap(), &self.unit().get_unit())
+        self.to_string()
+    }
+}
+
+impl Display for TimeOut {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{} {}{}", TIMEOUT, &self.timeout().unwrap(), &self.unit().get_unit())
     }
 }
 

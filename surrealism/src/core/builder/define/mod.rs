@@ -1,3 +1,17 @@
+mod ns;
+mod db;
+mod table;
+mod scope;
+mod field;
+mod user;
+mod token;
+mod event;
+
+pub use ns::DefineNS;
+pub use db::DefineDB;
+pub use table::DefineTable;
+pub use event::
+
 //! # Define Wrapper
 //! ```txt
 //! @author:syf20020816@Outlook.com
@@ -9,9 +23,45 @@
 
 use std::fmt::{Display, Formatter};
 use crate::db::constants::{ROLES, DEFINE_USER, NAMESPACE, DATABASE, PASSHASH, PASSWORD, ROOT, TABLE, DEFINE_DB, DEFINE_NS, DEFINE_LOGIN, DEFINE_SCOPE, STMT_END, ON, TYPE, SCOPE, PS256, PS384, PS512, EDDSA, ES256, ES384, ES512, HS256, HS384, HS512, RS256, RS384, RS512, VALUE, DEFINE_TOKEN, SCHEMA_FULL, SCHEMA_LESS, SIGN_IN, SIGN_UP, DROP, DEFINE_TABLE, BLANK, NONE, FULL, FOR, DEFINE_EVENT, ON_TABLE, WHEN, THEN, DEFINE_FUNCTION, RETURN, DEFINE_FIELD, FIELDS, COLUMNS, DEFINE_INDEX, UNIQUE, DEFINE_PARAM};
-use crate::core::db::{Condition, ParamCombine, SurrealValue, TimeOut, ValueConstructor, Role};
+use crate::core::db::{Condition, ParamCombine, SurrealValue, TimeOut, ValueConstructor, Role, TimeUnit};
 
 
+
+/// DEFINE TOKEN @name ON [ NAMESPACE | DATABASE | SCOPE @scope ] TYPE @type VALUE @value
+TOKEN {
+
+},
+/// DEFINE EVENT @name ON [ TABLE ] @table WHEN @expression THEN @expression
+EVENT {
+name: & 'w str,
+on: & 'w str,
+when: Condition,
+then: & 'w str,
+},
+FUNCTION {
+name: & 'w str,
+args: Vec< & 'w str>,
+query: & 'w str,
+returned: & 'w str,
+},
+FIELD {
+name: & 'w str,
+on: & 'w str,
+value: ValueConstructor,
+permissions: Option<Permissions>,
+},
+/// DEFINE INDEX @name ON [ TABLE ] @table [ FIELDS | COLUMNS ] @fields [ UNIQUE ]
+INDEX {
+name: & 'w str,
+on: & 'w str,
+field_column: FieldColumn<'w >,
+unique: bool,
+},
+/// DEFINE PARAM $@name VALUE @value;
+PARAM {
+name: & 'w str,
+value: SurrealValue,
+},
 /// # DefineWrapper
 /// The DEFINE statement can be used to specify authentication access and behaviour, global parameters, table configurations, table events, schema definitions, and indexes.
 /// ## example
@@ -72,79 +122,11 @@ use crate::core::db::{Condition, ParamCombine, SurrealValue, TimeOut, ValueConst
 /// }
 /// ```
 #[derive(Debug, Clone)]
-pub enum DefineWrapper<'w> {
-    NONE,
-    NAMESPACE(&'w str),
-    DATABASE(&'w str),
-    /// DEFINE LOGIN @name ON [ NAMESPACE | DATABASE ] [ PASSWORD @pass | PASSHASH @hash ]
-    LOGIN {
-        name: &'w str,
-        on: OnType<'w>,
-        pwd: PwdType<'w>,
-    },
-    /// DEFINE TOKEN @name ON [ NAMESPACE | DATABASE | SCOPE @scope ] TYPE @type VALUE @value
-    TOKEN {
-        name: &'w str,
-        on: OnType<'w>,
-        token_type: TokenType,
-        value: &'w str,
-    },
-    /// DEFINE SCOPE @name SESSION @duration SIGNUP @expression SIGNIN @expression
-    SCOPE {
-        name: &'w str,
-        session: TimeOut,
-        sign_up: &'w str,
-        sign_in: &'w str,
-    },
-    TABLE {
-        name: &'w str,
-        drop: bool,
-        schema: Option<Schema>,
-        as_expression: Option<&'w str>,
-        permissions: Option<Permissions>,
-    },
-    /// DEFINE EVENT @name ON [ TABLE ] @table WHEN @expression THEN @expression
-    EVENT {
-        name: &'w str,
-        on: &'w str,
-        when: Condition,
-        then: &'w str,
-    },
-    FUNCTION {
-        name: &'w str,
-        args: Vec<&'w str>,
-        query: &'w str,
-        returned: &'w str,
-    },
-    FIELD {
-        name: &'w str,
-        on: &'w str,
-        value: ValueConstructor,
-        permissions: Option<Permissions>,
-    },
-    /// DEFINE INDEX @name ON [ TABLE ] @table [ FIELDS | COLUMNS ] @fields [ UNIQUE ]
-    INDEX {
-        name: &'w str,
-        on: &'w str,
-        field_column: FieldColumn<'w>,
-        unique: bool,
-    },
-    /// DEFINE PARAM $@name VALUE @value;
-    PARAM {
-        name: &'w str,
-        value: SurrealValue,
-    },
-    USER {
-        username: &'w str,
-        on: OnType<'w>,
-        password: PwdType<'w>,
-        role: Role,
-    },
-}
+pub struct DefineWrapper<'w> {}
 
 impl<'w> DefineWrapper<'w> {
     pub fn new() -> Self {
-        DefineWrapper::NONE
+        DefineWrapper
     }
     pub fn user(&self, username: &'w str, password: PwdType<'w>, on: OnType<'w>, role: Role) -> Self {
         if on.is_scope() { panic!("OnType::SCOPE can not be used in Define User") }
@@ -158,14 +140,14 @@ impl<'w> DefineWrapper<'w> {
     }
     /// SurrealDB有一个多租户模型，它允许您将数据库的范围限定到一个名称空间。数据库的数量没有限制 可以在名称空间中，也没有对允许的名称空间的数量的限制。只有root用户有权 创建命名空间。
     /// - 您必须作为root用户进行身份验证，才能使用`DEFINE NAMESPACE`声明。
-    pub fn namespace(&self, ns: &'w str) -> Self {
-        DefineWrapper::NAMESPACE(ns)
+    pub fn ns<'w>(self) -> DefineNS<'w> {
+        DefineNS::default()
     }
     /// 该DEFINE DATABASE 语句使您可以实例化命名数据库，从而可以指定 安全和配置选项。
     /// - 必须以root用户或命名空间用户身份进行身份验证，然后才能使用DEFINE DATABASE 声明。
     /// - 必须选择命名空间 才能使用DEFINE DATABASE 声明。
-    pub fn db(&self, db: &'w str) -> Self {
-        DefineWrapper::DATABASE(db)
+    pub fn db<'w>(&self) -> DefineDB<'w> {
+        DefineDB::default()
     }
     ///使用DEFINE LOGIN 语句在SurrealDB上创建用户帐户
     ///- 必须以root或命名空间用户身份进行身份验证，才能使用DEFINE LOGIN 声明。
@@ -210,15 +192,7 @@ impl<'w> DefineWrapper<'w> {
     /// 该DEFINE TABLE 语句允许您按名称声明表，从而可以应用严格的 控件添加到表的架构中，方法是将SCHEMAFULL，创建外部表视图，并设置权限 指定可以在字段上执行什么操作。
     /// - 必须作为根用户、命名空间用户或数据库用户进行身份验证，才能使用DEFINE TABLE 声明。
     /// - 必须选择命名空间和数据库 才能使用DEFINE TABLE 声明。
-    pub fn table(&self, name: &'w str, drop: bool, schema: Option<Schema>, as_expression: Option<&'w str>, permissions: Option<Permissions>) -> Self {
-        DefineWrapper::TABLE {
-            name,
-            drop,
-            schema,
-            as_expression,
-            permissions,
-        }
-    }
+    pub fn table() -> Self {}
     /// 事件可以在对记录中的数据进行任何更改或修改之后触发。每个触发器都能看到 The$before 和/或$after 值，从而为每个触发器启用高级自定义逻辑。
     /// - 必须作为根用户、命名空间用户或数据库用户进行身份验证，才能使用DEFINE EVENT 声明。
     /// - 必须选择命名空间和数据库 才能使用DEFINE EVENT 声明。
@@ -343,6 +317,12 @@ pub enum OnType<'o> {
     SCOPE(&'o str),
 }
 
+impl<'o> Default for OnType<'o> {
+    fn default() -> Self {
+        OnType::ROOT
+    }
+}
+
 impl<'o> Display for OnType<'o> {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
         let res = match self {
@@ -422,9 +402,14 @@ pub enum TokenType {
     RS512,
 }
 
+impl Default for TokenType{
+    fn default() -> Self {
+        TokenType::HS512
+    }
+}
+
 impl Display for TokenType {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
-        // let mut res = format!("{} ", TYPE);
         let res = match self {
             TokenType::EDDSA => EDDSA,
             TokenType::ES256 => ES256,

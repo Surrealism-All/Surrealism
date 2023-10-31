@@ -961,6 +961,12 @@ pub enum Role {
     VIEWER,
 }
 
+impl Default for Role {
+    fn default() -> Self {
+        Role::OWNER
+    }
+}
+
 impl Display for Role {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
         write!(f, "{}", match self {

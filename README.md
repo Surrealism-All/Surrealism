@@ -433,7 +433,7 @@ full = ["row", "builder", "surreal"]
 - [x]  <strong>FIELD</strong> 
 - [x]  <strong>INDEX</strong> 
 - [x]  <strong>PARAM</strong> 
-- [ ] <strong>ANALYZER</strong> 
+- [x] <strong>ANALYZER</strong> 
 
 
 
@@ -550,6 +550,10 @@ full = ["row", "builder", "surreal"]
 
 ## Update Des
 
+- 0.3.1：
+  - 重构Define语句且补全DEFINE ANALYSIS
+  - 
+
 - 0.3.0：
   - 重构init Service 和 config Service（Refactoring init service and config service）
   - 优化SurrealValue（Optimize SurrealValue）
@@ -590,3 +594,6 @@ full = ["row", "builder", "surreal"]
   - 分离语句构造和语句提交（Separate statement construction and statement submission）
 
 - 0.1.1：更新配置，增加基于Namespace和Database的支持，但是基于当前SurrealDB无法支持，所以并不能使用🥲（Update the configuration and add support based on Namespace and Database, but it cannot be used due to the current SurrealDB support 🥲）
+
+
+
