@@ -19,6 +19,10 @@ pub use scope::DefineScope;
 pub use user::DefineUser;
 pub use token::DefineToken;
 pub use field::DefineField;
+pub use analyzer::DefineAnalyzer;
+pub use function::DefineFunction;
+pub use param::DefineParam;
+pub use index::DefineIndex;
 
 //! # Define Wrapper
 //! ```txt
@@ -38,61 +42,6 @@ use crate::core::db::{Condition, ParamCombine, SurrealValue, TimeOut, ValueConst
 /// The DEFINE statement can be used to specify authentication access and behaviour, global parameters, table configurations, table events, schema definitions, and indexes.
 /// ## example
 /// ```rust
-/// use surrealism::db::{Condition, ConditionSign, Criteria, CriteriaSign,  SurrealValue, TimeOut, TimeUnit, ValueConstructor, ValueType};
-/// use surrealism::builder::*;
-/// use surrealism::surreal::SurrealismRes;
-/// use surrealism::builder::define::{FieldColumn, OnType, Permissions, PwdType, Schema, TokenType};
-///
-/// // [tests\src\main.rs:51] define1 = "DEFINE NAMESPACE abcum;"
-/// // [tests\src\main.rs:52] define2 = "DEFINE DATABASE app_vitalsense;"
-/// // [tests\src\main.rs:53] define3 = "DEFINE LOGIN username ON DATABASE PASSWORD 123456;"
-/// // [tests\src\main.rs:54] define4 = "DEFINE TOKEN token_name ON DATABASE TYPE HS512 VALUE sNSYneezcr8kqphfOC6NwwraUHJCVAt0XjsRSNmssBaBRh3WyMa9TRfq8ST7fsU2H2kGiOpU4GbAF1bCiXmM1b3JGgleBzz7rsrz6VvYEM4q3CLkcO8CMBIlhwhzWmy8;"
-/// // [tests\src\main.rs:55] define5 = "DEFINE TOKEN token_name ON SCOPE account TYPE HS512 VALUE sNSYneezcr8kqphfOC6NwwraUHJCVAt0XjsRSNmssBaBRh3WyMa9TRfq8ST7fsU2H2kGiOpU4GbAF1bCiXmM1b3JGgleBzz7rsrz6VvYEM4q3CLkcO8CMBIlhwhzWmy8;"
-/// // [tests\src\main.rs:56] define6 = "DEFINE SCOPE account TIMEOUT 24h SIGNUP ( CREATE user SET email = $email, pass = crypto::argon2::generate($pass) ) SIGNIN ( SELECT * FROM user WHERE email = $email AND crypto::argon2::compare(pass,
-/// // $pass) );"
-/// // [tests\src\main.rs:57] define7 = "DEFINE TABLE post SCHEMALESS FOR WHERE published = true OR user = '$auth.id' FOR WHERE user = '$auth.id' FOR WHERE user = '$auth.id' FOR WHERE user = '$auth.id' OR $auth.admin = true;"
-/// // [tests\src\main.rs:58] define8 = "DEFINE TABLE temperatures_by_month SELECT count() AS total,time::month(recorded_at) AS month,math::mean(temperature) AS average_temp FROM reading GROUP BY city;"
-/// // [tests\src\main.rs:59] define9 = "DEFINE EVENT publish_post ON TABLE publish_post WHEN $event = 'CREATE' THEN UPDATE post SET status = \"PUBLISHED\" WHERE id = $after.post_id;"
-/// // [tests\src\main.rs:60] define10 = "DEFINE FUNCTION fn::greet($name:string) {  RETURN \"Hello, \" + $name + \"!\"; };"
-/// // [tests\src\main.rs:61] define11 = "DEFINE FIELD email ON TABLE user TYPE string;"
-/// // [tests\src\main.rs:62] define12 = "DEFINE FIELD countrycode ON TABLE user TYPE string VALUE $value OR 'GBR' ASSERT $value != 'NONE' AND $value = '/[A-Z]{3}/';"
-/// // [tests\src\main.rs:63] define13 = "DEFINE INDEX userEmailIndex ON TABLE user COLUMNS email UNIQUE;"
-/// // [tests\src\main.rs:64] define14 = "DEFINE PARAM $endpointBase VALUE 'https://dummyjson.com';"
-/// #[tokio::main]
-/// async fn main() -> SurrealismRes<()> {
-///     let define1 = SQLBuilderFactory::define().namespace("abcum").build();
-///     let define2 = SQLBuilderFactory::define().db("app_vitalsense").build();
-///     let define3 = SQLBuilderFactory::define()
-///         .login("username", OnType::DB, PwdType::Pwd("123456")).build();
-///     let define4 = SQLBuilderFactory::define()
-///         .token("token_name", OnType::DB, TokenType::HS512, "sNSYneezcr8kqphfOC6NwwraUHJCVAt0XjsRSNmssBaBRh3WyMa9TRfq8ST7fsU2H2kGiOpU4GbAF1bCiXmM1b3JGgleBzz7rsrz6VvYEM4q3CLkcO8CMBIlhwhzWmy8").build();
-///     let define5 = SQLBuilderFactory::define()
-///         .token("token_name", OnType::SCOPE("account"), TokenType::HS512, "sNSYneezcr8kqphfOC6NwwraUHJCVAt0XjsRSNmssBaBRh3WyMa9TRfq8ST7fsU2H2kGiOpU4GbAF1bCiXmM1b3JGgleBzz7rsrz6VvYEM4q3CLkcO8CMBIlhwhzWmy8").build();
-///     let define6 = SQLBuilderFactory::define().scope("account", TimeOut::new(24, TimeUnit::HOUR), "CREATE user SET email = $email, pass = crypto::argon2::generate($pass)", "SELECT * FROM user WHERE email = $email AND crypto::argon2::compare(pass, $pass)").build();
-///     let define7 = SQLBuilderFactory::define()
-///         .table("post", false, Some(Schema::SCHEMALESS), None, Some(
-///             Permissions::FOR {
-///                 select: Condition::new().push(Criteria::new("published", true, CriteriaSign::Eq), ConditionSign::Or).push(Criteria::new("user", "$auth.id", CriteriaSign::Eq), ConditionSign::None).deref_mut(),
-///                 create: Condition::new().push(Criteria::new("user", "$auth.id", CriteriaSign::Eq), ConditionSign::None).deref_mut(),
-///                 update: Condition::new().push(Criteria::new("user", "$auth.id", CriteriaSign::Eq), ConditionSign::None).deref_mut(),
-///                 delete: Condition::new().push(Criteria::new("user", "$auth.id", CriteriaSign::Eq), ConditionSign::Or).push(Criteria::new("$auth.admin", true, CriteriaSign::Eq), ConditionSign::None).deref_mut(),
-///             }
-///         )).build();
-///     let define8 = SQLBuilderFactory::define()
-///         .table("temperatures_by_month", false, None, Some("SELECT count() AS total,time::month(recorded_at) AS month,math::mean(temperature) AS average_temp FROM reading GROUP BY city"), None).build();
-///
-///
-///     let define9 = SQLBuilderFactory::define()
-///         .event("publish_post", "publish_post", Condition::new().push(Criteria::new_event("CREATE", CriteriaSign::Eq), ConditionSign::None).deref_mut(), r#"UPDATE post SET status = "PUBLISHED" WHERE id = $after.post_id"#).build();
-///
-///     let define10 = SQLBuilderFactory::define()
-///         .function("greet", vec!["$name:string"], "", r#""Hello, " + $name + "!""#).build();
-///     let define13 = SQLBuilderFactory::define().index("userEmailIndex", "user", FieldColumn::COLUMNS(vec!["email"]), true).build();
-///     let define14 = SQLBuilderFactory::define().param("endpointBase", SurrealValue::from("https://dummyjson.com")).build();
-///
-///     Ok(())
-/// }
-/// ```
 #[derive(Debug, Clone)]
 pub struct DefineWrapper<'w> {}
 
@@ -100,15 +49,13 @@ impl<'w> DefineWrapper<'w> {
     pub fn new() -> Self {
         DefineWrapper
     }
-    pub fn user(&self, username: &'w str, password: PwdType<'w>, on: OnType<'w>, role: Role) -> Self {
-        if on.is_scope() { panic!("OnType::SCOPE can not be used in Define User") }
-        if on.is_table() { panic!("OnType::TABLE can not be used in Define User") }
-        DefineWrapper::USER {
-            username,
-            on,
-            password,
-            role,
-        }
+    ///使用DEFINE USER语句在SurrealDB上创建用户帐户
+    ///- 必须以root或命名空间用户身份进行身份验证，才能使用DEFINE USER 声明。
+    ///- 必须以root、命名空间或数据库用户身份进行身份验证，才能使用DEFINE USER 声明。
+    ///- 必须选择命名空间和/或数据库 才能使用DEFINE USER 声明。
+    /// > 注意：您不能使用DEFINE USER 语句创建根或SCOPE 用户。
+    pub fn user(self) -> DefineUser<'w> {
+       DefineUser::default()
     }
     /// SurrealDB有一个多租户模型，它允许您将数据库的范围限定到一个名称空间。数据库的数量没有限制 可以在名称空间中，也没有对允许的名称空间的数量的限制。只有root用户有权 创建命名空间。
     /// - 您必须作为root用户进行身份验证，才能使用`DEFINE NAMESPACE`声明。
@@ -118,25 +65,10 @@ impl<'w> DefineWrapper<'w> {
     /// 该DEFINE DATABASE 语句使您可以实例化命名数据库，从而可以指定 安全和配置选项。
     /// - 必须以root用户或命名空间用户身份进行身份验证，然后才能使用DEFINE DATABASE 声明。
     /// - 必须选择命名空间 才能使用DEFINE DATABASE 声明。
-    pub fn db<'w>(&self) -> DefineDB<'w> {
+    pub fn db<'w>(self) -> DefineDB<'w> {
         DefineDB::default()
     }
-    ///使用DEFINE LOGIN 语句在SurrealDB上创建用户帐户
-    ///- 必须以root或命名空间用户身份进行身份验证，才能使用DEFINE LOGIN 声明。
-    ///- 必须以root、命名空间或数据库用户身份进行身份验证，才能使用DEFINE LOGIN 声明。
-    ///- 必须选择命名空间和/或数据库 才能使用DEFINE LOGIN 声明。
-    /// > 注意：您不能使用DEFINE LOGIN 语句创建根或SCOPE 用户。
-    pub fn login(&self, name: &'w str, on: OnType<'w>, pwd: PwdType<'w>) -> Self {
-        return if !on.is_scope() {
-            DefineWrapper::LOGIN {
-                name,
-                on,
-                pwd,
-            }
-        } else {
-            panic!("OnType::SCOPE use in Define Token")
-        };
-    }
+
     ///  SurrealDB可以与第三方OAuth提供商合作。假设您的提供者在您的服务通过身份验证后向其发布JWT。 通过使用DEFINE TOKEN 语句，您可以设置验证JWT真实性所需的公钥。
     ///
     /// 您可以指定什么TYPE 您的令牌使用的加密签名算法。支持以下算法：
@@ -145,69 +77,41 @@ impl<'w> DefineWrapper<'w> {
     /// - 到DEFINE TOKEN ... ON DATABASE ... 必须具有根、命名空间或数据库级别的访问权限。
     /// - 到DEFINE TOKEN ... ON SCOPE ... 必须具有根、命名空间或数据库级别的访问权限。
     /// - 必须选择命名空间和/或数据库 才能使用DEFINE DATABASE 数据库或命名空间标记的语句。
-    pub fn token(&self, name: &'w str, on: OnType<'w>, token_type: TokenType, value: &'w str) -> Self {
-        DefineWrapper::TOKEN {
-            name,
-            on,
-            token_type,
-            value,
-        }
+    pub fn token(self) ->DefineToken<'w>{
+        DefineToken::default()
     }
-    pub fn scope(&self, name: &'w str, session: TimeOut, sign_up: &'w str, sign_in: &'w str) -> Self {
-        DefineWrapper::SCOPE {
-            name,
-            session,
-            sign_up,
-            sign_in,
-        }
+    pub fn scope(self) -> DefineScope {
+        DefineScope::default()
     }
     /// 该DEFINE TABLE 语句允许您按名称声明表，从而可以应用严格的 控件添加到表的架构中，方法是将SCHEMAFULL，创建外部表视图，并设置权限 指定可以在字段上执行什么操作。
     /// - 必须作为根用户、命名空间用户或数据库用户进行身份验证，才能使用DEFINE TABLE 声明。
     /// - 必须选择命名空间和数据库 才能使用DEFINE TABLE 声明。
-    pub fn table() -> Self {}
+    pub fn table(self) -> DefineTable {
+        DefineTable::default()
+    }
     /// 事件可以在对记录中的数据进行任何更改或修改之后触发。每个触发器都能看到 The$before 和/或$after 值，从而为每个触发器启用高级自定义逻辑。
     /// - 必须作为根用户、命名空间用户或数据库用户进行身份验证，才能使用DEFINE EVENT 声明。
     /// - 必须选择命名空间和数据库 才能使用DEFINE EVENT 声明。
-    pub fn event(&self, name: &'w str, on: &'w str, when: Condition, then: &'w str) -> Self {
-        DefineWrapper::EVENT {
-            name,
-            on,
-            when,
-            then,
-        }
+    pub fn event(self) -> DefineEvent {
+        DefineEvent::def
     }
     /// 该DEFINE FUNCTION 语句允许您定义可在整个数据库中重用的自定义函数。
     /// - 必须作为根用户、命名空间用户或数据库用户进行身份验证，才能使用DEFINE FUNCTION 声明。
     /// - 必须选择命名空间和数据库 才能使用DEFINE FUNCTION 声明。
-    pub fn function(&self, name: &'w str, args: Vec<&'w str>, query: &'w str, returned: &'w str) -> Self {
-        DefineWrapper::FUNCTION {
-            name,
-            args,
-            query,
-            returned,
-        }
+    pub fn function(self) -> DefineFunction {
+       DefineFunction::default()
     }
     /// 该DEFINE FIELD 语句允许您实例化表中的命名字段，使您能够设置 字段的数据类型、设置默认值、应用断言以保护数据一致性以及设置权限 指定可以在字段上执行什么操作。
     /// - 必须作为根用户、命名空间用户或数据库用户进行身份验证，才能使用DEFINE FIELD 声明。
     /// - 必须选择命名空间和数据库 才能使用DEFINE FIELD 声明。
     pub fn field(&self, name: &'w str, on: &'w str, value: ValueConstructor, permissions: Option<Permissions>) -> Self {
-        DefineWrapper::FIELD {
-            name,
-            on,
-            value,
-            permissions,
-        }
+        DefineField::def
     }
     /// 就像在其他数据库中一样，SurrealDB使用索引来帮助优化查询性能。索引可以包括 表中的一个或多个字段，并且可以强制唯一性约束。如果您不希望索引具有 唯一性约束，则为索引选择的字段应具有高度的基数， 这意味着在索引表记录中的数据之间存在大量的多样性。
     /// - 必须作为根用户、命名空间用户或数据库用户进行身份验证，才能使用DEFINE INDEX 声明。
     /// - 必须选择命名空间和数据库 才能使用DEFINE INDEX 声明。
-    pub fn index(&self, name: &'w str, on: &'w str, field_column: FieldColumn<'w>, unique: bool) -> Self {
-        DefineWrapper::INDEX {
-            name,
-            on,
-            field_column,
-            unique,
-        }
+    pub fn index() -> DefineIndex {
+        DefineIndex::default()
     }
     /// 该DEFINE PARAM 语句允许您定义可用于每个客户端的全局（数据库范围）参数。
     /// - 必须作为根用户、命名空间用户或数据库用户进行身份验证，才能使用DEFINE PARAM 声明。
@@ -445,6 +349,12 @@ impl Display for Permissions {
 pub enum FieldColumn<'f> {
     FIELDS(Vec<&'f str>),
     COLUMNS(Vec<&'f str>),
+}
+
+impl<'f> From<Vec<&'f str>> for FieldColumn<'f> {
+    fn from(value: Vec<&'f str>) -> Self {
+        FieldColumn::COLUMNS(value)
+    }
 }
 
 impl<'f> Display for FieldColumn<'f> {
