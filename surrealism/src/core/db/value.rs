@@ -955,19 +955,19 @@ impl From<f64> for Number {
 /// EDITOR 	可以查看和编辑用户级别或更低级别的任何资源，但不能查看和编辑用户或令牌（IAM）资源它还为支持`PERMISSIONS`子句的子资源（表、字段等）赠款完全权限。
 /// VIEWER 	授予赠款以查看用户级别或更低级别的任何资源，但不能进行编辑。它还为支持`PERMISSIONS`子句的子资源（表、字段等）赠款查看权限。
 #[derive(Debug, Clone)]
-pub enum Role {
+pub enum Roles {
     OWNER,
     EDITOR,
     VIEWER,
 }
 
-impl Default for Role {
+impl Default for Roles {
     fn default() -> Self {
         Role::OWNER
     }
 }
 
-impl Display for Role {
+impl Display for Roles {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
         write!(f, "{}", match self {
             Role::OWNER => OWNER,

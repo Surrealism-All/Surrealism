@@ -13,7 +13,7 @@ use super::{OnType, TokenType};
 #[derive(Debug, Clone)]
 pub struct DefineToken<'a> {
     name: &'a str,
-    on: OnType<'a>,
+    on: Option<OnType<'a>>,
     token_type: TokenType,
     value: &'a str,
 }
@@ -22,8 +22,8 @@ impl<'a> Default for DefineToken<'a> {
     fn default() -> Self {
         DefineToken {
             name: "",
-            on: OnType::default(),
-            token_type: TokenType::defa,
+            on: None,
+            token_type: TokenType::default(),
             value: "",
         }
     }
@@ -33,10 +33,15 @@ impl<'a> Default for DefineToken<'a> {
 impl<'a> DefineToken<'a> {
     pub fn new(
         name: &'a str,
-        on: OnType<'a>,
+        on: Option<OnType<'a>>,
         token_type: TokenType,
         value: &'a str,
     ) -> Self {
+        if on.is_some() {
+            if !on.as_ref().unwrap().on_token() {
+                panic!("DEFINE TOKEN should use OnType::DB | OnType::NS | OnType::SCOPE!")
+            }
+        }
         DefineToken {
             name,
             on,
@@ -49,7 +54,10 @@ impl<'a> DefineToken<'a> {
         self
     }
     pub fn on(&mut self, on: OnType<'a>) -> &mut Self {
-        self.on = on;
+        if !on.as_ref().unwrap().on_token() {
+            panic!("DEFINE TOKEN should use OnType::DB | OnType::NS | OnType::SCOPE!")
+        }
+        self.on.replace(on);
         self
     }
     pub fn token_type(&mut self, token_type: TokenType) -> &mut Self {
@@ -67,6 +75,10 @@ impl<'a> DefineToken<'a> {
 
 impl<'a> Display for DefineToken<'a> {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        f.write_str(format!("{} {} {}",DEFINE_TOKEN,self.name,ON).as_str());
+        if self.on.is_some() {
+            f.write_str()
+        }
         write!(f, "{} {} {} {} {} {} {}{}", DEFINE_TOKEN, name, ON, on.to_string(), token_type.to_string(), VALUE, value, STMT_END)
     }
 }

@@ -7,34 +7,41 @@
 //! ```
 use std::fmt::{Display, Formatter};
 use crate::db::constants::{DEFINE_USER, ON, ROLES, STMT_END};
-use super::{OnType, PwdType, Role};
+use crate::db::Roles;
+
+use super::{OnType, PwdType};
 
 #[derive(Debug, Clone)]
 pub struct DefineUser<'a> {
     username: &'a str,
-    on: OnType<'a>,
-    password: PwdType<'a>,
-    role: Role,
+    on: Option<OnType<'a>>,
+    password: Option<PwdType<'a>>,
+    roles: Roles,
 }
 
 impl<'a> Default for DefineUser<'a> {
     fn default() -> Self {
         DefineUser {
             username: "",
-            on: OnType::default(),
-            password: PwdType::Pwd(""),
-            role: Role::default(),
+            on: Some(OnType::default()),
+            password: None,
+            roles: Roles::default(),
         }
     }
 }
 
 impl<'a> DefineUser<'a> {
-    pub fn new(name: &'a str, on: OnType<'a>, pwd: PwdType<'a>, role: Role) -> Self {
+    pub fn new(name: &'a str, on: Option<OnType<'a>>, pwd: Option<PwdType<'a>>, roles: Roles) -> Self {
+        if on.is_some() {
+            if !on.as_ref().unwrap().on_user() {
+                panic!("DEFINE USER should use OnType::ROOT | OnType::NS | OnType::DB!")
+            }
+        }
         DefineUser {
             username: name,
             on,
             password: pwd,
-            role,
+            roles,
         }
     }
     pub fn name(&mut self, name: &'a str) -> &mut Self {
@@ -42,15 +49,18 @@ impl<'a> DefineUser<'a> {
         self
     }
     pub fn on(&mut self, on: OnType) -> &mut Self {
-        self.on = on;
+        if !on.as_ref().unwrap().on_user() {
+            panic!("DEFINE USER should use OnType::ROOT | OnType::NS | OnType::DB!")
+        }
+        self.on.replace(on);
         self
     }
-    pub fn pwd(&mut self,pwd:PwdType)->&mut Self{
-        self.password = pwd;
+    pub fn pwd(&mut self, pwd: PwdType) -> &mut Self {
+        self.password.replace(pwd);
         self
     }
-    pub fn role(&mut self, role: Role)->&mut Self{
-        self.role = role;
+    pub fn role(&mut self, roles: Roles) -> &mut Self {
+        self.roles = roles;
         self
     }
     pub fn build(&self) -> String {
@@ -60,6 +70,6 @@ impl<'a> DefineUser<'a> {
 
 impl<'a> Display for DefineUser<'a> {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
-        write!(f, "{} {} {} {} {} {} {}{}", DEFINE_USER, self.username, ON, self.on.to_string(), self.password.to_string(), ROLES, self.role.to_string(), STMT_END)
+        write!(f, "{} {} {} {} {} {} {}{}", DEFINE_USER, self.username, ON, self.on.to_string(), self.password.to_string(), ROLES, self.roles.to_string(), STMT_END)
     }
 }

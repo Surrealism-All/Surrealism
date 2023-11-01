@@ -7,8 +7,8 @@
 //! ```
 use std::fmt::{Display, Formatter};
 use serde::{Serialize, Deserialize};
-use crate::db::{SurrealValue,ParamCombine};
-use super::constants::{EQ, LT, GT, GTE, LTE, LINK, NEQ, WHERE, AND, OR,CONTAINS};
+use crate::db::{SurrealValue, ParamCombine};
+use super::constants::{EQ, LT, GT, GTE, LTE, LINK, NEQ, WHERE, AND, OR, CONTAINS};
 
 /// where condition for statment
 /// ## example
@@ -45,6 +45,12 @@ impl Condition {
         Condition(self.0.clone())
     }
     pub fn build(&self) -> String {
+        self.to_string()
+    }
+}
+
+impl Display for Condition {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
         let mut res = String::new();
         // pre for ConditionSign
         // use if ConditionSign::Links
@@ -64,7 +70,7 @@ impl Condition {
             };
             pre_pointer = sign.clone();
         }
-        res
+        write!(f, "{}", res)
     }
 }
 
@@ -92,7 +98,7 @@ impl Default for ConditionSign {
 
 impl Display for ConditionSign {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
-        write!(f,"{}",self.to_str())
+        write!(f, "{}", self.to_str())
     }
 }
 
@@ -170,14 +176,14 @@ impl Criteria {
         }
     }
     /// use when define field
-    pub fn new_field<T>(right: T, sign: CriteriaSign)-> Self where T: Serialize,{
+    pub fn new_field<T>(right: T, sign: CriteriaSign) -> Self where T: Serialize, {
         Criteria {
             left: String::from("$value"),
             right: SurrealValue::from(serde_json::to_value(right).unwrap()),
             sign,
         }
     }
-    pub fn new_event<T>(right: T, sign: CriteriaSign)-> Self where T: Serialize,{
+    pub fn new_event<T>(right: T, sign: CriteriaSign) -> Self where T: Serialize, {
         Criteria {
             left: String::from("$event"),
             right: SurrealValue::from(serde_json::to_value(right).unwrap()),
@@ -185,11 +191,11 @@ impl Criteria {
         }
     }
     /// This is a simple but unreasonable method to new Criteria
-    pub fn new_easy<T>(left: T, right: T, sign: CriteriaSign) ->Self where T:Serialize,{
-        Criteria{
-            left:  SurrealValue::from(serde_json::to_value(left).unwrap()).inner_str().unwrap(),
-            right:  SurrealValue::from(serde_json::to_value(right).unwrap()),
-            sign
+    pub fn new_easy<T>(left: T, right: T, sign: CriteriaSign) -> Self where T: Serialize, {
+        Criteria {
+            left: SurrealValue::from(serde_json::to_value(left).unwrap()).inner_str().unwrap(),
+            right: SurrealValue::from(serde_json::to_value(right).unwrap()),
+            sign,
         }
     }
     /// # Cheat Condition Builder
@@ -238,7 +244,7 @@ impl Criteria {
         }
     }
     /// consume self to SurrealValue
-    pub fn to_value(self)->SurrealValue{
+    pub fn to_value(self) -> SurrealValue {
         SurrealValue::from(self.build())
     }
 }
@@ -286,7 +292,7 @@ impl ParamCombine for CriteriaSign {
 
 impl Display for CriteriaSign {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
-        write!(f,"{}",self.to_str())
+        write!(f, "{}", self.to_str())
     }
 }
 

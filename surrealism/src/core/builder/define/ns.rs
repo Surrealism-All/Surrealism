@@ -1,4 +1,5 @@
 //! # Define NS
+//! DEFINE NAMESPACE @name
 //! ```txt
 //! @author:syf20020816@Outlook.com
 //! @date:2023/10/31

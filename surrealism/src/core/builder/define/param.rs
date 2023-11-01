@@ -48,6 +48,6 @@ impl<'a> DefineParam<'a> {
 
 impl<'a> Display for DefineParam<'a> {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
-        write!(f, "{} ${} {} {}{}", DEFINE_PARAM, name, VALUE, value.to_string(), STMT_END)
+        write!(f, "{} ${} {} {}{}", DEFINE_PARAM, self.name, VALUE, self.value.to_string(), STMT_END)
     }
 }

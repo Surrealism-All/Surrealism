@@ -55,7 +55,7 @@ impl<'w> DefineWrapper<'w> {
     ///- 必须选择命名空间和/或数据库 才能使用DEFINE USER 声明。
     /// > 注意：您不能使用DEFINE USER 语句创建根或SCOPE 用户。
     pub fn user(self) -> DefineUser<'w> {
-       DefineUser::default()
+        DefineUser::default()
     }
     /// SurrealDB有一个多租户模型，它允许您将数据库的范围限定到一个名称空间。数据库的数量没有限制 可以在名称空间中，也没有对允许的名称空间的数量的限制。只有root用户有权 创建命名空间。
     /// - 您必须作为root用户进行身份验证，才能使用`DEFINE NAMESPACE`声明。
@@ -77,7 +77,7 @@ impl<'w> DefineWrapper<'w> {
     /// - 到DEFINE TOKEN ... ON DATABASE ... 必须具有根、命名空间或数据库级别的访问权限。
     /// - 到DEFINE TOKEN ... ON SCOPE ... 必须具有根、命名空间或数据库级别的访问权限。
     /// - 必须选择命名空间和/或数据库 才能使用DEFINE DATABASE 数据库或命名空间标记的语句。
-    pub fn token(self) ->DefineToken<'w>{
+    pub fn token(self) -> DefineToken<'w> {
         DefineToken::default()
     }
     pub fn scope(self) -> DefineScope {
@@ -99,13 +99,13 @@ impl<'w> DefineWrapper<'w> {
     /// - 必须作为根用户、命名空间用户或数据库用户进行身份验证，才能使用DEFINE FUNCTION 声明。
     /// - 必须选择命名空间和数据库 才能使用DEFINE FUNCTION 声明。
     pub fn function(self) -> DefineFunction {
-       DefineFunction::default()
+        DefineFunction::default()
     }
     /// 该DEFINE FIELD 语句允许您实例化表中的命名字段，使您能够设置 字段的数据类型、设置默认值、应用断言以保护数据一致性以及设置权限 指定可以在字段上执行什么操作。
     /// - 必须作为根用户、命名空间用户或数据库用户进行身份验证，才能使用DEFINE FIELD 声明。
     /// - 必须选择命名空间和数据库 才能使用DEFINE FIELD 声明。
-    pub fn field(&self, name: &'w str, on: &'w str, value: ValueConstructor, permissions: Option<Permissions>) -> Self {
-        DefineField::def
+    pub fn field(self) -> DefineField {
+        DefineField
     }
     /// 就像在其他数据库中一样，SurrealDB使用索引来帮助优化查询性能。索引可以包括 表中的一个或多个字段，并且可以强制唯一性约束。如果您不希望索引具有 唯一性约束，则为索引选择的字段应具有高度的基数， 这意味着在索引表记录中的数据之间存在大量的多样性。
     /// - 必须作为根用户、命名空间用户或数据库用户进行身份验证，才能使用DEFINE INDEX 声明。
@@ -116,11 +116,8 @@ impl<'w> DefineWrapper<'w> {
     /// 该DEFINE PARAM 语句允许您定义可用于每个客户端的全局（数据库范围）参数。
     /// - 必须作为根用户、命名空间用户或数据库用户进行身份验证，才能使用DEFINE PARAM 声明。
     /// - 必须选择命名空间和数据库 才能使用DEFINE PARAM 声明。
-    pub fn param(&self, name: &'w str, value: SurrealValue) -> Self {
-        DefineWrapper::PARAM {
-            name,
-            value,
-        }
+    pub fn param(self) -> DefineParam {
+        DefineParam::default()
     }
     pub fn build(&self) -> String {
         match self {
@@ -158,7 +155,7 @@ impl<'w> DefineWrapper<'w> {
                 res
             }
             DefineWrapper::EVENT { name, on, when, then } =>
-                format!("{} {} {} {} {} {} {} {}{}", DEFINE_EVENT, name, ON_TABLE, on, WHEN, when.build(), THEN, then, STMT_END),
+            ,
             DefineWrapper::FUNCTION { name, args, query, returned } =>
                 format!("{} fn::{}({}){} {} {} {}{} {}{}", DEFINE_FUNCTION, name, args.join(" , "), "{", query, RETURN, returned, STMT_END, "}", STMT_END),
             DefineWrapper::FIELD { name, on, value, permissions } => {
@@ -243,6 +240,19 @@ impl<'o> OnType<'o> {
             _ => false
         }
     }
+    pub fn on_user(&self) -> bool {
+        match self {
+            OnType::ROOT | OnType::NS | OnType::DB => true,
+            _ => false
+        }
+    }
+    ///judge when in token
+    pub fn on_token(&self) -> bool {
+        match self {
+            OnType::DB | OnType::NS | OnType::SCOPE(_) => true,
+            _ => false
+        }
+    }
 }
 
 #[derive(Debug, Clone)]
@@ -278,7 +288,7 @@ pub enum TokenType {
     RS512,
 }
 
-impl Default for TokenType{
+impl Default for TokenType {
     fn default() -> Self {
         TokenType::HS512
     }

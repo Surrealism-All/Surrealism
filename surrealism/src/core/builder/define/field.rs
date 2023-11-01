@@ -6,10 +6,41 @@
 //! @description:
 //! ```
 
-#[derive(Debug,Clone)]
-pub struct DefineField<'a>{
-    name: & 'a str,
-    on: & 'a str,
+
+
+#[derive(Debug, Clone)]
+pub struct DefineField<'a> {
+    name: &'a str,
+    on:OnType<'a>,
     value: ValueConstructor,
     permissions: Option<Permissions>,
+
+}
+
+impl<'a> Default for DefineField<'a> {
+    fn default() -> Self {
+        DefineField {
+            name: "",
+            on: OnType::TABLE(""),
+            when: None,
+            then: "",
+        }
+    }
+}
+
+impl<'a> DefineField<'a> {
+    pub fn new(
+        name: &'a str,
+        on: OnType<'a>,
+        when: Option<Condition>,
+        then: &'a str,
+    )->Self{
+        DefineField{}
+    }
+}
+
+impl<'a> Display for DefineField<'a> {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        todo!()
+    }
 }
