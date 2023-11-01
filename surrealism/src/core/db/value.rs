@@ -874,6 +874,12 @@ impl ValueConstructor {
         }
     }
     pub fn build(&self) -> String {
+        self.to_string()
+    }
+}
+
+impl Display for ValueConstructor {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
         let mut res = if self.flexible {
             String::from("FLEXIBLE ")
         } else { String::new() };
@@ -890,7 +896,7 @@ impl ValueConstructor {
             res.push_str(BLANK);
             res.push_str(format!("ASSERT {}", self.assert.as_ref().unwrap().build()).as_str());
         }
-        res
+        write!(f, "{}", res)
     }
 }
 

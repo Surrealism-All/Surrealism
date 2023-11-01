@@ -17,7 +17,7 @@
 
 
 use std::fmt::{Display, Formatter};
-use crate::db::constants::{DEFINE_FUNCTION, RETURN, STMT_END};
+use crate::db::constants::{DEFINE_FUNCTION, LEFT_BRACE, RETURN, RIGHT_BRACE, STMT_END};
 
 #[derive(Debug, Clone)]
 pub struct DefineFunction<'a> {
@@ -29,11 +29,11 @@ pub struct DefineFunction<'a> {
 
 impl<'a> Default for DefineFunction<'a> {
     fn default() -> Self {
-        DefineFunction{
+        DefineFunction {
             name: "",
             args: None,
             query: None,
-            returned: None
+            returned: None,
         }
     }
 }
@@ -68,13 +68,23 @@ impl<'a> DefineFunction<'a> {
         self.returned.replace(returned);
         self
     }
-    pub fn build(&self)->String{
+    pub fn build(&self) -> String {
         self.to_string()
     }
 }
 
 impl<'a> Display for DefineFunction<'a> {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
-        write!(f, "{} fn::{}({}){} {} {} {}{} {}{}", DEFINE_FUNCTION, self.name, self.args.join(" , "), "{", query, RETURN, returned, STMT_END, "}", STMT_END)
+        write!(f, "{} fn::{}(", DEFINE_FUNCTION, self.name);
+        if let Some(args) = self.args.as_ref() {
+            write!(f, "{}) {}", args.join(", "), LEFT_BRACE);
+        }
+        if let Some(query) = self.query {
+            write!(f, "{}", query);
+        }
+        if let Some(returned) = self.returned {
+            write!(f, " {}", returned);
+        }
+        write!(f, "{}{}", RIGHT_BRACE, STMT_END)
     }
 }

@@ -158,15 +158,7 @@ impl<'w> DefineWrapper<'w> {
             ,
             DefineWrapper::FUNCTION { name, args, query, returned } =>
                 format!("{} fn::{}({}){} {} {} {}{} {}{}", DEFINE_FUNCTION, name, args.join(" , "), "{", query, RETURN, returned, STMT_END, "}", STMT_END),
-            DefineWrapper::FIELD { name, on, value, permissions } => {
-                let mut res = format!("{} {} {} {} {}", DEFINE_FIELD, name, ON_TABLE, on, value.build());
-                if permissions.is_some() {
-                    res.push_str(BLANK);
-                    res.push_str(&permissions.as_ref().unwrap().to_string())
-                }
-                res.push_str(STMT_END);
-                res
-            }
+            DefineWrapper::FIELD { name, on, value, permissions } => {}
             DefineWrapper::INDEX { name, on, field_column, unique } => {
                 let mut res = format!("{} {} {} {} {}", DEFINE_INDEX, name, ON_TABLE, on, field_column.to_string());
                 if *unique {
@@ -361,6 +353,12 @@ pub enum FieldColumn<'f> {
     COLUMNS(Vec<&'f str>),
 }
 
+impl<'f> Default for FieldColumn<'f> {
+    fn default() -> Self {
+        FieldColumn::COLUMNS(Vec::new())
+    }
+}
+
 impl<'f> From<Vec<&'f str>> for FieldColumn<'f> {
     fn from(value: Vec<&'f str>) -> Self {
         FieldColumn::COLUMNS(value)
@@ -369,10 +367,9 @@ impl<'f> From<Vec<&'f str>> for FieldColumn<'f> {
 
 impl<'f> Display for FieldColumn<'f> {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
-        let res = match self {
-            FieldColumn::FIELDS(f) => format!("{} {}", FIELDS, f.join(" , ")),
-            FieldColumn::COLUMNS(c) => format!("{} {}", COLUMNS, c.join(" , ")),
-        };
-        write!(f, "{}", res)
+        match self {
+            FieldColumn::FIELDS(f) => write!(f, "{} {}", FIELDS, f.join(" , ")),
+            FieldColumn::COLUMNS(c) => write!(f, "{} {}", COLUMNS, c.join(" , ")),
+        }
     }
 }

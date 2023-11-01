@@ -75,10 +75,10 @@ impl<'a> DefineToken<'a> {
 
 impl<'a> Display for DefineToken<'a> {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
-        f.write_str(format!("{} {} {}",DEFINE_TOKEN,self.name,ON).as_str());
-        if self.on.is_some() {
-            f.write_str()
+        write!(f, "{} {} {} ", DEFINE_TOKEN, self.name, ON);
+        if let Some(on) = self.on.as_ref() {
+            f.write_str(&on.to_string());
         }
-        write!(f, "{} {} {} {} {} {} {}{}", DEFINE_TOKEN, name, ON, on.to_string(), token_type.to_string(), VALUE, value, STMT_END)
+        write!(f, " {} {} {}{}", self.token_type.to_string(), VALUE, self.value, STMT_END)
     }
 }

@@ -66,14 +66,13 @@ impl<'a> DefineAnalyzer<'a> {
 
 impl<'a> Display for DefineAnalyzer<'a> {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
-        let mut res = format!("{} {}", DEFINE_ANALYZER, self.name);
-        if self.tokenizers.is_some() {
-            res.push_str(format!(" {} {}", TOKENIZERS, self.tokenizers.as_ref().unwrap().join(", ")).as_str());
+        write!(f,"{} {}", DEFINE_ANALYZER, self.name);
+        if let Some(tokenizers) = self.tokenizers.as_ref() {
+            write!(f," {} {}", TOKENIZERS, &tokenizers.join(", "));
         }
-        if self.filters.is_some() {
-            res.push_str(format!(" {} {}", FILTERS, self.filters.as_ref().unwrap().join(", ")).as_str())
+        if let Some(filters) =  self.filters.as_ref() {
+            write!(f," {} {}", FILTERS, filters.join(", "))
         }
-        res.push_str(STMT_END);
-        write!(f, "{}", res)
+        write!(f, "{}", STMT_END)
     }
 }

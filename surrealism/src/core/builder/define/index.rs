@@ -11,13 +11,14 @@
 //! ```
 
 use std::fmt::{Display, Formatter};
+use crate::db::constants::{DEFINE_INDEX, ON, STMT_END, UNIQUE};
 use super::{FieldColumn, OnType};
 
 #[derive(Debug, Clone)]
 pub struct DefineIndex<'a> {
     name: &'a str,
     on: OnType<'a>,
-    field_column: Option<FieldColumn<'a>>,
+    field_column: FieldColumn<'a>,
     unique_search: Option<UniqueSearch<'a>>,
 }
 
@@ -26,7 +27,7 @@ impl<'a> Default for DefineIndex<'a> {
         DefineIndex {
             name: "",
             on: OnType::TABLE(""),
-            field_column: None,
+            field_column: FieldColumn::default(),
             unique_search: None,
         }
     }
@@ -35,34 +36,42 @@ impl<'a> Default for DefineIndex<'a> {
 impl<'a> DefineIndex<'a> {
     pub fn new(
         name: &'a str,
-        on: OnType<'a>,
-        field_column: Option<FieldColumn<'a>>,
+        on: &'a str,
+        field_column: FieldColumn<'a>,
         unique_search: Option<UniqueSearch<'a>>,
-    )->Self{
-        DefineIndex{
+    ) -> Self {
+        DefineIndex {
             name,
-            on,
+            on: OnType::TABLE(on),
             field_column,
-            unique_search
+            unique_search,
         }
     }
-    pub fn name(&mut self,name:&'a str)->&mut Self{
+    pub fn name(&mut self, name: &'a str) -> &mut Self {
         self.name = name;
         self
     }
-    pub fn on(&mut self,on:OnType<'a>)->&mut Self{
-        self.on = on;
+    pub fn on(&mut self, on: &'a str) -> &mut Self {
+        self.on = OnType::TABLE(on);
         self
     }
-    pub fn field_column(&mut self,columns:FieldColumn)->&mut Self{
-        self.field_column.replace(columns);
+    pub fn field_column(&mut self, columns: FieldColumn) -> &mut Self {
+        self.field_column = columns;
+        self
+    }
+    pub fn unique_search(&mut self, unique_search: UniqueSearch) -> &mut Self {
+        self.unique_search.replace(unique_search);
         self
     }
 }
 
 impl<'a> Display for DefineIndex<'a> {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
-        todo!()
+        write!(f, "{} {} {} {} {}", DEFINE_INDEX, self.name, ON, &self.on.to_string(), &self.field_column.to_string());
+        if let Some(u_s) = self.unique_search.as_ref() {
+            write!(f, " {}", &u_s.to_string())
+        }
+        write!(f, "{}", STMT_END)
     }
 }
 
@@ -75,16 +84,74 @@ pub enum UniqueSearch<'u> {
     },
 }
 
-impl<'u> Default for UniqueSearch<'u>{
+impl<'u> Default for UniqueSearch<'u> {
     fn default() -> Self {
         UniqueSearch::Unique
     }
 }
 
-impl<'u> UniqueSearch<'u>{
+impl<'u> UniqueSearch<'u> {
+    pub fn unique() -> Self {
+        UniqueSearch::default()
+    }
+    /// Whole Params constructor -> Search
+    pub fn new(
+        analyzer: &'u str,
+        bm25: Option<Vec<(&'u str, &'u str)>>,
+        highlights: bool,
+    ) -> Self {
+        UniqueSearch::Search {
+            analyzer,
+            bm25,
+            highlights,
+        }
+    }
 
+    /// build a easy Search
+    pub fn search(analyzer: &'u str) -> Self {
+        UniqueSearch::Search {
+            analyzer,
+            bm25: None,
+            highlights: false,
+        }
+    }
+    /// push (@k1, @b) to UniqueSearch::Search BM25
+    pub fn push(&mut self, key: &'u str, value: &'u str) -> &mut Self {
+        match self {
+            UniqueSearch::Unique => panic!("push function can not use on UniqueSearch::Unique"),
+            UniqueSearch::Search { analyzer: _analyzer, bm25, highlights: _highlights } => {
+                bm25.as_mut().unwrap().push((key, value))
+            }
+        }
+        self
+    }
+
+    pub fn highlight(&mut self) -> &mut Self {
+        match self {
+            UniqueSearch::Unique => panic!("highlight function can not use on UniqueSearch::Unique"),
+            UniqueSearch::Search { analyzer: _analyzer, bm25: _bm25, highlights } => {
+                *highlights = true;
+            }
+        }
+        self
+    }
 }
 
-impl<'u> UniqueSearch<'u>{
-
+impl<'u> Display for UniqueSearch<'u> {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        match self {
+            UniqueSearch::Unique => {
+                write!(f, "{}", UNIQUE)
+            }
+            UniqueSearch::Search { analyzer, bm25, highlights } => {
+                write!(f, "SEARCH ANALYZER {}", analyzer);
+                if let Some(bm25) = bm25 {
+                    write!(f, " {}", bm25.join(", "));
+                }
+                if *highlights {
+                    write!(f, " {}", highlights)
+                }
+            }
+        }
+    }
 }

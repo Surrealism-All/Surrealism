@@ -32,16 +32,13 @@ impl<'a> Default for DefineEvent<'a> {
 impl<'a> DefineEvent<'a> {
     pub fn new(
         name: &'a str,
-        on: OnType<'a>,
+        on: &'a str,
         when: Option<Condition>,
         then: &'a str,
     ) -> Self {
-        if !on.is_table() {
-            panic!("Define Event should use OnType::TABLE!")
-        }
         DefineEvent {
             name,
-            on,
+            on: OnType::TABLE(on),
             when,
             then,
         }
@@ -50,11 +47,8 @@ impl<'a> DefineEvent<'a> {
         self.name = name;
         self
     }
-    pub fn on(&mut self, table: OnType<'a>) -> &mut Self {
-        if !table.is_table() {
-            panic!("Define Event should use OnType::TABLE!")
-        }
-        self.on = table;
+    pub fn on(&mut self, table: &'a str) -> &mut Self {
+        self.on = OnType::TABLE(table);
         self
     }
     pub fn when(&mut self, condition: Condition) -> &mut Self {
@@ -70,11 +64,10 @@ impl<'a> DefineEvent<'a> {
 
 impl<'a> Display for DefineEvent<'a> {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
-        let condition = match self.when.as_ref() {
-            None => String::new(),
-            Some(condition) => format!("{} {}", WHEN, condition.to_string())
+        write!(f, "{} {} {} {}", DEFINE_EVENT, self.name, ON_TABLE, self.on.to_string());
+        if let Some(condition) = self.when.as_ref() {
+            write!(f, " {} {}", WHEN, condition.to_string())
         };
-
-        write!(f, "{} {} {} {}  {} {} {}{}", DEFINE_EVENT, self.name, ON_TABLE, self.on.to_string(), condition, THEN, self.then, STMT_END)
+        write!(f, " {} {}{}", THEN, self.then, STMT_END)
     }
 }
