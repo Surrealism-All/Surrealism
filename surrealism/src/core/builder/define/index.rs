@@ -55,11 +55,11 @@ impl<'a> DefineIndex<'a> {
         self.on = OnType::TABLE(on);
         self
     }
-    pub fn field_column(&mut self, columns: FieldColumn) -> &mut Self {
+    pub fn field_column(&mut self, columns: FieldColumn<'a>) -> &mut Self {
         self.field_column = columns;
         self
     }
-    pub fn unique_search(&mut self, unique_search: UniqueSearch) -> &mut Self {
+    pub fn unique_search(&mut self, unique_search: UniqueSearch<'a>) -> &mut Self {
         self.unique_search.replace(unique_search);
         self
     }
@@ -69,12 +69,13 @@ impl<'a> Display for DefineIndex<'a> {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
         write!(f, "{} {} {} {} {}", DEFINE_INDEX, self.name, ON, &self.on.to_string(), &self.field_column.to_string());
         if let Some(u_s) = self.unique_search.as_ref() {
-            write!(f, " {}", &u_s.to_string())
+            write!(f, " {}", &u_s.to_string());
         }
         write!(f, "{}", STMT_END)
     }
 }
 
+#[derive(Debug, Clone, PartialEq)]
 pub enum UniqueSearch<'u> {
     Unique,
     Search {
@@ -146,11 +147,12 @@ impl<'u> Display for UniqueSearch<'u> {
             UniqueSearch::Search { analyzer, bm25, highlights } => {
                 write!(f, "SEARCH ANALYZER {}", analyzer);
                 if let Some(bm25) = bm25 {
-                    write!(f, " {}", bm25.join(", "));
+                    write!(f, " {}", bm25.iter().map(|(k,v)| format!("{}, {}",k,v)).collect::<Vec<String>>().join(", "));
                 }
                 if *highlights {
-                    write!(f, " {}", highlights)
+                    return write!(f, " {}", highlights);
                 }
+                Ok(())
             }
         }
     }

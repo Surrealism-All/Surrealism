@@ -71,7 +71,7 @@ impl<'a> Display for DefineAnalyzer<'a> {
             write!(f," {} {}", TOKENIZERS, &tokenizers.join(", "));
         }
         if let Some(filters) =  self.filters.as_ref() {
-            write!(f," {} {}", FILTERS, filters.join(", "))
+            write!(f," {} {}", FILTERS, filters.join(", "));
         }
         write!(f, "{}", STMT_END)
     }

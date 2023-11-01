@@ -33,7 +33,7 @@ impl<'a> DefineDB<'a> {
         self
     }
     pub fn build(&self) -> String {
-        DefineDB::to_string()
+        self.to_string()
     }
 }
 

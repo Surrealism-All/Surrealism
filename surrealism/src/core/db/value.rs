@@ -969,16 +969,16 @@ pub enum Roles {
 
 impl Default for Roles {
     fn default() -> Self {
-        Role::OWNER
+        Roles::OWNER
     }
 }
 
 impl Display for Roles {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
         write!(f, "{}", match self {
-            Role::OWNER => OWNER,
-            Role::EDITOR => EDITOR,
-            Role::VIEWER => VIEWER,
+            Roles::OWNER => OWNER,
+            Roles::EDITOR => EDITOR,
+            Roles::VIEWER => VIEWER,
         })
     }
 }

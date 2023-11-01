@@ -54,7 +54,7 @@ impl<'a> DefineToken<'a> {
         self
     }
     pub fn on(&mut self, on: OnType<'a>) -> &mut Self {
-        if !on.as_ref().unwrap().on_token() {
+        if !on.on_token() {
             panic!("DEFINE TOKEN should use OnType::DB | OnType::NS | OnType::SCOPE!")
         }
         self.on.replace(on);

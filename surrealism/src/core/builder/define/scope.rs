@@ -60,6 +60,6 @@ impl<'a> DefineScope<'a> {
 
 impl<'a> Display for DefineScope<'a> {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
-        write!(f, "{} {} {} {} ( {} ) {} ( {} ){}", DEFINE_SCOPE, name, session.combine(), SIGN_UP, sign_up, SIGN_IN, sign_in, STMT_END)
+        write!(f, "{} {} {} {} ( {} ) {} ( {} ){}", DEFINE_SCOPE, self.name, &self.session.to_string(), SIGN_UP, self.sign_up, SIGN_IN, self.sign_in, STMT_END)
     }
 }

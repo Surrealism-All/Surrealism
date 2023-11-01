@@ -66,8 +66,8 @@ impl<'a> Display for DefineEvent<'a> {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
         write!(f, "{} {} {} {}", DEFINE_EVENT, self.name, ON_TABLE, self.on.to_string());
         if let Some(condition) = self.when.as_ref() {
-            write!(f, " {} {}", WHEN, condition.to_string())
-        };
+            write!(f, " {} {}", WHEN, condition.to_string());
+        }
         write!(f, " {} {}{}", THEN, self.then, STMT_END)
     }
 }

@@ -44,18 +44,18 @@ impl<'a> DefineUser<'a> {
             roles,
         }
     }
-    pub fn name(&mut self, name: &'a str) -> &mut Self {
-        self.name = name;
+    pub fn name(&mut self, name: &'a str) -> &mut Self{
+        self.username = name;
         self
     }
-    pub fn on(&mut self, on: OnType) -> &mut Self {
-        if !on.as_ref().unwrap().on_user() {
+    pub fn on(&mut self, on: OnType<'a>) -> &mut Self {
+        if !on.on_user() {
             panic!("DEFINE USER should use OnType::ROOT | OnType::NS | OnType::DB!")
         }
         self.on.replace(on);
         self
     }
-    pub fn pwd(&mut self, pwd: PwdType) -> &mut Self {
+    pub fn pwd(&mut self, pwd: PwdType<'a>) -> &mut Self {
         self.password.replace(pwd);
         self
     }
@@ -64,12 +64,12 @@ impl<'a> DefineUser<'a> {
         self
     }
     pub fn build(&self) -> String {
-        DefineUser::to_string()
+        self.to_string()
     }
 }
 
 impl<'a> Display for DefineUser<'a> {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
-        write!(f, "{} {} {} {} {} {} {}{}", DEFINE_USER, self.username, ON, self.on.to_string(), self.password.to_string(), ROLES, self.roles.to_string(), STMT_END)
+        write!(f, "{} {} {} {} {} {} {}{}", DEFINE_USER, self.username, ON, &self.on.as_ref().unwrap().to_string(), &self.password.as_ref().unwrap().to_string(), ROLES, &self.roles.to_string(), STMT_END)
     }
 }

@@ -66,7 +66,7 @@ impl SQLBuilderFactory {
     pub fn transaction<'w>() -> Transaction<'w> {
         Transaction::new()
     }
-    pub fn define<'w>() -> DefineWrapper<'w> {
+    pub fn define() -> DefineWrapper {
         DefineWrapper::new()
     }
     pub fn remove<'w>() -> RemoveWrapper<'w> {

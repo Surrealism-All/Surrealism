@@ -34,7 +34,7 @@ impl<'a> DefineNS<'a> {
         self
     }
     pub fn build(&self) -> String {
-        DefineNS::to_string()
+        self.to_string()
     }
 }
 
