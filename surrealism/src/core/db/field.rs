@@ -8,7 +8,6 @@
 //! ```
 
 use std::fmt::{Display, Formatter};
-use crate::db::constants::BLANK;
 use crate::db::ParamCombine;
 use super::constants::{ALL, DIFF};
 

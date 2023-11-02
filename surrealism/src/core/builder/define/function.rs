@@ -17,7 +17,7 @@
 
 
 use std::fmt::{Display, Formatter};
-use crate::db::constants::{DEFINE_FUNCTION, LEFT_BRACE, RETURN, RIGHT_BRACE, STMT_END};
+use crate::db::constants::{DEFINE_FUNCTION, LEFT_BRACE, RIGHT_BRACE, STMT_END};
 
 #[derive(Debug, Clone)]
 pub struct DefineFunction<'a> {

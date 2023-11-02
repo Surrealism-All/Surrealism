@@ -7,7 +7,7 @@
 //! ```
 use std::fmt::{Display, Formatter};
 use super::{OnType};
-use crate::db::{Condition, ValueConstructor};
+use crate::db::{Condition};
 use crate::db::constants::{DEFINE_EVENT, ON_TABLE, STMT_END, THEN, WHEN};
 
 #[derive(Debug, Clone)]

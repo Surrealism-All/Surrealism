@@ -246,15 +246,11 @@ full = ["row", "builder", "surreal"]
 - [x]  <strong>Surrealism.toml支持</strong> 
 - [ ]   <strong>自定义构建支持(SurrealismConfig)</strong> 
 
-
-
 ### Init 初始化服务
 
 
 - [x]  <strong>DefaultInitService 默认初始化服务的支持</strong> 
 - [ ]   <strong>自定义初始化服务的支持</strong> 
-
-
 
 ### ID 表ID
 
@@ -267,8 +263,6 @@ full = ["row", "builder", "surreal"]
 - [x]  <strong>SurrealID::ULID的支持</strong> 
 - [x]  <strong>SurrealID::RAND的支持</strong> 
 - [x]  <strong>SurrealID::Range的支持</strong> 
-
-
 
 
 ### Value 数据类型
@@ -291,8 +285,6 @@ full = ["row", "builder", "surreal"]
 - [ ]   <strong>SurrealValue::Future的支持</strong> 
 - [x]  <strong>数学常数构建</strong> 
 - [x]  <strong>数学常数支持</strong> 
-
-
 
 ## Builder
 
@@ -318,18 +310,15 @@ full = ["row", "builder", "surreal"]
 - [ ] <strong>FOR STMT</strong> 
 - [ ] <strong>BREAK STMT</strong> 
 - [ ] <strong>CONTINUE STMT</strong> 
-- [ ] <strong>KILL STMT</strong> 
-- [ ] <strong>THROW STMT</strong> 
-
-
+- [x] <strong>KILL STMT</strong> 
+- [x] <strong>THROW STMT</strong> 
+- [x] <strong>RETURN STMT</strong> 
 
 ### Use
 
 
 - [x]  <strong>USE NS STMT</strong> 
 - [x]  <strong>USE DB STMT</strong> 
-
-
 
 ### Create
 
@@ -339,8 +328,6 @@ full = ["row", "builder", "surreal"]
 - [x]  <strong>RETURN STMT</strong> 
 - [x]  <strong>TIMEOUT STMT</strong> 
 - [x]  <strong>PARALLEL STMT</strong> 
-
-
 
 ### Insert
 
@@ -385,8 +372,6 @@ full = ["row", "builder", "surreal"]
 - [x]  <strong>TIMEOUT</strong> 
 - [x]  <strong>PARALLEL</strong> 
 - [ ] <strong>DELETE WITH RELETE</strong> 
-
-
 
 ### Remove
 
@@ -435,8 +420,6 @@ full = ["row", "builder", "surreal"]
 - [x]  <strong>PARAM</strong> 
 - [x] <strong>ANALYZER</strong> 
 
-
-
 ### Info
 
 
@@ -446,22 +429,16 @@ full = ["row", "builder", "surreal"]
 - [x]  <strong>SCOPE</strong> 
 - [x]  <strong>TABLE</strong> 
 
-
-
 ### Show
 
 
 - [x]  <strong>SINCE</strong> 
 - [x]  <strong>LIMIT</strong> 
 
-
-
 ### Sleep
 
 
 - [x]  <strong>Duration</strong> 
-
-
 
 ## Assert
 
@@ -470,8 +447,6 @@ full = ["row", "builder", "surreal"]
 - [x]  <strong>WHERE</strong> 
 - [x]  <strong>Condition</strong> 
 - [x]  <strong>Criteria</strong> 
-
-
 
 ## Functions
 
@@ -494,8 +469,6 @@ full = ["row", "builder", "surreal"]
 - [ ] <strong>Type</strong> 
 - [ ] <strong>Scripting</strong> 
 - [ ] <strong>Vector</strong> 
-
-
 
 ## Row
 
@@ -552,8 +525,11 @@ full = ["row", "builder", "surreal"]
 
 - 0.3.1：
   - 重构Define语句且补全DEFINE ANALYSIS
+  - 支持Return语句
+  - 支持Kill语句
+  - 支持Throw语句
   - 
-
+  
 - 0.3.0：
   - 重构init Service 和 config Service（Refactoring init service and config service）
   - 优化SurrealValue（Optimize SurrealValue）

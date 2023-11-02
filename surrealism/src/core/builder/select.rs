@@ -33,7 +33,7 @@ use std::fmt::{Display, Formatter};
 use crate::{timeout_lifetime_impl, parallel_lifetime_impl, table_lifetime_impl};
 use crate::core::db::{Condition, Table, TimeOut, Order, Field, SurrealID, TimeUnit, ParamCombine};
 use super::{TimeoutImpl, ParallelImpl, TableImpl, ConditionImpl, BaseWrapperImpl};
-use crate::core::db::constants::{EXPLAIN, FULL, SELECT, STMT_END, BLANK, PARALLEL, ALL, GROUP_BY, ORDER_BY, SPLIT, START, LIMIT, FETCH, FROM, DIFF, LIVE_SELECT};
+use crate::core::db::constants::{EXPLAIN, FULL, SELECT, STMT_END, BLANK, PARALLEL, GROUP_BY, ORDER_BY, SPLIT, START, LIMIT, FETCH, FROM, LIVE_SELECT};
 use crate::db::With;
 
 pub trait SelectWrapperImpl<'w>: TableImpl + ParallelImpl + ConditionImpl + TimeoutImpl + BaseWrapperImpl {
@@ -187,7 +187,7 @@ impl<'w> BaseWrapperImpl for SelectWrapper<'w> {
 
 impl<'w> Display for SelectWrapper<'w> {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
-        let mut res = format!("{} {} {} {}", SELECT, &self.field.iter().map(|x|x.to_string()).collect::<Vec<String>>().join(", "), FROM, &self.table.combine());
+        let mut res = format!("{} {} {} {}", SELECT, &self.field.iter().map(|x| x.to_string()).collect::<Vec<String>>().join(", "), FROM, &self.table.combine());
         if self.omit.is_some() {
             res.push_str(BLANK);
 
@@ -418,7 +418,7 @@ impl<'w> BaseWrapperImpl for LiveSelectWrapper<'w> {
     }
 
     fn build_as_child(&mut self) -> String {
-        let mut res = format!("{} {} {} {}", LIVE_SELECT, &self.field.iter().map(|x|x.to_string()).collect::<Vec<String>>().join(", "), FROM, &self.table.combine());
+        let mut res = format!("{} {} {} {}", LIVE_SELECT, &self.field.iter().map(|x| x.to_string()).collect::<Vec<String>>().join(", "), FROM, &self.table.combine());
         if self.condition.is_some() {
             res.push_str(BLANK);
             res.push_str(&self.condition.as_ref().unwrap().combine())

@@ -1,6 +1,6 @@
 use std::fmt::{Display, Formatter};
 use crate::db::constants::{BLANK, WITH_INDEX};
-use super::constants::{WITH, WITH_NOINDEX};
+use super::constants::{WITH_NOINDEX};
 
 /// # With INDEX | NOINDEX
 /// 查询规划器可以根据查询的结构和需求，用一个或多个索引迭代器替换标准的表迭代器。
@@ -61,8 +61,8 @@ impl<'w> Display for With<'w> {
         match self {
             With::NOINDEX => f.write_str(WITH_NOINDEX),
             With::INDEX(index) => {
-                f.write_str(WITH_INDEX);
-                f.write_str(BLANK);
+                let _ = f.write_str(WITH_INDEX);
+                let _ = f.write_str(BLANK);
                 f.write_str(&index.join(", "))
             }
         }

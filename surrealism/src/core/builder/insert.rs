@@ -16,7 +16,7 @@
 
 use std::collections::{BTreeMap};
 use serde::Serialize;
-use crate::db::{Table, Criteria, SurrealValue, Object, SurrealID, ParamCombine, Set, Operator, InsertStrategy};
+use crate::db::{Table, SurrealValue, Object, SurrealID, ParamCombine, Set, Operator, InsertStrategy};
 use super::{BaseWrapperImpl, TableImpl};
 use crate::db::constants::{STMT_END, INSERT_UPDATE, INSERT, BLANK, VALUES, INTO};
 use crate::table_impl;

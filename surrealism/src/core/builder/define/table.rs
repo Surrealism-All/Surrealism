@@ -8,7 +8,7 @@
 
 use super::{Permissions, Schema};
 use std::fmt::{Display, Formatter};
-use crate::db::constants::{BLANK, DEFINE_TABLE, DROP, STMT_END};
+use crate::db::constants::{DEFINE_TABLE, DROP, STMT_END};
 use crate::db::TimeUnit;
 
 #[derive(Debug, Clone)]

@@ -40,9 +40,7 @@
 //!
 use std::collections::{BTreeMap, HashMap};
 use std::fmt::{Display, Formatter};
-use std::ops::Deref;
 use num_traits::cast::FromPrimitive;
-use std::str::FromStr;
 use serde::{Serialize, Deserialize};
 use serde_json::Value;
 use surrealdb::sql::{Duration, Datetime};

@@ -8,7 +8,7 @@
 //! ```
 
 use std::fmt::{Display, Formatter};
-use crate::db::constants::{BLANK, DEFINE_ANALYZER, FILTERS, STMT_END, TOKENIZERS};
+use crate::db::constants::{DEFINE_ANALYZER, FILTERS, STMT_END, TOKENIZERS};
 
 #[derive(Debug, Clone)]
 pub struct DefineAnalyzer<'a> {
@@ -66,12 +66,12 @@ impl<'a> DefineAnalyzer<'a> {
 
 impl<'a> Display for DefineAnalyzer<'a> {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
-        write!(f,"{} {}", DEFINE_ANALYZER, self.name);
+        write!(f, "{} {}", DEFINE_ANALYZER, self.name);
         if let Some(tokenizers) = self.tokenizers.as_ref() {
-            write!(f," {} {}", TOKENIZERS, &tokenizers.join(", "));
+            write!(f, " {} {}", TOKENIZERS, &tokenizers.join(", "));
         }
-        if let Some(filters) =  self.filters.as_ref() {
-            write!(f," {} {}", FILTERS, filters.join(", "));
+        if let Some(filters) = self.filters.as_ref() {
+            write!(f, " {} {}", FILTERS, filters.join(", "));
         }
         write!(f, "{}", STMT_END)
     }

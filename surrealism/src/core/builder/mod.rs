@@ -72,7 +72,7 @@ impl SQLBuilderFactory {
     pub fn remove<'w>() -> RemoveWrapper<'w> {
         RemoveWrapper::new()
     }
-    pub fn show()->ShowWrapper{ShowWrapper::new()}
+    pub fn show() -> ShowWrapper { ShowWrapper::new() }
     /// # make sleep statement
     /// ## example
     /// ```rust
@@ -89,12 +89,24 @@ impl SQLBuilderFactory {
     ///     Ok(())
     /// }
     /// ```
-    pub fn sleep(duration:SurrealValue)->String{
-        return if duration.is_duration(){
-           format!("SLEEP {}",duration.to_string())
-        }else{
+    pub fn sleep(duration: SurrealValue) -> String {
+        return if duration.is_duration() {
+            format!("SLEEP {}", duration.to_string())
+        } else {
             panic!("SLEEP should use Duration")
-        }
+        };
+    }
+    /// THROW语句可用于在发生意外情况的地方抛出错误。查询的执行将中止，错误将返回给客户端。
+    pub fn throw(error_msg: &str) -> String {
+        format!("THROW {}", &SurrealValue::string(error_msg).to_string())
+    }
+    pub fn returned(value: SurrealValue) -> String {
+        format!("RETURN {}", value.to_string())
+    }
+    /// KILL 语句用于终止正在运行的实时查询
+    /// KILL 语句不接受值类型，则此值必须解析为UUID。 因此，它将接受UUID或参数的字符串文字。
+    pub fn kill(value: &str) -> String {
+        format!("KILL '{}'", value)
     }
 }
 
@@ -109,7 +121,7 @@ pub trait BaseWrapperImpl {
     ///
     /// wrapper will build to String(Complete Statement)
     fn build(&mut self) -> String;
-    fn build_as_child(&mut self)->String;
+    fn build_as_child(&mut self) -> String;
 }
 
 /// wrapper param need table:Table
