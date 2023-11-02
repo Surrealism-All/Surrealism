@@ -11,7 +11,7 @@
 //! ```
 
 use std::fmt::{Display, Formatter};
-use crate::db::constants::{DEFINE_INDEX, ON, STMT_END, UNIQUE};
+use crate::db::constants::{DEFINE_INDEX, HIGHLIGHTS, ON, STMT_END, UNIQUE};
 use super::{FieldColumn, OnType};
 
 #[derive(Debug, Clone)]
@@ -62,6 +62,9 @@ impl<'a> DefineIndex<'a> {
     pub fn unique_search(&mut self, unique_search: UniqueSearch<'a>) -> &mut Self {
         self.unique_search.replace(unique_search);
         self
+    }
+    pub fn build(&self) -> String {
+        self.to_string()
     }
 }
 
@@ -121,7 +124,10 @@ impl<'u> UniqueSearch<'u> {
         match self {
             UniqueSearch::Unique => panic!("push function can not use on UniqueSearch::Unique"),
             UniqueSearch::Search { analyzer: _analyzer, bm25, highlights: _highlights } => {
-                bm25.as_mut().unwrap().push((key, value))
+                match bm25 {
+                    None => { let _ = bm25.replace(vec![(key, value)]); }
+                    Some(inner) => inner.push((key, value))
+                }
             }
         }
         self
@@ -147,10 +153,15 @@ impl<'u> Display for UniqueSearch<'u> {
             UniqueSearch::Search { analyzer, bm25, highlights } => {
                 write!(f, "SEARCH ANALYZER {}", analyzer);
                 if let Some(bm25) = bm25 {
-                    write!(f, " {}", bm25.iter().map(|(k,v)| format!("{}, {}",k,v)).collect::<Vec<String>>().join(", "));
+                    write!(f, " BM25 {}", bm25.iter().map(|(k, v)| {
+                        match (k, v) {
+                            (&"", &"") => String::new(),
+                            _ => format!("{}, {}", k, v)
+                        }
+                    }).collect::<Vec<String>>().join(", "));
                 }
                 if *highlights {
-                    return write!(f, " {}", highlights);
+                    return write!(f, " {}", HIGHLIGHTS);
                 }
                 Ok(())
             }

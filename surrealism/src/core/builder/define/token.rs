@@ -79,6 +79,6 @@ impl<'a> Display for DefineToken<'a> {
         if let Some(on) = self.on.as_ref() {
             f.write_str(&on.to_string());
         }
-        write!(f, " {} {} {}{}", self.token_type.to_string(), VALUE, self.value, STMT_END)
+        write!(f, " {} {} '{}'{}", self.token_type.to_string(), VALUE, self.value, STMT_END)
     }
 }

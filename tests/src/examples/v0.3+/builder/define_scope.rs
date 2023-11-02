@@ -6,15 +6,11 @@ use surrealism::db::{Condition, ConditionSign, Criteria, CriteriaSign, Roles, Ti
 
 #[tokio::main]
 async fn main() -> DefaultRes<()> {
-    let define_field1 = SQLBuilderFactory::define().field()
-        .name("email")
-        .on("user")
-        .value(ValueConstructor::new(ValueType::String, None, None, None, false))
-        .build();
-    let define_field2 = SQLBuilderFactory::define().field()
-        .name("locked")
-        .on("user")
-        .value(ValueConstructor::new(ValueType::Bool, Some(true.into()), Some(true.into()), None, true))
+    let define_scope = SQLBuilderFactory::define().scope()
+        .name("account")
+        .session(24, TimeUnit::HOUR)
+        .sign_up("CREATE user SET email = $email, pass = crypto::argon2::generate($pass)")
+        .sign_in("SELECT * FROM user WHERE email = $email AND crypto::argon2::compare(pass, $pass)")
         .build();
 
     Ok(())

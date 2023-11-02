@@ -47,7 +47,7 @@ impl<'a> DefineTable<'a> {
         self
     }
     pub fn changefeed(&mut self, duration: u32, unit: TimeUnit) -> &mut Self {
-        self.changefeed.replace(format!("{} {}", duration, unit.to_str()));
+        self.changefeed.replace(format!("{}{}", duration, unit.get_unit()));
         self
     }
     pub fn schemafull(&mut self) -> &mut Self {

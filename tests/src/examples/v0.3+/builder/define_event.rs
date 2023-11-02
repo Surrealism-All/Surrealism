@@ -6,16 +6,10 @@ use surrealism::db::{Condition, ConditionSign, Criteria, CriteriaSign, Roles, Ti
 
 #[tokio::main]
 async fn main() -> DefaultRes<()> {
-    let define_field1 = SQLBuilderFactory::define().field()
-        .name("email")
+    let define_event = SQLBuilderFactory::define().event()
         .on("user")
-        .value(ValueConstructor::new(ValueType::String, None, None, None, false))
+        .when(Condition::new().push(Criteria::new("1@mail.com", "2@mail.com", CriteriaSign::Neq), ConditionSign::None).deref_mut())
+        .then("CREATE event SET user = $value.id, time = time::now(), value = $after.email, action = 'email_changed'")
         .build();
-    let define_field2 = SQLBuilderFactory::define().field()
-        .name("locked")
-        .on("user")
-        .value(ValueConstructor::new(ValueType::Bool, Some(true.into()), Some(true.into()), None, true))
-        .build();
-
     Ok(())
 }

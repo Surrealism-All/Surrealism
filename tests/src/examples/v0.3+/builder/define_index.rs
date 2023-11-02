@@ -6,15 +6,17 @@ use surrealism::db::{Condition, ConditionSign, Criteria, CriteriaSign, Roles, Ti
 
 #[tokio::main]
 async fn main() -> DefaultRes<()> {
-    let define_field1 = SQLBuilderFactory::define().field()
-        .name("email")
+    let define_index1 = SQLBuilderFactory::define().index()
+        .name("userEmailIndex")
         .on("user")
-        .value(ValueConstructor::new(ValueType::String, None, None, None, false))
+        .field_column(FieldColumn::COLUMNS(vec!["email"]))
+        .unique_search(UniqueSearch::Unique)
         .build();
-    let define_field2 = SQLBuilderFactory::define().field()
-        .name("locked")
+    let define_index2 = SQLBuilderFactory::define().index()
+        .name("userEmailIndex")
         .on("user")
-        .value(ValueConstructor::new(ValueType::Bool, Some(true.into()), Some(true.into()), None, true))
+        .field_column(FieldColumn::COLUMNS(vec!["name"]))
+        .unique_search(UniqueSearch::search("ascii").push("", "").highlight().clone())
         .build();
 
     Ok(())

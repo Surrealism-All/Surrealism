@@ -7,7 +7,7 @@
 //! ```
 use std::fmt::{Display, Formatter};
 use crate::db::constants::{DEFINE_SCOPE, SIGN_IN, SIGN_UP, STMT_END};
-use crate::db::TimeOut;
+use crate::db::{TimeOut, TimeUnit};
 
 #[derive(Debug, Clone)]
 pub struct DefineScope<'a> {
@@ -41,8 +41,12 @@ impl<'a> DefineScope<'a> {
             sign_in,
         }
     }
-    pub fn session(&mut self, session: TimeOut) -> &mut Self {
-        self.session = session;
+    pub fn name(&mut self,name:&'a str)->&mut Self{
+        self.name = name;
+        self
+    }
+    pub fn session(&mut self, session: u32,unit:TimeUnit) -> &mut Self {
+        self.session = TimeOut::new(session as usize, unit);
         self
     }
     pub fn sign_in(&mut self, sign_in: &'a str) -> &mut Self {
