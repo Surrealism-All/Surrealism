@@ -38,9 +38,18 @@ pub fn crate_user_table() -> CreateWrapper {
 async fn main() -> SurrealismRes<()> {
     // init service
     let mut service = DefaultInitService::new().init();
+    // you can use this way , and you can define and use ns | db | table with define in sql
+    let define_ns = SQLBuilderFactory::define().ns().name("test").build();
+    let define_db = SQLBuilderFactory::define().db().name("test").build();
+    service.commit_sql(&define_ns).await?;
+    service.use_ns("test").await?;
+    service.commit_sql(&define_db).await?;
     // you have already define test namespace and test database!
     // use ns:test and db:test
-    let _ = service.use_commit("test", "test").await?;
+    // let _ = service.use_commit("test", "test").await?;
+    service.use_db("test").await?;
+    let define_table  = SQLBuilderFactory::define().table().name("user").build();
+    service.commit_sql(&define_table).await?;
     // get info from surrealdb
     // let info = SQLBuilderFactory::info().db().build();
     // let info_res = service.commit_sql(&info).await?;

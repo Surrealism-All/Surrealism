@@ -7,7 +7,7 @@
 //! ```
 use std::fmt::{Display, Formatter};
 
-use crate::db::constants::{DEFINE_NS, STMT_END};
+use crate::db::constants::{DEFINE_DB, STMT_END};
 
 #[derive(Debug, Clone)]
 pub struct DefineDB<'a> {
@@ -39,6 +39,6 @@ impl<'a> DefineDB<'a> {
 
 impl<'a> Display for DefineDB<'a> {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
-        write!(f, "{} {}{}", DEFINE_NS, self.name, STMT_END)
+        write!(f, "{} {}{}", DEFINE_DB, self.name, STMT_END)
     }
 }

@@ -175,7 +175,7 @@ async fn main() -> SurrealismRes<()> {
     // dbg!(info_res);
     // create a table (you should define user table first!)
     let create_stmt = crate_user_table().build();
-    let create_res = service.commit_sql(&create_stmt).await?;
+    let _ = service.commit_sql(&create_stmt).await?;
     // dbg!(create_res);
     // select user::surrealism table
     let select = SQLBuilderFactory::select().table("user").id("surrealism".into()).column("*", None).build();
@@ -483,41 +483,41 @@ full = ["row", "builder", "surreal"]
 | ------------ | ------------------------------------------------------------ | ------ |
 | && or AND    | Checks whether both of two values are truthy                 | ✅      |
 | \|\| or OR   | Checks whether either of two values is truthy                | ✅      |
-| ??           | Check whether either of two values are truthy and not `NULL` | ⛔      |
-| ?:           | Check whether either of two values are truthy                | ⛔      |
+| ??           | Check whether either of two values are truthy and not `NULL` | ✅      |
+| ?:           | Check whether either of two values are truthy                | ✅      |
 | = or IS      | Check whether two values are equal                           | ✅      |
 | != or IS NOT | Check whether two values are not equal                       | ✅      |
 | ==           | Check whether two values are exactly equal                   | ✅      |
-| ?=           | Check whether any value in a set is equal to a value         | ⛔      |
-| *=           | Check whether all values in a set are equal to a value       | ⛔      |
-| ~            | Compare two values for equality using fuzzy matching         | ⛔      |
-| !~           | Compare two values for inequality using fuzzy matching       | ⛔      |
-| ?~           | Check whether any value in a set is equal to a value using fuzzy matching | ⛔      |
-| *~           | Check whether all values in a set are equal to a value using fuzzy matching | ⛔      |
+| ?=           | Check whether any value in a set is equal to a value         | ✅      |
+| *=           | Check whether all values in a set are equal to a value       | ✅      |
+| ~            | Compare two values for equality using fuzzy matching         | ✅      |
+| !~           | Compare two values for inequality using fuzzy matching       | ✅      |
+| ?~           | Check whether any value in a set is equal to a value using fuzzy matching | ✅      |
+| *~           | Check whether all values in a set are equal to a value using fuzzy matching | ✅      |
 | <            | Check whether a value is less than another value             | ✅      |
 | <=           | Check whether a value is less than or equal to another value | ✅      |
 | >            | Check whether a value is greater than another value          | ✅      |
 | >=           | Check whether a value is greater than or equal to another value | ✅      |
 | +            | Add two values together                                      | ✅      |
 | -            | Subtract a value from another value                          | ✅      |
-| * or ×       | Multiply two values together                                 | ⛔      |
-| / or ÷       | Divide a value by another value                              | ⛔      |
-| **           | Raises a base value by another value                         | ⛔      |
-| IN           | Checks whether a value is contained within another value     | ⛔      |
-| NOT IN       | Checks whether a value is not contained within another value | ⛔      |
+| * or ×       | Multiply two values together                                 | ✅      |
+| / or ÷       | Divide a value by another value                              | ✅      |
+| **           | Raises a base value by another value                         | ✅      |
+| IN           | Checks whether a value is contained within another value     | ✅      |
+| NOT IN       | Checks whether a value is not contained within another value | ✅      |
 | CONTAINS     | Checks whether a value contains another value                | ✅      |
-| CONTAINSNOT  | Checks whether a value does not contain another value        | ⛔      |
-| CONTAINSALL  | Checks whether a value contains all other values             | ⛔      |
-| CONTAINSANY  | Checks whether a value contains any other value              | ⛔      |
-| CONTAINSNONE | Checks whether a value contains none of the following values | ⛔      |
-| INSIDE       | Checks whether a value is contained within another value     | ⛔      |
-| NOTINSIDE    | Checks whether a value is not contained within another value | ⛔      |
-| ALLINSIDE    | Checks whether all values are contained within other values  | ⛔      |
-| ANYINSIDE    | Checks whether any value is contained within other values    | ⛔      |
-| NONEINSIDE   | Checks whether no value is contained within other values     | ⛔      |
-| OUTSIDE      | Checks whether a geometry type is outside of another geometry type | ⛔      |
-| INTERSECTS   | Checks whether a geometry type intersects another geometry type | ⛔      |
-| @@           | Checks whether the terms are found in a full-text indexed field | ⛔      |
+| CONTAINSNOT  | Checks whether a value does not contain another value        | ✅      |
+| CONTAINSALL  | Checks whether a value contains all other values             | ✅      |
+| CONTAINSANY  | Checks whether a value contains any other value              | ✅      |
+| CONTAINSNONE | Checks whether a value contains none of the following values | ✅      |
+| INSIDE       | Checks whether a value is contained within another value     | ✅      |
+| NOTINSIDE    | Checks whether a value is not contained within another value | ✅      |
+| ALLINSIDE    | Checks whether all values are contained within other values  | ✅      |
+| ANYINSIDE    | Checks whether any value is contained within other values    | ✅      |
+| NONEINSIDE   | Checks whether no value is contained within other values     | ✅      |
+| OUTSIDE      | Checks whether a geometry type is outside of another geometry type | ✅      |
+| INTERSECTS   | Checks whether a geometry type intersects another geometry type | ✅      |
+| @@           | Checks whether the terms are found in a full-text indexed field | ✅      |
 
 
 

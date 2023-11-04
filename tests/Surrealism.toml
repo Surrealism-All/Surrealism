@@ -1,6 +1,6 @@
 [default]
 username = "root"
-password = "syf20020816"
+password = "root"
 bind = "127.0.0.1:10086"
 mode = "Memory"
 log = "Info"

@@ -339,6 +339,7 @@ pub enum Operator {
     Plus,
     Divide,
     Eq,
+
 }
 
 impl Operator {

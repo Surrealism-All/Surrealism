@@ -21,6 +21,8 @@ use crate::surreal::SurrealismConfig;
 #[async_trait]
 pub trait UseNSDB {
     async fn use_commit(&self, ns: &str, db: &str) -> Result<(), Error>;
+    async fn use_ns(&self,ns:&str)->Result<(),Error>;
+    async fn use_db(&self,db:&str)->Result<(),Error>;
 }
 
 #[async_trait]
@@ -37,6 +39,12 @@ pub struct SurrealismConnector {
 impl UseNSDB for SurrealismConnector {
     async fn use_commit(&self, ns: &str, db: &str) -> Result<(), Error> {
         self.client.use_ns(ns).use_db(db).await
+    }
+    async fn use_ns(&self,ns:&str)->Result<(),Error>{
+        self.client.use_ns(ns).await
+    }
+    async fn use_db(&self,db:&str)->Result<(),Error>{
+        self.client.use_db(db).await
     }
 }
 

@@ -8,7 +8,7 @@
 use std::fmt::{Display, Formatter};
 use serde::{Serialize, Deserialize};
 use crate::db::{SurrealValue, ParamCombine};
-use super::constants::{EQ, LT, GT, GTE, LTE, LINK, NEQ, WHERE, AND, OR, CONTAINS};
+use crate::db::constants::{ADD, ADD_OP, ALLEQ, BOTH, DIVIDE, EITHER, GT_EQ, HAS, INLIKE, IS, ISNOT, LIKE, LT_EQ, MATCHES, MINUS, NOTLIKE, PLUS, POW, EQ, LT, GT, GTE, LTE, LINK, NEQ, WHERE, AND, OR, CONTAINS, CONTAINSALL, CONTAINSNOT, CONTAINSANY, CONTAINSNONE, INSIDE, NOTINSIDE, ALLINSIDE, ANYINSIDE, NONEINSIDE, OUTSIDE, INTERSECTS, SELECT_ALL, STMT_END};
 
 /// where condition for statment
 /// ## example
@@ -226,26 +226,36 @@ impl Criteria {
         self
     }
     pub fn build(&self) -> String {
+        self.to_string()
+    }
+    /// consume self to SurrealValue
+    pub fn to_value(self) -> SurrealValue {
+        SurrealValue::from(self.build())
+    }
+    /// build easy : select * from ... ;
+    pub fn build_easy(&self) -> String {
+        format!("{} {}{}", SELECT_ALL, &self.to_string(), STMT_END)
+    }
+}
+
+impl Display for Criteria {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
         match self.sign {
             CriteriaSign::Link => {
                 match self.right {
-                    SurrealValue::String(ref s) => format!("{} {} {} {}", self.sign.to_str(), &self.left, LINK, s),
+                    SurrealValue::String(ref s) => write!(f, "{} {} {} {}", self.sign.to_str(), &self.left, LINK, s),
                     _ => panic!("{}", "Link Multiple Tables need use SurrealValue::Str for right!")
                 }
             }
             // for cheat
             CriteriaSign::Cheat(ref value) => {
                 match self.right {
-                    SurrealValue::String(ref s) => format!("{} {} {}", &self.left, value, s),
+                    SurrealValue::String(ref s) => write!(f, "{} {} {}", &self.left, value, s),
                     _ => panic!("{}", "This Panic may not exist , if you see this panic , please connect to author or commit issue on github!")
                 }
             }
-            _ => format!("{} {} {}", &self.left, self.sign.to_str(), &self.right.to_string())
+            _ => write!(f, "{} {} {}", &self.left, self.sign.to_str(), &self.right.to_string())
         }
-    }
-    /// consume self to SurrealValue
-    pub fn to_value(self) -> SurrealValue {
-        SurrealValue::from(self.build())
     }
 }
 
@@ -257,24 +267,76 @@ impl ParamCombine for Criteria {
 
 
 /// # criteria sign
-/// 作用于Criteria
-/// - Eq:等于
-/// - Lt:小于
-/// - Gt:大于
-/// - Neq:不等于
-/// - Lte:小于等于
-/// - Gte:大于等于
-/// - Link:连接`->`
+/// 作用于Criteria是SurrealDB的操作符
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub enum CriteriaSign {
-    Eq,
+    /// &&
+    And,
+    /// ||
+    Or,
+    /// ??
+    Either,
+    /// ?:
+    Both,
+    /// = 会进行隐式转换
+    Is,
+    /// !=
+    IsNot,
+    /// ?= 检查数组中的任何值是否等于另一个值
+    Has,
+    /// *= 检查数组中的所有值是否都等于另一个值
+    AllEq,
+    /// ~  使用模糊匹配比较两个值是否相等
+    Like,
+    /// !~  使用模糊匹配比较两个值的不等式
+    NotLike,
+    /// ?~ 检查集合中的任何值是否等于使用模糊匹配的值
+    InLike,
+    /// <
     Lt,
+    /// <=
+    Leq,
+    /// >
     Gt,
-    Neq,
-    Lte,
-    Gte,
-    Link,
+    /// >=
+    Geq,
+    Add,
+    Minus,
+    /// * 或 ×
+    Plus,
+    /// / 或÷
+    Divide,
+    /// == 检查两个值是否精确。该运算符还检查每个值是否具有相同的类型
+    Eq,
+    /// 幂运算 **
+    Pow,
+    /// CONTAINS 或 ∋ 检查一个值是否包含其他值
     Contains,
+    /// CONTAINSNOT 或 ∌ 检查一个值是否不包含其他值
+    ContainsNot,
+    /// CONTAINSALL 或 ⊇ 检查一个值是否包含所有多个值
+    ContainsAll,
+    /// CONTAINSANY 或 ⊃ 检查一个值是否包含多个值中的任何一个
+    ContainsAny,
+    /// CONTAINSNONE 或 ⊅ 检查一个值是否不包含任何多个值。
+    ContainsNone,
+    /// INSIDE 或 ∈ 或 IN 检查一个值是否包含在另一个值中
+    Inside,
+    /// NOTINSIDE 或 ∉ 或NOT IN 检查一个值是否不包含在另一个值中。
+    NotInside,
+    /// ALLINSIDE 或 ⊆ 检查所有多个值是否包含在另一个值中
+    AllInside,
+    /// ANYINSIDE 或 ⊂ 检查多个值中的任何一个是否包含在另一个值中
+    AnyInside,
+    /// NONEINSIDE 或 ⊄ 检查多个值中是否没有一个包含在另一个值中
+    NoneInside,
+    /// OUTSIDE 检查一个几何体值是否在另一个几何体值之外
+    Outside,
+    /// INTERSECTS 检查一个几何值是否与另一个几何值相交
+    Intersects,
+    /// MATCHES 检查是否在全文索引字段中找到术语
+    Matches,
+    Link,
     Cheat(String),
 }
 
@@ -297,17 +359,70 @@ impl Display for CriteriaSign {
 }
 
 impl CriteriaSign {
+    /// # quick build and select
+    ///
+    /// ## example
+    /// ```rust
+    /// use surrealism::builder::SQLBuilderFactory;
+    /// use surrealism::db::{Criteria, CriteriaSign};
+    /// use surrealism::DefaultRes;
+    ///
+    /// // [tests\src\main.rs:13] operator1 = "SELECT * FROM 10 AND 20;"
+    /// // [tests\src\main.rs:14] operator2 = "SELECT * FROM 0 OR false;"
+    /// // [tests\src\main.rs:15] operator3 = "SELECT * FROM NULL ?? 0;"
+    /// // [tests\src\main.rs:16] operator4 = "SELECT * FROM true ?: 1;"
+    /// // [tests\src\main.rs:17] operator5 = "SELECT * FROM 'test text' ~ 'Test';"
+    /// #[tokio::main]
+    /// async fn main() -> DefaultRes<()> {
+    ///     let operator1 = CriteriaSign::And.build(10.into(), 20.into());
+    ///     let operator2 = CriteriaSign::Or.build(0.into(), false.into());
+    ///     let operator3 = CriteriaSign::Either.build("NULL".into(), 0.into());
+    ///     let operator4 = CriteriaSign::Both.build(true.into(), 1.into());
+    ///     let operator5 = CriteriaSign::Like.build("test text".into(), "Test".into());
+    ///     Ok(())
+    /// }
+    /// ```
+    pub fn build(self, left: SurrealValue, right: SurrealValue) -> String {
+        format!("{} {} {} {}{}", SELECT_ALL, &left.to_string(), self.to_str(), &right.to_string(),STMT_END)
+    }
     pub fn to_str(&self) -> &str {
         match self {
             CriteriaSign::Eq => EQ,
             CriteriaSign::Lt => LT,
             CriteriaSign::Gt => GT,
-            CriteriaSign::Neq => NEQ,
-            CriteriaSign::Lte => LTE,
-            CriteriaSign::Gte => GTE,
             CriteriaSign::Link => LINK,
             CriteriaSign::Cheat(value) => value.as_str(),
-            CriteriaSign::Contains => CONTAINS
+            CriteriaSign::And => AND,
+            CriteriaSign::Or => OR,
+            CriteriaSign::Either => EITHER,
+            CriteriaSign::Both => BOTH,
+            CriteriaSign::Is => IS,
+            CriteriaSign::IsNot => ISNOT,
+            CriteriaSign::Has => HAS,
+            CriteriaSign::AllEq => ALLEQ,
+            CriteriaSign::Like => LIKE,
+            CriteriaSign::NotLike => NOTLIKE,
+            CriteriaSign::InLike => INLIKE,
+            CriteriaSign::Leq => LT_EQ,
+            CriteriaSign::Geq => GT_EQ,
+            CriteriaSign::Add => ADD,
+            CriteriaSign::Minus => MINUS,
+            CriteriaSign::Plus => PLUS,
+            CriteriaSign::Divide => DIVIDE,
+            CriteriaSign::Pow => POW,
+            CriteriaSign::Contains => CONTAINS,
+            CriteriaSign::ContainsNot => CONTAINSNOT,
+            CriteriaSign::ContainsAll => CONTAINSALL,
+            CriteriaSign::ContainsAny => CONTAINSANY,
+            CriteriaSign::ContainsNone => CONTAINSNONE,
+            CriteriaSign::Inside => INSIDE,
+            CriteriaSign::NotInside => NOTINSIDE,
+            CriteriaSign::AllInside => ALLINSIDE,
+            CriteriaSign::AnyInside => ANYINSIDE,
+            CriteriaSign::NoneInside => NONEINSIDE,
+            CriteriaSign::Outside => OUTSIDE,
+            CriteriaSign::Intersects => INTERSECTS,
+            CriteriaSign::Matches => MATCHES
         }
     }
 }
@@ -315,14 +430,40 @@ impl CriteriaSign {
 impl From<&str> for CriteriaSign {
     fn from(value: &str) -> Self {
         match value {
-            EQ => CriteriaSign::Eq,
+            MATCHES => CriteriaSign::Matches,
+            INTERSECTS => CriteriaSign::Intersects,
+            OUTSIDE => CriteriaSign::Outside,
+            NONEINSIDE => CriteriaSign::NoneInside,
+            ANYINSIDE => CriteriaSign::AnyInside,
+            ALLINSIDE => CriteriaSign::AllInside,
+            NOTINSIDE => CriteriaSign::NotInside,
+            INSIDE => CriteriaSign::Inside,
+            CONTAINSNONE => CriteriaSign::ContainsNone,
+            CONTAINSANY => CriteriaSign::ContainsAny,
+            CONTAINSALL => CriteriaSign::ContainsAll,
+            CONTAINSNOT => CriteriaSign::ContainsNot,
+            CONTAINS => CriteriaSign::Contains,
+            POW => CriteriaSign::Pow,
+            DIVIDE => CriteriaSign::Divide,
+            PLUS => CriteriaSign::Plus,
+            MINUS => CriteriaSign::Minus,
+            ADD => CriteriaSign::Add,
+            GT_EQ => CriteriaSign::Geq,
+            LT_EQ => CriteriaSign::Leq,
+            INLIKE => CriteriaSign::InLike,
+            NOTLIKE => CriteriaSign::NotLike,
+            LIKE => CriteriaSign::Like,
+            ALLEQ => CriteriaSign::AllEq,
+            HAS => CriteriaSign::Has,
+            ISNOT => CriteriaSign::IsNot,
+            IS => CriteriaSign::Is,
+            BOTH => CriteriaSign::Both,
+            EITHER => CriteriaSign::Either,
+            OR => CriteriaSign::Or,
+            AND => CriteriaSign::And,
             LT => CriteriaSign::Lt,
             GT => CriteriaSign::Gt,
-            LTE => CriteriaSign::Lte,
-            GTE => CriteriaSign::Gte,
-            NEQ => CriteriaSign::Neq,
             LINK => CriteriaSign::Link,
-            CONTAINS => CriteriaSign::Contains,
             _ => CriteriaSign::Cheat(String::from(value))
         }
     }
