@@ -1,12 +1,12 @@
-<img src="https://img.shields.io/badge/surrealism-0.3.0-orange?style=flat-square&logo=rust&logoColor=%23fff&labelColor=%23DEA584&color=%23DEA584">  <img src="https://img.shields.io/badge/License-MIT-orange?style=flat-square&logoColor=%23fff&labelColor=%2323B898&color=%2323B898">
+<img src="https://img.shields.io/badge/surrealism-0.3.1-orange?style=flat-square&logo=rust&logoColor=%23fff&labelColor=%23DEA584&color=%23DEA584">  <img src="https://img.shields.io/badge/License-MIT-orange?style=flat-square&logoColor=%23fff&labelColor=%2323B898&color=%2323B898">
 
 # Surrealism
 
 - author：syf20020816@outlook.com
 - docName：Surrealism README
 - createDate：20230506
-- updateDate：20231024
-- version：0.3.0
+- updateDate：20231104
+- version：0.3.1
 - email：syf20020816@outlook.com
 
 ## LICEMSE
@@ -27,7 +27,7 @@ Surrealism relies on Surrealdb's official Rust standard library:surrealdb,The pu
 
 ```toml
 [dependencies]
-surrealism = {version="0.3.0"}
+surrealism = {version="0.3.1"}
 tokio = { version = "1.28.0", features = ["macros", "rt-multi-thread"] }
 ```
 
@@ -91,19 +91,15 @@ The configuration file address can be set to：
 - ./configs/Surrealism.toml
 - ./templates/Surrealism.toml
 
-> ❗note：当前SurrealDB仍处于开发阶段，对应连接鉴权方式：NS和DB并为支持，所以使用Surrealism进行配置时请以Root方式进行鉴权连接，不要设置ns和db！
->
-> ❗note：Currently, SurrealDB is still in the development stage, and the corresponding connection authentication methods are supported: NS and DB. Therefore, when using Surrealsm for configuration, please use Root mode for authentication connections and do not set ns and db!
-
 #### Surrealism.json(JSON)
 ```json
 {
-	"username" : "root"
-	"password" : "syf20020816"
-	"bind" : "127.0.0.1:10086"
-	"mode" : "Memory"
+	"username" : "root",
+	"password" : "syf20020816",
+	"bind" : "127.0.0.1:10086",
+	"mode" : "Memory",
 	"log" : "Info",
-    "local": true
+    "local": true,
 }
 ```
 #### Surrealism.toml(TOML)
@@ -179,7 +175,7 @@ async fn main() -> SurrealismRes<()> {
     // dbg!(info_res);
     // create a table (you should define user table first!)
     let create_stmt = crate_user_table().build();
-    let create_res = service.commit_sql(&create_stmt).await?;
+    let _ = service.commit_sql(&create_stmt).await?;
     // dbg!(create_res);
     // select user::surrealism table
     let select = SQLBuilderFactory::select().table("user").id("surrealism".into()).column("*", None).build();
@@ -250,15 +246,11 @@ full = ["row", "builder", "surreal"]
 - [x]  <strong>Surrealism.toml支持</strong> 
 - [ ]   <strong>自定义构建支持(SurrealismConfig)</strong> 
 
-
-
 ### Init 初始化服务
 
 
 - [x]  <strong>DefaultInitService 默认初始化服务的支持</strong> 
 - [ ]   <strong>自定义初始化服务的支持</strong> 
-
-
 
 ### ID 表ID
 
@@ -271,8 +263,6 @@ full = ["row", "builder", "surreal"]
 - [x]  <strong>SurrealID::ULID的支持</strong> 
 - [x]  <strong>SurrealID::RAND的支持</strong> 
 - [x]  <strong>SurrealID::Range的支持</strong> 
-
-
 
 
 ### Value 数据类型
@@ -296,12 +286,10 @@ full = ["row", "builder", "surreal"]
 - [x]  <strong>数学常数构建</strong> 
 - [x]  <strong>数学常数支持</strong> 
 
-
-
 ## Builder
 
 
-- [x]  <strong>USE STMT</strong> 
+- [x]  <strong>USE STMT</strong> （In Connection）
 - [x]  <strong>CREATE STMT</strong> 
 - [x]  <strong>SELECT STMT</strong> 
 - [x]  <strong>LIVE SELECT STMT</strong> 
@@ -322,18 +310,15 @@ full = ["row", "builder", "surreal"]
 - [ ] <strong>FOR STMT</strong> 
 - [ ] <strong>BREAK STMT</strong> 
 - [ ] <strong>CONTINUE STMT</strong> 
-- [ ] <strong>KILL STMT</strong> 
-- [ ] <strong>THROW STMT</strong> 
-
-
+- [x] <strong>KILL STMT</strong> 
+- [x] <strong>THROW STMT</strong> 
+- [x] <strong>RETURN STMT</strong> 
 
 ### Use
 
 
 - [x]  <strong>USE NS STMT</strong> 
 - [x]  <strong>USE DB STMT</strong> 
-
-
 
 ### Create
 
@@ -343,8 +328,6 @@ full = ["row", "builder", "surreal"]
 - [x]  <strong>RETURN STMT</strong> 
 - [x]  <strong>TIMEOUT STMT</strong> 
 - [x]  <strong>PARALLEL STMT</strong> 
-
-
 
 ### Insert
 
@@ -389,8 +372,6 @@ full = ["row", "builder", "surreal"]
 - [x]  <strong>TIMEOUT</strong> 
 - [x]  <strong>PARALLEL</strong> 
 - [ ] <strong>DELETE WITH RELETE</strong> 
-
-
 
 ### Remove
 
@@ -437,9 +418,7 @@ full = ["row", "builder", "surreal"]
 - [x]  <strong>FIELD</strong> 
 - [x]  <strong>INDEX</strong> 
 - [x]  <strong>PARAM</strong> 
-- [ ] <strong>ANALYZER</strong> 
-
-
+- [x] <strong>ANALYZER</strong> 
 
 ### Info
 
@@ -450,22 +429,16 @@ full = ["row", "builder", "surreal"]
 - [x]  <strong>SCOPE</strong> 
 - [x]  <strong>TABLE</strong> 
 
-
-
 ### Show
 
 
 - [x]  <strong>SINCE</strong> 
 - [x]  <strong>LIMIT</strong> 
 
-
-
 ### Sleep
 
 
 - [x]  <strong>Duration</strong> 
-
-
 
 ## Assert
 
@@ -474,8 +447,6 @@ full = ["row", "builder", "surreal"]
 - [x]  <strong>WHERE</strong> 
 - [x]  <strong>Condition</strong> 
 - [x]  <strong>Criteria</strong> 
-
-
 
 ## Functions
 
@@ -499,8 +470,6 @@ full = ["row", "builder", "surreal"]
 - [ ] <strong>Scripting</strong> 
 - [ ] <strong>Vector</strong> 
 
-
-
 ## Row
 
 
@@ -514,46 +483,53 @@ full = ["row", "builder", "surreal"]
 | ------------ | ------------------------------------------------------------ | ------ |
 | && or AND    | Checks whether both of two values are truthy                 | ✅      |
 | \|\| or OR   | Checks whether either of two values is truthy                | ✅      |
-| ??           | Check whether either of two values are truthy and not `NULL` | ⛔      |
-| ?:           | Check whether either of two values are truthy                | ⛔      |
+| ??           | Check whether either of two values are truthy and not `NULL` | ✅      |
+| ?:           | Check whether either of two values are truthy                | ✅      |
 | = or IS      | Check whether two values are equal                           | ✅      |
 | != or IS NOT | Check whether two values are not equal                       | ✅      |
 | ==           | Check whether two values are exactly equal                   | ✅      |
-| ?=           | Check whether any value in a set is equal to a value         | ⛔      |
-| *=           | Check whether all values in a set are equal to a value       | ⛔      |
-| ~            | Compare two values for equality using fuzzy matching         | ⛔      |
-| !~           | Compare two values for inequality using fuzzy matching       | ⛔      |
-| ?~           | Check whether any value in a set is equal to a value using fuzzy matching | ⛔      |
-| *~           | Check whether all values in a set are equal to a value using fuzzy matching | ⛔      |
+| ?=           | Check whether any value in a set is equal to a value         | ✅      |
+| *=           | Check whether all values in a set are equal to a value       | ✅      |
+| ~            | Compare two values for equality using fuzzy matching         | ✅      |
+| !~           | Compare two values for inequality using fuzzy matching       | ✅      |
+| ?~           | Check whether any value in a set is equal to a value using fuzzy matching | ✅      |
+| *~           | Check whether all values in a set are equal to a value using fuzzy matching | ✅      |
 | <            | Check whether a value is less than another value             | ✅      |
 | <=           | Check whether a value is less than or equal to another value | ✅      |
 | >            | Check whether a value is greater than another value          | ✅      |
 | >=           | Check whether a value is greater than or equal to another value | ✅      |
 | +            | Add two values together                                      | ✅      |
 | -            | Subtract a value from another value                          | ✅      |
-| * or ×       | Multiply two values together                                 | ⛔      |
-| / or ÷       | Divide a value by another value                              | ⛔      |
-| **           | Raises a base value by another value                         | ⛔      |
-| IN           | Checks whether a value is contained within another value     | ⛔      |
-| NOT IN       | Checks whether a value is not contained within another value | ⛔      |
+| * or ×       | Multiply two values together                                 | ✅      |
+| / or ÷       | Divide a value by another value                              | ✅      |
+| **           | Raises a base value by another value                         | ✅      |
+| IN           | Checks whether a value is contained within another value     | ✅      |
+| NOT IN       | Checks whether a value is not contained within another value | ✅      |
 | CONTAINS     | Checks whether a value contains another value                | ✅      |
-| CONTAINSNOT  | Checks whether a value does not contain another value        | ⛔      |
-| CONTAINSALL  | Checks whether a value contains all other values             | ⛔      |
-| CONTAINSANY  | Checks whether a value contains any other value              | ⛔      |
-| CONTAINSNONE | Checks whether a value contains none of the following values | ⛔      |
-| INSIDE       | Checks whether a value is contained within another value     | ⛔      |
-| NOTINSIDE    | Checks whether a value is not contained within another value | ⛔      |
-| ALLINSIDE    | Checks whether all values are contained within other values  | ⛔      |
-| ANYINSIDE    | Checks whether any value is contained within other values    | ⛔      |
-| NONEINSIDE   | Checks whether no value is contained within other values     | ⛔      |
-| OUTSIDE      | Checks whether a geometry type is outside of another geometry type | ⛔      |
-| INTERSECTS   | Checks whether a geometry type intersects another geometry type | ⛔      |
-| @@           | Checks whether the terms are found in a full-text indexed field | ⛔      |
+| CONTAINSNOT  | Checks whether a value does not contain another value        | ✅      |
+| CONTAINSALL  | Checks whether a value contains all other values             | ✅      |
+| CONTAINSANY  | Checks whether a value contains any other value              | ✅      |
+| CONTAINSNONE | Checks whether a value contains none of the following values | ✅      |
+| INSIDE       | Checks whether a value is contained within another value     | ✅      |
+| NOTINSIDE    | Checks whether a value is not contained within another value | ✅      |
+| ALLINSIDE    | Checks whether all values are contained within other values  | ✅      |
+| ANYINSIDE    | Checks whether any value is contained within other values    | ✅      |
+| NONEINSIDE   | Checks whether no value is contained within other values     | ✅      |
+| OUTSIDE      | Checks whether a geometry type is outside of another geometry type | ✅      |
+| INTERSECTS   | Checks whether a geometry type intersects another geometry type | ✅      |
+| @@           | Checks whether the terms are found in a full-text indexed field | ✅      |
 
 
 
 ## Update Des
 
+- 0.3.1：
+  - 重构Define语句且补全DEFINE ANALYSIS （Refactoring the Define statement and completing DEFINE ANALYSIS）
+  - 支持Return语句 (Support for Return statements)
+  - 支持Kill语句 (Support for Kill statements)
+  - 支持Throw语句 (Support for Throw statements)
+  - 支持所有SurrealDB的Operators，见CriteriaSign （Supports all SurrealDB Operators ，see CriteriaSign）
+  
 - 0.3.0：
   - 重构init Service 和 config Service（Refactoring init service and config service）
   - 优化SurrealValue（Optimize SurrealValue）
@@ -594,3 +570,6 @@ full = ["row", "builder", "surreal"]
   - 分离语句构造和语句提交（Separate statement construction and statement submission）
 
 - 0.1.1：更新配置，增加基于Namespace和Database的支持，但是基于当前SurrealDB无法支持，所以并不能使用🥲（Update the configuration and add support based on Namespace and Database, but it cannot be used due to the current SurrealDB support 🥲）
+
+
+

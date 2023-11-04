@@ -1,12 +1,12 @@
-<img src="https://img.shields.io/badge/surrealism-0.3.0-orange?style=flat-square&logo=rust&logoColor=%23fff&labelColor=%23DEA584&color=%23DEA584">  <img src="https://img.shields.io/badge/License-MIT-orange?style=flat-square&logoColor=%23fff&labelColor=%2323B898&color=%2323B898">
+<img src="https://img.shields.io/badge/surrealism-0.3.1-orange?style=flat-square&logo=rust&logoColor=%23fff&labelColor=%23DEA584&color=%23DEA584">  <img src="https://img.shields.io/badge/License-MIT-orange?style=flat-square&logoColor=%23fff&labelColor=%2323B898&color=%2323B898">
 
 # Surrealism
 
 - author：syf20020816@outlook.com
 - docName：Surrealism README
 - createDate：20230506
-- updateDate：20231024
-- version：0.3.0
+- updateDate：20231104
+- version：0.3.1
 - email：syf20020816@outlook.com
 
 ## LICEMSE
@@ -27,7 +27,7 @@ Surrealism relies on Surrealdb's official Rust standard library:surrealdb,The pu
 
 ```toml
 [dependencies]
-surrealism = {version="0.3.0"}
+surrealism = {version="0.3.1"}
 tokio = { version = "1.28.0", features = ["macros", "rt-multi-thread"] }
 ```
 
@@ -289,7 +289,7 @@ full = ["row", "builder", "surreal"]
 ## Builder
 
 
-- [x]  <strong>USE STMT</strong> 
+- [x]  <strong>USE STMT</strong> （In Connection）
 - [x]  <strong>CREATE STMT</strong> 
 - [x]  <strong>SELECT STMT</strong> 
 - [x]  <strong>LIVE SELECT STMT</strong> 
@@ -524,11 +524,11 @@ full = ["row", "builder", "surreal"]
 ## Update Des
 
 - 0.3.1：
-  - 重构Define语句且补全DEFINE ANALYSIS
-  - 支持Return语句
-  - 支持Kill语句
-  - 支持Throw语句
-  - 
+  - 重构Define语句且补全DEFINE ANALYSIS （Refactoring the Define statement and completing DEFINE ANALYSIS）
+  - 支持Return语句 (Support for Return statements)
+  - 支持Kill语句 (Support for Kill statements)
+  - 支持Throw语句 (Support for Throw statements)
+  - 支持所有SurrealDB的Operators，见CriteriaSign （Supports all SurrealDB Operators ，see CriteriaSign）
   
 - 0.3.0：
   - 重构init Service 和 config Service（Refactoring init service and config service）
